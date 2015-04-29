@@ -1,6 +1,7 @@
-Package: frailtyr
-Type: Package
 Title: A General Semiparametric Shared Frailty Model
+Priority: optional
+Type: Package
+Package: frailtyr
 Version: 0.0.0.9000
 Date: 2015-04-28
 Authors@R: as.person(c(
@@ -12,5 +13,11 @@ Description: TODO
 License: LGPL-2
 URL: https://bitbucket.org/vmonaco/frailtyr/
 BugReports: https://bitbucket.org/vmonaco/frailtyr/issues
-Suggests: knitr, rticles
+Suggests: knitr,
+    rticles,
+    testthat
+Depends: 
+Imports: 
 VignetteBuilder: knitr
+LazyData: Yes
+LazyLoad: Yes
