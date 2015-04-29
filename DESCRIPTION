@@ -1,9 +1,16 @@
 Package: frailtyr
 Type: Package
-Title: What the package does (short line)
-Version: 1.0
+Title: A General Semiparametric Shared Frailty Model
+Version: 0.0.0.9000
 Date: 2015-04-28
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Authors@R: as.person(c(
+    "Vinnie Monaco <contact@vmonaco.com> [aut, cre]", 
+    "Malka Gorfine <gorfinem@post.tau.ac.il> [exp]",
+    "Li Hsu <lih@fredhutch.org> [exp]"
+  ))
+Description: TODO
+License: LGPL-2
+URL: https://bitbucket.org/vmonaco/frailtyr/
+BugReports: https://bitbucket.org/vmonaco/frailtyr/issues
+Suggests: knitr
+VignetteBuilder: knitr
