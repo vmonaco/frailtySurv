@@ -1,8 +1,8 @@
-### tmp files ###
+### tmp files
 \#*#
 *~
 
-### R ###
+### R 
 # History files
 .Rhistory
 .Rapp.history
@@ -16,3 +16,9 @@ vignettes/*.html
 vignettes/*.pdf
 .Rbuildignore
 inst/doc
+.RData
+
+### OS X
+.DS_Store
+
+

@@ -12,5 +12,5 @@ Description: TODO
 License: LGPL-2
 URL: https://bitbucket.org/vmonaco/frailtyr/
 BugReports: https://bitbucket.org/vmonaco/frailtyr/issues
-Suggests: knitr
+Suggests: knitr, rticles
 VignetteBuilder: knitr
