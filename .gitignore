@@ -60,3 +60,4 @@ vignettes/frailtyr.tex
 *.vrb
 *.xdy
 *.tdo
+.Rproj.user
