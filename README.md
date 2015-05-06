@@ -2,7 +2,7 @@
 frailtyr
 --------
 
-frailtyr is a library for fitting shared frailty models with support for general frailty distributions. *This is currently a work in progress*, part of Google Summer of Code 2015.
+frailtyr is a library for fitting shared frailty models with support for general frailty distributions. **This is currently a work in progress**, part of Google Summer of Code 2015.
 
 Installation
 ------------
@@ -34,7 +34,7 @@ To load the package (simulate installing and loading with `library(frailty)`):
 devtools::load_all()
 ```
 
-or shortuct: *Ctrl+Shift+L*
+or shortuct: **Ctrl+Shift+L**
 
 Use this command to build a source package (binary = FALSE by default)
 
@@ -42,7 +42,7 @@ Use this command to build a source package (binary = FALSE by default)
 devtools::build()
 ```
 
-Other usefull commands and shortcuts: Build and reload everything: *Ctrl+Shift+B* Check the package, `devtools::check()`: *Ctrl+Shift+E* Run all tests, `devtools::test()`: *Ctrl+Shift+T*
+Other usefull commands and shortcuts: Build and reload everything: **Ctrl+Shift+B** Check the package, `devtools::check()`: **Ctrl+Shift+E** Run all tests, `devtools::test()`: **Ctrl+Shift+T**
 
 ### Build vignettes
 
