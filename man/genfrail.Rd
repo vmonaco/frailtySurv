@@ -4,7 +4,9 @@
 \alias{genfrail}
 \title{Generate shared frailty survival data}
 \usage{
-genfrail(...)
+genfrail(beta = c(log(2)), frailty = c("gamma", "log.normal"),
+  censor.mu = 130, censor.sigma = 15, theta = 2, N = 300, K = 2,
+  tau = 4.6, C = 0.01, covariates = c("normal", "uniform"))
 }
 \arguments{
 \item{...}{model}

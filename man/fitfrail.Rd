@@ -4,7 +4,7 @@
 \alias{fitfrail}
 \title{Fit a Shared Frailty model}
 \usage{
-fitfrail(...)
+fitfrail(data)
 }
 \arguments{
 \item{...}{model}
