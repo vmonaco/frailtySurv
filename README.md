@@ -42,7 +42,13 @@ Use this command to build a source package (binary = FALSE by default)
 devtools::build()
 ```
 
-Other usefull commands and shortcuts: Build and reload everything: **Ctrl+Shift+B** Check the package, `devtools::check()`: **Ctrl+Shift+E** Run all tests, `devtools::test()`: **Ctrl+Shift+T**
+Other usefull commands and shortcuts:
+
+Build and reload everything: **Ctrl+Shift+B**
+
+Check the package, `devtools::check()`: **Ctrl+Shift+E**
+
+Run all tests, `devtools::test()`: **Ctrl+Shift+T**
 
 ### Build vignettes
 
@@ -52,4 +58,4 @@ Build the vignettes with the command:
 devtools::build_vignettes()
 ```
 
-Compiled vignettes will reside in `inst/doc`. In particular, see frailtyr.pdf.
+Compiled vignettes will reside in `inst/doc`. In particular, see frailtyr.pdf
