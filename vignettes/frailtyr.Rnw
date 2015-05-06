@@ -1,0 +1,84 @@
+% \documentclass[nojss]{jss}
+\documentclass[article]{jss}
+\usepackage{thumbpdf}
+%% need no \usepackage{Sweave}
+
+%% Symbols
+% TODO: define new commands for commonly used symbols, equations
+
+\author{John V. Monaco\\Pace University \And
+        Malka Gorfine\\Tel Aviv University \And
+        Li Hsu \\Fred Hutchinson \\Cancer Research Center}
+\Plainauthor{John V. Monaco, Malka Gorfine, Li Hsu} %% comma-separated
+
+\title{\pkg{frailtyr}: A General Semiparametric Shared Frailty Model}
+\Plaintitle{frailtyr: A General Semiparametric Shared Frailty Model} %% without formatting
+\Shorttitle{\pkg{frailtyr}}
+
+\Abstract{
+TODO
+}
+
+\Keywords{survival analysis, shared frailty model, \proglang{R}}
+\Plainkeywords{survival analysis, shared frailty model, R}
+
+%% TODO: publication information
+%% \Volume{??}
+%% \Issue{??}
+%% \Month{??}
+%% \Year{????}
+%% \Submitdate{????-??-??}
+%% \Acceptdate{????-??-??}
+
+\Address{
+  John V. Monaco\\
+  Seidenberg School of Computer Science and Information Systems\\
+  Pace University\\
+  861 Bedford Road\\
+  Pleasantville, NY 10570\\
+  E-mail: \email{jmonaco@pace.edu}\\
+  URL: \url{http://vmonaco.com}
+  \\\\
+  Malka Gorfine\\
+  TODO: department?\\
+  Tel Aviv University\\
+  Address line 1\\
+  Address line 2\\
+  E-mail: \email{TODO}\\
+  URL: \url{TODO}
+  \\\\
+  Li Hsu
+  TODO: department?\\
+  Fred Hutchinson Cancer Research Center\\
+  Address line 1\\
+  Address line 2\\
+  E-mail: \email{TODO}\\
+  URL: \url{TODO}
+}
+
+%% end of declarations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\SweaveOpts{concordance=FALSE,engine=R,eps=FALSE}
+%\VignetteIndexEntry{A General Semiparametric Shared Frailty Model}
+%\VignetteDepends{frailtyr}
+%\VignetteKeywords{survival analysis, shared frailty model}
+%\VignettePackage{frailtyr}
+
+<<preliminaries,echo=FALSE,results=hide>>=
+options(prompt = "R> ", continue = "+   ")
+@
+
+\section{Introduction} \label{sec:intro}
+
+Based on \cite{gorfine2006prospective}.
+
+
+\section*{Acknowledgments}
+
+The development of \pkg{frailtyr} was supported by Google Summer of Code 2015.
+% TODO: DoD IASP acknowledgment
+
+\bibliography{frailtyr}
+
+\end{document}

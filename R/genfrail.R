@@ -11,6 +11,7 @@
 #' @examples
 #' genfrail()
 #'
+#'@export
 genfrail <- function(beta = c(log(2)), # Covariate coefficients
                       frailty = c("gamma", "log.normal"), # Frailty distribution
                       censor.mu = 130, # Gaussian distribution for censoring

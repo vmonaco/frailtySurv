@@ -11,13 +11,11 @@ Authors@R: as.person(c(
   ))
 Description: TODO
 License: LGPL-2
-URL: https://bitbucket.org/vmonaco/frailtyr/
-BugReports: https://bitbucket.org/vmonaco/frailtyr/issues
+URL: https://github.com/vmonaco/frailtyr/
+BugReports: https://github.com/vmonaco/frailtyr/issues
 Suggests: knitr,
-    rticles,
     testthat
-Depends: 
+Depends: R (>= 3.0.0)
 Imports: 
-VignetteBuilder: knitr
 LazyData: Yes
 LazyLoad: Yes

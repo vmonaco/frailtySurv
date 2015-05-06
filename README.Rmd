@@ -6,10 +6,14 @@ output:
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-```{r, echo = FALSE}
+## frailtyr
+
+```{r, cache = FALSE, echo = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "README-"
+  fig.path = "figures"
 )
 ```
+
+frailtyr is a library for fitting shared frailty models with support for general 

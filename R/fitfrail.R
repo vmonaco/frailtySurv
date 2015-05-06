@@ -9,7 +9,7 @@
 #' @return parameters
 #'   \url{} for more details.
 #' @examples
-#' fitfrail()
+#' fitfrail(genfrail())
 #' 
 #' @export
 fitfrail <- function(data) {

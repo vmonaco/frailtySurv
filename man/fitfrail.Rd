@@ -20,6 +20,6 @@ parameters
 This function ...
 }
 \examples{
-fitfrail()
+fitfrail(genfrail())
 }
 
