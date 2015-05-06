@@ -44,11 +44,9 @@ devtools::build()
 
 Other usefull commands and shortcuts:
 
-Build and reload everything: **Ctrl+Shift+B**
-
-Check the package, `devtools::check()`: **Ctrl+Shift+E**
-
-Run all tests, `devtools::test()`: **Ctrl+Shift+T**
+-   Build and reload everything: **Ctrl+Shift+B**
+-   Check the package, `devtools::check()`: **Ctrl+Shift+E**
+-   Run all tests, `devtools::test()`: **Ctrl+Shift+T**
 
 ### Build vignettes
 
