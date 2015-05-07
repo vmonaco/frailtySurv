@@ -137,10 +137,10 @@ fitfrail <- function(data) {
     sum(sapply(family_names, function(i) {
       integrate(function (w) {
         # TODO: df(w)/dtheta correct? Getting a divergent integral with large thete right now.
-        ( w ^ N_[[i]][tau] ) * exp(-w*H_[[i]][tau]) * sapply(w, function (wi) {grad(function(p) {dgamma(wi, 1/p, 1/p)}, x=theta)})
+        ( w ^ N_[[i]][tau] ) * exp(-w*H_dot[[i]][tau]) * sapply(w, function (wi) {grad(function(p) {dgamma(wi, 1/p, 1/p)}, x=theta)})
       }, 0, Inf)$value /
         integrate(function (w) {
-        ( w ^ N_[[i]][tau] ) * exp(-w*H_[[i]][tau]) * dgamma(w, 1/theta, 1/theta)
+        ( w ^ N_[[i]][tau] ) * exp(-w*H_dot[[i]][tau]) * dgamma(w, 1/theta, 1/theta)
       }, 0, Inf)$value
     }))
   }
