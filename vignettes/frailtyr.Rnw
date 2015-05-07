@@ -1,6 +1,6 @@
 % \documentclass[nojss]{jss}
 \documentclass[article]{jss}
-\usepackage{thumbpdf}
+%% \usepackage{thumbpdf}
 
 % Some of these are redundent
 \usepackage[utf8]{inputenc}
