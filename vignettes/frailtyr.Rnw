@@ -1,6 +1,12 @@
 % \documentclass[nojss]{jss}
 \documentclass[article]{jss}
 \usepackage{thumbpdf}
+
+% Some of these are redundent
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{color, pdfcolmk}
+\usepackage{Sweave}
 %% need no \usepackage{Sweave}
 
 %% Symbols
