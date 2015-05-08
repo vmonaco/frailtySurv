@@ -53,13 +53,14 @@ fitfrail <- function(data) {
     function(theta, k, H_dot_ik) {
       
       phi_1 <- function (w) {
-        ( w ^ N_[[i]][k] ) * exp(-w*H_dot_ik) * dgamma(w, theta, theta)
+        ( w ^ N_[[i]][k] ) * exp(-w*H_dot_ik) * dgamma(w, 1/theta, 1/theta)
       }
       
       phi_2 <- function (w) {
-        ( w ^ (N_[[i]][k] + 1) ) * exp(-w*H_dot_ik) * dgamma(w, theta, theta)
+        ( w ^ (N_[[i]][k] + 1) ) * exp(-w*H_dot_ik) * dgamma(w, 1/theta, 1/theta)
       }
-      
+      # For gamma, 
+      # psi_[i](theta, k, H_dot_ik) == (N_[[i]][k] + 1/theta)/(H_dot[[i]][k] + 1/theta)
       integrate(phi_2, 0, Inf)$value/integrate(phi_1, 0, Inf)$value
     }
   }, simplify = FALSE, USE.NAMES = TRUE)
