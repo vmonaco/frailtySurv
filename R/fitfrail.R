@@ -1,37 +1,3 @@
-
-dgamma_ <- function(x, theta) {
-  dgamma(x, 1/theta, 1/theta)
-}
-
-dgamma_dtheta <- function(x, theta) {
-  if (is.infinite(x)) return(0)
-  
-  term1 <- (x/theta)^(1/theta - 1)
-  term2 <- exp(-x/theta)
-  term3 <- log(theta/x) + digamma(1/theta) + x - 1
-  
-  (term1 * term2 * term3)/(gamma(1/theta)*theta^3)
-}
-# 
-# dlnorm_dtheta <- function(x, sigma) {
-#   term1 <- log(x)^2 * exp(-(log(x)^2)/(2*sigma^2)) / (x*sqrt(2*pi)*sigma^4)
-#   term2 <- exp(-(log(x)^2)/(2*sigma^2)) / (x*sqrt(2*pi)*sigma^2)
-#     
-#   term1 - term2
-# }
-
-sum_by_family <- function(A_) {
-  A_dot <- sapply(names(A_), function(i) {
-    rep(0, length(A_[[i]][1,]))
-  }, simplify = FALSE, USE.NAMES = TRUE)
-  
-  for (i in names(A_)) {
-    A_dot[[i]] <- colSums(A_[[i]])
-  }
-  
-  A_dot
-}
-
 #' Fit a Shared Frailty model
 #'
 #' \code{fitfrail} fits a model.
@@ -45,148 +11,84 @@ sum_by_family <- function(A_) {
 #' fitfrail(genfrail())
 #' 
 #' @export
-fitfrail <- function(data) {
+fitfrail <- function(formula, data, control, frailty=c("gamma","lognormal"), ...) {
   
-  # Temporary, these values will be extractd from the observed data based on
-  # the survival formula
-  timecol <- 'time'
-  statuscol <- 'status'
-  covars <- c('Z1')
+  Call <- match.call()
   
-  # Store the time step index to avoid lookups when the rank is needed later
-  data$k <- 1 + rank(data[[timecol]])
+  # create a call to model.frame() that contains the formula (required)
+  #  and any other of the relevant optional arguments
+  # then evaluate it in the proper frame
+  indx <- match(c("formula", "data"),
+                names(Call), nomatch=0) 
+  if (indx[1] ==0) stop("A formula argument is required")
+  temp <- Call[c(1,indx)]  # only keep the arguments we wanted
+  temp[[1]] <- as.name('model.frame')  # change the function called
   
-  # The time steps will be used throughout this function
-  time_steps <- c(0, sort(unique(data$time)))
-  families <- split(data, data$family)
-  family_names <- names(families)
-  tau_k <- length(time_steps)
+  special <- c("cluster")
+  temp$formula <- if(missing(data)) terms(formula, special) else terms(formula, special, data=data)
   
-  # The number of individuals in family i that failed up to time step t, N[i,t]
-  # N_dot[[i]][k]
-  N_ <- sapply(family_names, function(i) {
-    t(sapply(1:nrow(families[[i]]), function(j) {
-      as.numeric((families[[i]][j,statuscol] > 0) & (families[[i]][j,timecol] <= time_steps))
-    }))
-  }, simplify = FALSE, USE.NAMES = TRUE)
-
-  N_dot <- sum_by_family(N_)
+  mf <- eval(temp, parent.frame())
+  if (nrow(mf) ==0) stop("No (non-missing) observations")
+  Terms <- terms(mf)
   
-  # Y_[[i]][j,k] = I(T_ij >= t_k)
-  Y_ <- sapply(families, function(family) {
-    t(apply(family, 1, function(individual) {
-      as.numeric(individual[timecol] >= time_steps)
-    }))
-  }, simplify = FALSE, USE.NAMES = TRUE)
+  ## Pass any ... args to nleqslv, but only valid args
+  extraArgs <- list(...)
+  if (length(extraArgs)) {
+    controlargs <- names(formals(nleqslv)) #legal arg names
+    indx <- pmatch(names(extraArgs), controlargs, nomatch=0L)
+    if (any(indx==0L))
+      stop(gettextf("Argument %s not matched", names(extraArgs)[indx==0L]),
+           domain = NA)
+  }
+  if (missing(control)) control <- frailtyr.control(...)
   
-  # d_[k] = The number of failures at time tau_k
-  d_ <- sapply(seq_along(time_steps), function(k) {
-    sum(data[[statuscol]][data[[timecol]] == time_steps[k]])
-  })
+  Y <- model.extract(mf, "response")
+  if (!inherits(Y, "Surv")) stop("Response must be a survival object")
   
-  # Create psi_i for each family. Depends on theta, t, and H_i.(t)
-  psi_ <- sapply(family_names, function (i) {
-    function(theta, H_dot, k) {
-      
-      phi_1 <- function (w) {
-        ( w ^ N_dot[[i]][k] ) * exp(-w*H_dot[[i]][k]) * dgamma_(w, theta)
-      }
-      
-      phi_2 <- function (w) {
-        ( w ^ (N_dot[[i]][k] + 1) ) * exp(-w*H_dot[[i]][k]) * dgamma_(w, theta)
-      }
-      # For gamma, 
-      # psi_[i](theta, k, H_dot_ik) == (N_dot[[i]][k] + 1/theta)/(H_dot[[i]][k] + 1/theta)
-      integrate(Vectorize(phi_2), 0, Inf, stop.on.error = FALSE)$value/
-        integrate(Vectorize(phi_1), 0, Inf, stop.on.error = FALSE)$value
-    }
-  }, simplify = FALSE, USE.NAMES = TRUE)
-  
-  # Step function for baseline hazard
-  estimate_lambda_hat <- function(beta, theta) {
-    # delta_lambda_hat[1] = 0, since at t_0 there is no chance of failure
-    delta_lambda_hat = rep(0, length(time_steps))
-    lambda_hat = rep(0, length(time_steps))
-    
-    H_ <- sapply(family_names, function(i) {
-      matrix(0, nrow(families[[i]]), length(time_steps))
-    }, simplify = FALSE, USE.NAMES = TRUE)
-    
-    H_dot <- sapply(family_names, function(i) {
-      rep(0, length(time_steps))
-    }, simplify = FALSE, USE.NAMES = TRUE)
-    
-    for (k in 2:length(time_steps)) {
-      # Denom for delta_lambda_hat[k]
-      denom <- sum(sapply(family_names, function(i) {
-          psi_[[i]](theta, H_dot, k - 1) * 
-          sum(sapply(1:nrow(families[[i]]), function(j) {
-            Y_[[i]][j, k] * exp(t(beta) %*% families[[i]][j,covars])
-          }))
-      }))
-      
-      delta_lambda_hat[k] <- d_[k]/denom
-    
-      # Update the cumsum since it's needed several times in the next iteration
-      lambda_hat[k] <- lambda_hat[k-1] + delta_lambda_hat[k]
-      
-      # Determine H_ij(t) and H_i.(t)
-      for (i in family_names) {
-        for (j in 1:nrow(families[[i]])) {
-          k_min = min(families[[i]][j,"k"], k)
-          H_[[i]][j, k] <- lambda_hat[k_min] * exp(t(beta) %*% families[[i]][j,covars])
-        }
-        H_dot[[i]][k] <- sum(H_[[i]][,k])
-      }
-    }
-    
-    list(lambda_hat=lambda_hat, H_=H_, H_dot=H_dot)
+  cluster<- attr(Terms, "specials")$cluster
+  if (length(cluster)) {
+    tempc <- untangle.specials(Terms, 'cluster', 1:10)
+    ord <- attr(Terms, 'order')[tempc$terms]
+    cluster <- strata(mf[,tempc$vars], shortlabel=TRUE)  #allow multiples
+    dropterms <- tempc$terms  #we won't want this in the X matrix
+    # Save away xlevels after removing cluster (we don't want to save upteen
+    #  levels of that variable, which we will never need).
+    xlevels <- .getXlevels(Terms[-tempc$terms], mf)
+  } else {
+    stop("Missing cluster, use coxme if there is no hidden frailty")
   }
   
-  # TODO: Build the system of equations
-  # E.g. will look something like this, without the duplicate integrations
-  U <- function(beta, theta) {
-    estimator <- estimate_lambda_hat(beta, theta)
-    lambda_hat <- estimator$lambda_hat
-    H_ <- estimator$H_
-    H_dot <- estimator$H_dot
-    
-    U_r <- function(covarcol) {
-      term1 <- mean(sapply(family_names, function(i) {
-          sum(sapply(1:nrow(families[[i]]), function(j) {
-            as.numeric(families[[i]][j,statuscol]) * families[[i]][j,covarcol]
-          }))
-      }))
-      
-      term2 <- mean(sapply(family_names, function(i) {
-        sum(sapply(1:nrow(families[[i]]), function(j) {
-          H_[[i]][j, families[[i]][j,"k"]] * families[[i]][j,covarcol]
-        })) *
-        psi_[[i]](theta, H_dot, tau_k)
-      }))
-      term1 - term2
-    }
-    
-    U_p <- function() {
-      mean(sapply(family_names, function(i) {
-        numer = integrate(function (w) {
-          ( w ^ N_dot[[i]][tau_k] ) * exp(-w*H_dot[[i]][tau_k]) * Vectorize(function(wi) dgamma_dtheta(wi, theta))(w)
-        }, 0, Inf, stop.on.error = FALSE)$value
-
-        denom = integrate(function (w) {
-          ( w ^ N_dot[[i]][tau_k] ) * exp(-w*H_dot[[i]][tau_k]) * dgamma_(w, theta)
-        }, 0, Inf, stop.on.error = FALSE)$value
-        
-        numer/denom
-      }))
-    }
+  contrast.arg <- NULL  #due to shared code with model.matrix.coxph
+  attr(Terms, "intercept") <- 1
+  adrop <- 0  #levels of "assign" to be dropped; 0= intercept
   
-    c(U_r("Z1"), U_p())
+  if (length(dropterms)) {
+    temppred <- attr(terms, "predvars")
+    Terms2 <- Terms[ -dropterms]
+    if (!is.null(temppred)) {
+      # subscripting a Terms object currently drops predvars, in error
+      attr(Terms2, "predvars") <- temppred[-(1+dropterms)] # "Call" object
+    }
+    X <- model.matrix(Terms2, mf, constrasts=contrast.arg)
+    # we want to number the terms wrt the original model matrix
+    # Do not forget the intercept, which will be a zero
+    renumber <- match(colnames(attr(Terms2, "factors")), 
+                      colnames(attr(Terms,  "factors")))
+    attr(X, "assign") <- c(0, renumber)[1+attr(X, "assign")]
   }
+  else {
+    X <- model.matrix(Terms, mf, contrasts=contrast.arg)
+  } 
   
-  function (x) {
-    beta <- x[1]
-    theta <- x[2]
-    U(beta, theta)
-  }
+  Xatt <- attributes(X) 
+  xdrop <- Xatt$assign %in% adrop  #columns to drop (always the intercept)
+  X <- X[, !xdrop, drop=FALSE]
+  
+  coef_init <- coxph.fit(X, Y, strata=NULL, 
+                         offset=NULL, init=NULL, 
+                         control=coxph.control(), weights=NULL, 
+                         method="efron", row.names(mf))$coefficients
+  fit <- sharedfrailty.fit(X, Y, cluster, coef_init, control, row.names(mf))
+  
+  fit
 }

@@ -1,7 +1,7 @@
 library(testthat)
 library(frailtyr)
 
-test_that("fitfrail recovers parameters from genfrail data", {
+test_that("fitfrail recovers parameters within error", {
   data <- genfrail()
   model <- fitfrail(data)
   
