@@ -40,7 +40,7 @@ fitfrail <- function(formula, data, control, frailty=c("gamma","lognormal"), ...
       stop(gettextf("Argument %s not matched", names(extraArgs)[indx==0L]),
            domain = NA)
   }
-  if (missing(control)) control <- frailtyr.control(...)
+  if (missing(control)) control <- fitfrail.control(...)
   
   Y <- model.extract(mf, "response")
   if (!inherits(Y, "Surv")) stop("Response must be a survival object")
@@ -84,11 +84,15 @@ fitfrail <- function(formula, data, control, frailty=c("gamma","lognormal"), ...
   xdrop <- Xatt$assign %in% adrop  #columns to drop (always the intercept)
   X <- X[, !xdrop, drop=FALSE]
   
-  coef_init <- coxph.fit(X, Y, strata=NULL, 
-                         offset=NULL, init=NULL, 
-                         control=coxph.control(), weights=NULL, 
-                         method="efron", row.names(mf))$coefficients
-  fit <- sharedfrailty.fit(X, Y, cluster, coef_init, control, row.names(mf))
+  beta_init <- coxph.fit(X, Y, strata=NULL, 
+                          offset=NULL, init=NULL, 
+                          control=coxph.control(), weights=NULL, 
+                          method="efron", row.names(mf))$coefficients
+  theta_init = c(1)
+  fit <- sharedfrailty.fit(X, Y, cluster, 
+                           beta_init, theta_init, 
+                           NULL, NULL,
+                           control, row.names(mf))
   
   fit
 }

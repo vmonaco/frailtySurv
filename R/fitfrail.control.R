@@ -1,7 +1,7 @@
 #
 # Gather all of the control parameters for coxph into one spot
 #
-frailtyr.control <- function(eps=1e-9, 
+fitfrail.control <- function(eps=1e-9, 
                           toler.chol = .Machine$double.eps ^ .75, 
                           iter.max=20,
                           toler.inf= sqrt(eps), outer.max=10 ) {
