@@ -1,25 +1,4 @@
 
-dgamma_ <- function(x, theta) {
-  dgamma(x, 1/theta, 1/theta)
-}
-
-dgamma_dtheta <- function(x, theta) {
-  if (is.infinite(x)) return(0)
-  
-  term1 <- (x/theta)^(1/theta - 1)
-  term2 <- exp(-x/theta)
-  term3 <- log(theta/x) + digamma(1/theta) + x - 1
-  
-  (term1 * term2 * term3)/(gamma(1/theta)*theta^3)
-}
-# 
-# dlnorm_dtheta <- function(x, sigma) {
-#   term1 <- log(x)^2 * exp(-(log(x)^2)/(2*sigma^2)) / (x*sqrt(2*pi)*sigma^4)
-#   term2 <- exp(-(log(x)^2)/(2*sigma^2)) / (x*sqrt(2*pi)*sigma^2)
-#     
-#   term1 - term2
-# }
-
 sum_by_cluster <- function(A_) {
   A_dot <- sapply(names(A_), function(i) {
     rep(0, length(A_[[i]][1,]))
@@ -104,10 +83,10 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty,
   psi_ <- sapply(cluster_names, function (i) {
     function(theta, N_dot_ik, H_dot_ik) {
       phi_1 <- function (w) {
-        ( w ^ N_dot_ik ) * exp(-w*H_dot_ik) * dgamma_(w, theta)
+        ( w ^ N_dot_ik ) * exp(-w*H_dot_ik) * dfrailty(w, theta)
       }
       phi_2 <- function (w) {
-        ( w ^ (N_dot_ik + 1) ) * exp(-w*H_dot_ik) * dgamma_(w, theta)
+        ( w ^ (N_dot_ik + 1) ) * exp(-w*H_dot_ik) * dfrailty(w, theta)
       }
       
 #       integrate(Vectorize(phi_2), 0, Inf, stop.on.error = FALSE)$value/
@@ -176,11 +155,11 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty,
   U_p <- function(H_dot, theta_idx, theta) {
     mean(sapply(cluster_names, function(i) {
       numer = integrate(function (w) {
-        ( w ^ N_dot[[i]][tau_k] ) * exp(-w*H_dot[[i]][tau_k]) * Vectorize(function(wi) dgamma_dtheta(wi, theta))(w)
+        ( w ^ N_dot[[i]][tau_k] ) * exp(-w*H_dot[[i]][tau_k]) * Vectorize(function(wi) dfrailty_dtheta(wi, theta, theta_idx))(w)
       }, 0, Inf, stop.on.error = FALSE)$value
       
       denom = integrate(function (w) {
-        ( w ^ N_dot[[i]][tau_k] ) * exp(-w*H_dot[[i]][tau_k]) * dgamma_(w, theta)
+        ( w ^ N_dot[[i]][tau_k] ) * exp(-w*H_dot[[i]][tau_k]) * dfrailty(w, theta)
       }, 0, Inf, stop.on.error = FALSE)$value
       
       numer/denom

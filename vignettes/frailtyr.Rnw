@@ -87,4 +87,13 @@ The development of \pkg{frailtyr} was supported by Google Summer of Code 2015.
 
 \bibliography{frailtyr}
 
+\clearpage
+
+\begin{appendix}
+
+\section{Supported frailty distributions}
+Gamma, log-normal
+
+\end{appendix}
+
 \end{document}

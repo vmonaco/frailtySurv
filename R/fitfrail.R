@@ -42,6 +42,13 @@ fitfrail <- function(formula, data, control, frailty=c("gamma","lognormal"), ...
   }
   if (missing(control)) control <- fitfrail.control(...)
   
+  if (frailty== "gamma") {
+    dfrailty <- dgamma_
+    dfrailty_dtheta <- dgamma_dtheta
+  } else {
+    stop("frailty distribution", frailty, "not supported yet.")
+  }
+  
   Y <- model.extract(mf, "response")
   if (!inherits(Y, "Surv")) stop("Response must be a survival object")
   
@@ -91,7 +98,7 @@ fitfrail <- function(formula, data, control, frailty=c("gamma","lognormal"), ...
   theta_init = c(1)
   fit <- sharedfrailty.fit(X, Y, cluster, 
                            beta_init, theta_init, 
-                           NULL, NULL,
+                           dfrailty, dfrailty_dtheta,
                            control, row.names(mf))
   
   fit
