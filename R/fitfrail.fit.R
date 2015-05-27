@@ -88,11 +88,11 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty,
       phi_2 <- function (w) {
         ( w ^ (N_dot_ik + 1) ) * exp(-w*H_dot_ik) * dfrailty(w, theta)
       }
-      
-#       integrate(Vectorize(phi_2), 0, Inf, stop.on.error = FALSE)$value/
-#         integrate(Vectorize(phi_1), 0, Inf, stop.on.error = FALSE)$value
-      # Simplified for gamma, 
-      (N_dot_ik + 1/theta)/(H_dot_ik + 1/theta)
+      # TODO: use GSL for integration?
+      integrate(Vectorize(phi_2), 0, Inf, stop.on.error = FALSE)$value/
+        integrate(Vectorize(phi_1), 0, Inf, stop.on.error = FALSE)$value
+      # TODO: use this shortcut for gamma when possible. Others? 
+#       (N_dot_ik + 1/theta)/(H_dot_ik + 1/theta)
     }
   }, simplify = FALSE, USE.NAMES = TRUE)
   
@@ -154,11 +154,12 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty,
   
   U_p <- function(H_dot, theta_idx, theta) {
     mean(sapply(cluster_names, function(i) {
-      numer = integrate(function (w) {
+      # TODO: use GSL for integration?
+      numer <- integrate(function (w) {
         ( w ^ N_dot[[i]][tau_k] ) * exp(-w*H_dot[[i]][tau_k]) * Vectorize(function(wi) dfrailty_dtheta(wi, theta, theta_idx))(w)
       }, 0, Inf, stop.on.error = FALSE)$value
       
-      denom = integrate(function (w) {
+      denom <- integrate(function (w) {
         ( w ^ N_dot[[i]][tau_k] ) * exp(-w*H_dot[[i]][tau_k]) * dfrailty(w, theta)
       }, 0, Inf, stop.on.error = FALSE)$value
       
@@ -176,6 +177,7 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty,
     H_ <- estimator$H_
     H_dot <- estimator$H_dot
     
+    # TODO: This could be done in parallel
     c(sapply(1:n_beta, function(beta_idx) U_r(H_, H_dot, beta_idx, theta)),
       sapply(1:n_theta, function(theta_idx) U_p(H_dot, theta_idx, theta)))
   }
