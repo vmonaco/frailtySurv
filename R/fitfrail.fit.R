@@ -96,19 +96,19 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty,
     }
   }, simplify = FALSE, USE.NAMES = TRUE)
   
+  H_ <- sapply(cluster_names, function(i) {
+    matrix(0, cluster_sizes[[i]], length(time_steps))
+  }, simplify = FALSE, USE.NAMES = TRUE)
+  
+  H_dot <- sapply(cluster_names, function(i) {
+    rep(0, length(time_steps))
+  }, simplify = FALSE, USE.NAMES = TRUE)
+
   # Step function for baseline hazard
   estimate_lambda_hat <- function(beta, theta) {
     # delta_lambda_hat[1] = 0, since at t_0 there is no chance of failure
     delta_lambda_hat = rep(0, length(time_steps))
     lambda_hat = rep(0, length(time_steps))
-    
-    H_ <- sapply(cluster_names, function(i) {
-      matrix(0, cluster_sizes[[i]], length(time_steps))
-    }, simplify = FALSE, USE.NAMES = TRUE)
-    
-    H_dot <- sapply(cluster_names, function(i) {
-      rep(0, length(time_steps))
-    }, simplify = FALSE, USE.NAMES = TRUE)
     
     for (k in 2:length(time_steps)) {
       # Denom for delta_lambda_hat[k]
