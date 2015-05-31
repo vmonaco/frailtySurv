@@ -44,7 +44,7 @@ fitfrail <- function(formula, data, control, frailty=c("gamma","lognormal"), ...
   
   if (frailty== "gamma") {
     dfrailty <- dgamma_
-    dfrailty_dtheta <- dgamma_dtheta
+    deriv_dfrailty <- deriv_dgamma
   } else {
     stop("frailty distribution", frailty, "not supported yet.")
   }
@@ -98,8 +98,9 @@ fitfrail <- function(formula, data, control, frailty=c("gamma","lognormal"), ...
   theta_init = c(1)
   fit <- sharedfrailty.fit(X, Y, cluster, 
                            beta_init, theta_init, 
-                           dfrailty, dfrailty_dtheta,
+                           dfrailty, deriv_dfrailty,
                            control, row.names(mf))
-  
+  class(fit) <- 'fitfrail'
+  fit$call <- Call
   fit
 }

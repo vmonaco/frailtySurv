@@ -12,7 +12,7 @@ sum_by_cluster <- function(A_) {
 }
 
 sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty, 
-                              dfrailty_dtheta, control, rownames) {
+                              deriv_dfrailty, control, rownames) {
   
   n_theta <- 1
   
@@ -80,21 +80,19 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty,
   }, 0)
   
   # Create psi_i for each cluster. Depends on theta, N_i.(t) and H_i.(t)
-  psi_ <- sapply(cluster_names, function (i) {
-    function(theta, N_dot_ik, H_dot_ik) {
-      phi_1 <- function (w) {
-        ( w ^ N_dot_ik ) * exp(-w*H_dot_ik) * dfrailty(w, theta)
-      }
-      phi_2 <- function (w) {
-        ( w ^ (N_dot_ik + 1) ) * exp(-w*H_dot_ik) * dfrailty(w, theta)
-      }
-      # TODO: use GSL for integration?
-      integrate(Vectorize(phi_2), 0, Inf, stop.on.error = FALSE)$value/
-        integrate(Vectorize(phi_1), 0, Inf, stop.on.error = FALSE)$value
-      # TODO: use this shortcut for gamma when possible. Others? 
-#       (N_dot_ik + 1/theta)/(H_dot_ik + 1/theta)
+  psi_ <- function(theta, N_dot_ik, H_dot_ik) {
+    phi_1 <- function (w) {
+      ( w ^ N_dot_ik ) * exp(-w*H_dot_ik) * dfrailty(w, theta)
     }
-  }, simplify = FALSE, USE.NAMES = TRUE)
+    phi_2 <- function (w) {
+      ( w ^ (N_dot_ik + 1) ) * exp(-w*H_dot_ik) * dfrailty(w, theta)
+    }
+    # TODO: use GSL for integration?
+    integrate(Vectorize(phi_2), 0, Inf, stop.on.error = FALSE)$value/
+      integrate(Vectorize(phi_1), 0, Inf, stop.on.error = FALSE)$value
+    # TODO: use this shortcut for gamma when possible. Others? 
+#       (N_dot_ik + 1/theta)/(H_dot_ik + 1/theta)
+  }
   
   H_ <- sapply(cluster_names, function(i) {
     matrix(0, cluster_sizes[[i]], length(time_steps))
@@ -113,7 +111,7 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty,
     for (k in 2:length(time_steps)) {
       # Denom for delta_lambda_hat[k]
       denom <- sum(sapply(cluster_names, function(i) {
-        psi_[[i]](theta, N_dot[[i]][k-1], H_dot[[i]][k-1]) * 
+        psi_(theta, N_dot[[i]][k-1], H_dot[[i]][k-1]) * 
           sum(vapply(1:cluster_sizes[[i]], function(j) {
             Y_[[i]][j, k] * exp(t(beta) %*% spx[[i]][j,])
           }, 0))
@@ -147,7 +145,7 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty,
     term2 <- mean(sapply(cluster_names, function(i) {
       sum(sapply(1:cluster_sizes[[i]], function(j) {
         H_[[i]][j, spk[[i]][j]] * spx[[i]][j,beta_idx]})) *
-          psi_[[i]](theta, N_dot[[i]][tau_k], H_dot[[i]][tau_k])
+          psi_(theta, N_dot[[i]][tau_k], H_dot[[i]][tau_k])
     }))
     term1 - term2
   }
@@ -156,7 +154,7 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty,
     mean(sapply(cluster_names, function(i) {
       # TODO: use GSL for integration?
       numer <- integrate(function (w) {
-        ( w ^ N_dot[[i]][tau_k] ) * exp(-w*H_dot[[i]][tau_k]) * Vectorize(function(wi) dfrailty_dtheta(wi, theta, theta_idx))(w)
+        ( w ^ N_dot[[i]][tau_k] ) * exp(-w*H_dot[[i]][tau_k]) * Vectorize(function(wi) deriv_dfrailty(wi, theta, theta_idx))(w)
       }, 0, Inf, stop.on.error = FALSE)$value
       
       denom <- integrate(function (w) {
@@ -166,12 +164,12 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty,
       numer/denom
     }))
   }
-
+  iter <- 1
   # Build the system of equations where gamma is c(beta, theta)
   U <- function(gamma) {
     beta <- gamma[1:n_beta]
     theta <- gamma[(n_beta+1):(n_beta+n_theta)]
-    cat('beta',beta,'theta',theta,'\n')
+    cat("Iteration ", iter, " : ", "beta <- ", beta, ", theta <- ", theta, "\n")
     
     estimator <- estimate_lambda_hat(beta, theta)
     H_ <- estimator$H_
@@ -187,5 +185,7 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty,
   beta_hat <- gamma_hat[1:n_beta]
   theta_hat <- gamma_hat[(n_beta+1):(n_beta+n_theta)]
   
-  fit
+  list(beta = beta_hat,
+       theta = theta_hat,
+       method='fitfrail')
 }

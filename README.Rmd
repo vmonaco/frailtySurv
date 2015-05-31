@@ -73,3 +73,25 @@ frailtyr uses the `testthat` library for tests. Test files are all located in `t
 ### git pull
 
 Use RStudio to pull the latest code if you've already cloned the repository. In the "git" pane, look for the Pull button. You can also view the commit history from there and see the diff between modified files, if any.
+
+## Example
+The following code shows how to generate data and fit the model. For now, the baseline hazard estimator is very slow. Estimating parameters for 60 data points takes about 90 seconds, as shown in the example.
+```{r, echo=TRUE}
+set.seed(1234)
+library(frailtyr)
+data <- genfrail(beta=c(log(2)), theta=2, N=30, K=2, frailty="gamma", covariates="normal")
+ptm <- proc.time()
+fitfrail(Surv(time, status) ~ Z1 + cluster(family), data, frailty="gamma")
+proc.time() - ptm
+```
+
+These results can be compared to existing shared frailty models.
+
+```{r, message=FALSE, echo=TRUE}
+library(survival)
+library(frailtypack)
+```
+```{r, echo=TRUE}
+coxph(Surv(time, status) ~ Z1 + frailty.gamma(family), data=data)
+frailtyPenal(Surv(time, status) ~ Z1 + cluster(family), data=data, n.knots=10, kappa=2)
+```

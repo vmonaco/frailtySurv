@@ -91,8 +91,129 @@ The development of \pkg{frailtyr} was supported by Google Summer of Code 2015.
 
 \begin{appendix}
 
-\section{Supported frailty distributions}
-Gamma, log-normal
+\section{Frailty distributions}
+
+All frailty distributions have support $\omega\in\left(0,\infty\right)$.
+It is usually necessary to place constraints on the parameters to
+avoid identifiability problems.
+
+
+\subsection{Gamma}
+
+Frailty values from a gamma distribution are denoted by 
+$\omega\sim\Gamma(\frac{1}{\theta},\frac{1}{\theta})$,
+where $E[\omega]=1$ and $Var[\omega]=\theta$. The frailtyr package
+uses a one-parameter gamma distribution with shape and scale both
+$\frac{1}{\theta}$ and density given by
+
+\begin{equation}
+\Gamma(\omega;\theta)=
+\frac{
+\omega^{\frac{1}{\theta}-1}
+\exp\left(\frac{-\omega}{\theta}\right)}
+{\theta^{\frac{1}{\theta}}\Gamma(\frac{1}{\theta})}
+\label{eq:density-gamma}
+\end{equation}
+
+The special case when $\theta=0$ is taken to be a degenerate distribution
+where $\omega=1$, i.e. there is no hidden frailty in the hazard function.
+The partial derivative, with respect to the single parameter $\theta$,
+has closed form solution
+
+\begin{equation}
+\frac{\partial\Gamma(\omega;\theta)}{\partial\theta}=
+\frac{\left(\frac{\omega}{\theta}\right)^{\frac{1}{\theta}-1}
+\exp\left(\frac{-\omega}{\theta}\right)
+\left\{ \ln\left(\frac{\theta}{\omega}\right)+\psi^{(0)}\left(\frac{1}{\theta}\right)+\omega-1\right\} }
+{\theta^{3}\Gamma\left(\frac{1}{\theta}\right)}
+\label{eq:deriv-gamma}
+\end{equation}
+
+
+
+\subsection{Log-normal}
+
+Frailty values from a log-normal distribution are denoted $\omega\sim LN(\theta)$,
+where the log-mean and log-variance of $\omega$ are 0 and $\theta$,
+respectively. This distribution has $E[\omega]=\exp\frac{\theta}{2}$
+and $Var[\omega]=\exp2\theta-\exp\theta$, with density given by
+
+\begin{equation}
+LN(\omega;\theta)=
+\frac{1}{\omega\sqrt{\theta2\pi}}
+\exp\left\{ \frac{-\left(\ln\omega\right)^{2}}{2\theta}\right\} 
+\label{eq:density-log-norm}
+\end{equation}
+
+Similar to the gamma distribution, the special case of $\theta=0$
+indicates $\omega=1$. The partial derivative with respect to $\theta$
+is given by
+
+\begin{equation}
+\frac{\partial LN(\omega;\theta)}{\partial\theta}=\frac{\ln^{2}\left(\omega\right)\exp\left\{ \frac{-\ln^{2}\omega}{2\theta}\right\} }{2\sqrt{2\pi}\theta^{5/2}\omega}-\frac{\exp\left\{ \frac{-\ln^{2}\omega}{2\theta}\right\} }{2\sqrt{2\pi}\theta^{3/2}\omega}
+\label{eq:deriv-log-norm}
+\end{equation}
+
+
+
+\subsection{Positive stable}
+
+The one-parameter positive stable distribution is given by $\omega\sim PS(\alpha)$,
+where $\beta=1$, $\mu=0$, $0<\alpha<1$, and $\delta=\alpha$ as
+defined in Hougaard \cite{hougaard2000analysis}. The density is given
+by
+
+\begin{equation}
+PS\left(\omega;\alpha\right)=-\frac{1}{\pi\omega}\sum_{k=1}^{\infty}\frac{\Gamma\left(k\alpha+1\right)}{k!}\left(-\omega^{-\alpha}\right)^{k}\sin\left(\alpha k\pi\right)\label{eq:density-posstab}
+\end{equation}
+For small $\omega$, the density is approximated by
+\begin{equation}
+\left\{ 2\pi\left(1-\alpha\right)\right\} ^{1/2}\delta^{1/\left\{ 2\left(1-\alpha\right)\right\} }\omega^{\mathit{v}}\exp\left\{ -\theta\omega-\delta^{1/\left(1-\alpha\right)}\left(\frac{1}{\alpha}-1\right)\omega^{-\alpha/\left(1-\alpha\right)}+\frac{\delta\theta^{\alpha}}{\alpha}\right\}
+\label{eq:pvf-saddle-point-approx}
+\end{equation}
+with $\theta=0$ and $\delta=\alpha$. When $\alpha=1$, a degenerate
+distribution at 1 is obtained and there is no shared frailty. 
+
+
+\subsection{Inverse Gaussian}
+
+Frailty values from an inverse Gaussian distribution are denoted by
+$\omega\sim IG(\theta)$, where $\frac{1}{\theta}$ is the scale and
+the mean is fixed at 1. The density is given by
+
+\begin{equation}
+IG\left(\omega;\theta\right)=\left(2\pi\theta\omega^{3}\right)^{-1/2}\exp\left\{ \frac{-\left(\omega-1\right)^{2}}{2\theta\omega}\right\} \label{eq:density-inverse-gaussian}
+\end{equation}
+
+where $\theta>0$. The IG has $E[\omega]=1$ and $Var[\omega]=\theta$.
+Similar to the gamma and log-normal, $\omega$ is taken to be 1 when
+$\theta=0$. The derivative wrt. $\theta$ is given by
+\[
+\frac{\partial IG\left(\omega;\theta\right)}{\partial\theta}=\frac{\left(\omega-1\right)^{2}\exp\left\{ -\frac{\left(\omega-1\right){}^{2}}{2\theta\omega}\right\} }{2\sqrt{2\pi}\theta^{2}\omega\sqrt{\theta\omega^{3}}}-\frac{\omega^{3}\exp\left\{ -\frac{\left(\omega-1\right)^{2}}{2\theta\omega}\right\} }{2\sqrt{2\pi}\left(\theta\omega^{3}\right){}^{3/2}}
+\]
+
+
+
+\subsection{Power variance function}
+
+The power variance function (PVF) distribution is denoted $PVF(\alpha,\delta,\theta)$
+with density
+
+\[
+PVF\left(\omega;\alpha,\delta,\theta\right)=\exp\left\{ -\theta\omega+\frac{\delta^{\alpha}}{\alpha}\right\} \frac{1}{\pi}\sum_{k=1}^{\infty}\frac{\Gamma\left(k\alpha+1\right)}{k!}\left(-\frac{1}{\omega}\right)^{\alpha k+1}\sin\left(\alpha k\pi\right)
+\]
+
+where $0<\alpha\le1,\theta\ge0,\delta>0$. To avoid identifiability
+problems, we let $\delta=\theta=1$ as in \cite{hanagal2009modeling},
+and get the one-parameter PVF density
+
+\begin{equation}
+PVF\left(\omega;\alpha\right)=\exp\left\{ -\omega+\alpha^{-1}\right\} \frac{1}{\pi}\sum_{k=1}^{\infty}\frac{\Gamma\left(k\alpha+1\right)}{k!}\left(-\frac{1}{\omega}\right)^{\alpha k+1}\sin\left(\alpha k\pi\right)
+\label{eq:density-pvf}
+\end{equation}
+
+When $\alpha=1$, the degenerate distribution with $\omega=1$ is
+obtained. The PVF has $E[\omega]=1$ and $Var[\omega]=\left(1-\alpha\right)$.
 
 \end{appendix}
 

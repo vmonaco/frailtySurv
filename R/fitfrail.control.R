@@ -1,6 +1,7 @@
-#
-# Gather all of the control parameters for coxph into one spot
-#
+#' 
+#' Initialize control parameters
+#' 
+#' @export
 fitfrail.control <- function(eps=1e-9, 
                           toler.chol = .Machine$double.eps ^ .75, 
                           iter.max=20,
