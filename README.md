@@ -81,17 +81,17 @@ data <- genfrail(beta=c(log(2)), theta=2, N=30, K=2, frailty="gamma", covariates
 ptm <- proc.time()
 fitfrail(Surv(time, status) ~ Z1 + cluster(family), data, frailty="gamma")
 #> Iteration  1  :  beta <-  0.3715843 , theta <-  1 
-#> Iteration  1  :  beta <-  0.3715843 , theta <-  1 
-#> Iteration  1  :  beta <-  0.3715843 , theta <-  1 
-#> Iteration  1  :  beta <-  0.3715843 , theta <-  1 
-#> Iteration  1  :  beta <-  0.4351054 , theta <-  0.413516 
-#> Iteration  1  :  beta <-  0.4310277 , theta <-  0.7082956 
-#> Iteration  1  :  beta <-  0.4296597 , theta <-  0.6397397 
-#> Iteration  1  :  beta <-  0.4294886 , theta <-  0.6182223 
-#> Iteration  1  :  beta <-  0.4295137 , theta <-  0.6201941 
-#> Iteration  1  :  beta <-  0.4295115 , theta <-  0.6201543 
-#> Iteration  1  :  beta <-  0.4295117 , theta <-  0.620154 
-#> Iteration  1  :  beta <-  0.4295116 , theta <-  0.620154
+#> Iteration  2  :  beta <-  0.3715843 , theta <-  1 
+#> Iteration  3  :  beta <-  0.3715843 , theta <-  1 
+#> Iteration  4  :  beta <-  0.3715843 , theta <-  1 
+#> Iteration  5  :  beta <-  0.4351054 , theta <-  0.413516 
+#> Iteration  6  :  beta <-  0.4310277 , theta <-  0.7082956 
+#> Iteration  7  :  beta <-  0.4296597 , theta <-  0.6397397 
+#> Iteration  8  :  beta <-  0.4294886 , theta <-  0.6182223 
+#> Iteration  9  :  beta <-  0.4295137 , theta <-  0.6201941 
+#> Iteration  10  :  beta <-  0.4295115 , theta <-  0.6201543 
+#> Iteration  11  :  beta <-  0.4295117 , theta <-  0.620154 
+#> Iteration  12  :  beta <-  0.4295116 , theta <-  0.620154
 #> $beta
 #>        Z1 
 #> 0.4295116 
@@ -111,7 +111,7 @@ fitfrail(Surv(time, status) ~ Z1 + cluster(family), data, frailty="gamma")
 #> [1] "fitfrail"
 proc.time() - ptm
 #>    user  system elapsed 
-#>  92.419   0.301  92.757
+#>  91.591   0.436  92.335
 ```
 
 These results can be compared to existing shared frailty models.
