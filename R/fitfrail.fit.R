@@ -16,8 +16,7 @@ Rank<-function(d) {
   return(sapply(d,function(dd) which(dd==j)));
 }
 
-sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty, 
-                              deriv_dfrailty, control, rownames) {
+sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control, rownames) {
   
   n_theta <- 1
   
@@ -90,21 +89,20 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty,
     beta <- gamma[1:n_beta]
     theta <- gamma[(n_beta+1):(n_beta+n_theta)]
     cat("Iteration ", iter, " : ", "beta <- ", beta, ", theta <- ", theta, "\n")
-    # estimator <- estimate_lambda_hat(beta, theta)
     
-    estimator <- baseline_hazard_estimator(spx, spk, d_, Y_, N_dot, beta, theta, "gamma")
+    estimator <- baseline_hazard_estimator(spx, spk, d_, Y_, N_dot, beta, theta, frailty)
     H_ <<- estimator$H_
     H_dot <<- estimator$H_dot
     
     iter <<- iter + 1
     
-    # TODO: This could be done in parallel
+    # TODO: This could be done in parallel, not much gain though.
     c(sapply(1:n_beta,
              function(beta_idx)
-               U_r(spk, N_dot, spstatus, spx, H_, H_dot, beta, theta, beta_idx, "gamma")),
+               U_r(spk, N_dot, spstatus, spx, H_, H_dot, beta, theta, beta_idx, frailty)),
       sapply(1:n_theta, 
              function(theta_idx) 
-               U_p(spk, N_dot, spstatus, spx, H_, H_dot, beta, theta, theta_idx, tau_k, "gamma")))
+               U_p(spk, N_dot, spstatus, spx, H_, H_dot, beta, theta, theta_idx, tau_k, frailty)))
   }
   
   fit <- nleqslv(c(beta_init, theta_init), U)

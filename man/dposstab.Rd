@@ -2,11 +2,14 @@
 % Please edit documentation in R/frailtydists.R
 \name{dposstab}
 \alias{dposstab}
-\title{Positive stable density}
+\title{Gamma density}
 \usage{
 dposstab(x, alpha, K)
 }
 \description{
+Deriv of gamma density wrt. theta
+}
+\details{
 Positive stable density
 }
 

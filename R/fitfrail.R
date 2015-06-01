@@ -43,8 +43,7 @@ fitfrail <- function(formula, data, control, frailty=c("gamma","lognormal"), ...
   if (missing(control)) control <- fitfrail.control(...)
   
   if (frailty== "gamma") {
-    dfrailty <- dgamma_
-    deriv_dfrailty <- deriv_dgamma
+    
   } else {
     stop("frailty distribution", frailty, "not supported yet.")
   }
@@ -85,7 +84,7 @@ fitfrail <- function(formula, data, control, frailty=c("gamma","lognormal"), ...
   }
   else {
     X <- model.matrix(Terms, mf, contrasts=contrast.arg)
-  } 
+  }
   
   Xatt <- attributes(X) 
   xdrop <- Xatt$assign %in% adrop  #columns to drop (always the intercept)
@@ -95,12 +94,12 @@ fitfrail <- function(formula, data, control, frailty=c("gamma","lognormal"), ...
                           offset=NULL, init=NULL, 
                           control=coxph.control(), weights=NULL, 
                           method="efron", row.names(mf))$coefficients
-  theta_init = c(0.1)
+  theta_init <- c(1)
   fit <- sharedfrailty.fit(X, Y, cluster, 
                            beta_init, theta_init, 
-                           dfrailty, deriv_dfrailty,
+                           frailty,
                            control, row.names(mf))
-  class(fit) <- 'fitfrail'
-  fit$call <- Call
+#   class(fit) <- 'fitfrail'
+#   fit$call <- Call
   fit
 }

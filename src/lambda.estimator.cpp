@@ -1,7 +1,6 @@
-// [[Rcpp::depends(RcppGSL)]]
-#include <Rcpp.h>
 #include <RcppGSL.h>
-// #include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppGSL)]]
+
 #include <cmath>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_randist.h>
@@ -99,7 +98,8 @@ double phi_2(double w, void* data) {
 double psi(double theta, int N_dot, double H_dot, String frailty_distr) {
   
   if (frailty_distr == "gamma") {
-    
+    // gamma shortcut
+    // return (N_dot + 1/theta)/(H_dot + 1/theta);
   } else {
     throw std::range_error("Unsupported frailty distribution");
   }
@@ -109,8 +109,6 @@ double psi(double theta, int N_dot, double H_dot, String frailty_distr) {
   data[1] = H_dot;
   data[2] = theta;
   double out = integrate(&phi_2, &data)/integrate(&phi_1, &data);
-  // gamma shortcut
-  // double out = (N_dot + 1/theta)/(H_dot + 1/theta);
   return out;
 }
 
@@ -211,10 +209,19 @@ double U_r(Rcpp::List R_, Rcpp::List N_dot,
     for (int j = 0; j < X_i.nrow(); j++) {
       term1 += I_i[j] * X_i(j,beta_idx - 1);
       tmp += H_i(j, R_i[j] - 1) * X_i(j,beta_idx - 1);
+//       Rcout << "term1: " << term1 << std::endl;
+//       Rcout << "tmp: " << tmp << std::endl;
+//       Rcout << "H_i: " << H_i(j, R_i[j] - 1) << std::endl;
+//       Rcout << "R_i: " << R_i[j] << std::endl;
+//       Rcout << "X_i: " << X_i(j, beta_idx-1) << std::endl;
+      
     }
-    term2 += tmp * psi(theta, N_dot_i[N_dot_i.size()], H_dot_i[H_dot_i.size()], "gamma");
+//     Rcout << "N_i: " << N_dot_i[N_dot_i.size()-1] << std::endl;
+//     Rcout << "psi: " << psi(theta, N_dot_i[N_dot_i.size()-1], H_dot_i[H_dot_i.size()-1], "gamma") << std::endl;
+    term2 += tmp * psi(theta, N_dot_i[N_dot_i.size()-1], H_dot_i[H_dot_i.size()-1], "gamma");
   }
-  
+//   Rcout << "term1: " << term1 << std::endl;
+//   Rcout << "term2: " << term2 << std::endl;
   term1 = term1/n_clusters;
   term2 = term2/n_clusters;
   return term1 - term2;

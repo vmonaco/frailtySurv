@@ -2,7 +2,6 @@
 #' 
 #' Gamma density
 #' 
-#' @export
 # dgamma_ <- function(x, theta) {
 #   dgamma(x, 1/theta, 1/theta)
 # }
@@ -10,7 +9,6 @@
 #' 
 #' Deriv of gamma density wrt. theta
 #' 
-#' @export
 # deriv_dgamma <- function(x, theta, deriv_idx) {
 #   # deriv_idx ignored here since there is only one parameter
 #   term1 <- (x/theta)^(1/theta - 1)
@@ -22,7 +20,6 @@
 #' 
 #' Positive stable density
 #' 
-#' @export
 dposstab <- function(x, alpha, K) {
   # TODO: for small x, use PVF saddle point approximation
   k <- 1:K
@@ -34,7 +31,6 @@ dposstab <- function(x, alpha, K) {
 #' 
 #' Positive stable density
 #' 
-#' @export
 dpvf_sp_approx <- function(x, alpha, delta, theta) {
   v <- -(2 - alpha)/(2 * (1 - alpha))
   (2 * pi * (1 - alpha))^(1/2) * delta^(1/(2*(1 - alpha))) * x^v * 
