@@ -88,11 +88,11 @@ double phi_2(double w, void* data) {
 }
 
 // [[Rcpp::export]]
-NumericVector psi(double theta, NumericVector N_dot, NumericVector H_dot, String frailty_distr) {
+double psi(double theta, int N_dot, double H_dot, String frailty_distr) {
   
-  if (N_dot.size() != H_dot.size()) {
-    throw std::range_error("N_dot and H_dot must be the same size");
-  }
+//   if (N_dot.size() != H_dot.size()) {
+//     throw std::range_error("N_dot and H_dot must be the same size");
+//   }
   
   if (frailty_distr == "gamma") {
     
@@ -100,20 +100,16 @@ NumericVector psi(double theta, NumericVector N_dot, NumericVector H_dot, String
     throw std::range_error("Unsupported frailty distribution");
   }
   
-  int n = N_dot.size();
-  NumericVector out(n);
+  // int n = N_dot.size();
+  // NumericVector out(n);
   double data[3];
-  for(int i = 0; i < n; ++i) {
-    data[0] = N_dot[i];
-    data[1] = H_dot[i];
+  // for(int i = 0; i < n; ++i) {
+    data[0] = N_dot;
+    data[1] = H_dot;
     data[2] = theta;
-    out[i] = integrate(&phi_2, &data)/integrate(&phi_1, &data);
-  }
+    double out = integrate(&phi_2, &data)/integrate(&phi_1, &data);
+  // }
   return out;
-}
-
-double mult(NumericVector a, NumericVector b) {
-  
 }
 
 // [[Rcpp::export]]
@@ -123,7 +119,7 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_, Rcpp::List k_,
                                      NumericVector beta, double theta, 
                                      String frailty_distr) {
   int n_timesteps = d_.size();
-  int n_clusters = Y_.size();
+  int n_clusters = X_.size();
   // std::vector<std::string> cluster_names = Y_.names();
   
   // H_ is a list of matrices
@@ -136,10 +132,13 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_, Rcpp::List k_,
     // H_[i](NumericMatrix(n_members, n_timesteps));
     Rcpp::NumericMatrix H_i = H_[i];
     Rcpp::NumericVector H_dot_i = H_dot[i];
-    H_dot_i[0] += 3;
-    H_i[0, 0] += 3;
+    for (int k = 0; k < n_timesteps; ++k) {
+      for (int j = 0; j < H_i.nrow(); ++j) {
+        H_i(j, k) = 0;
+      }
+      H_dot_i[k] = 0;
+    }
   }
-  
   // lambda_hat is the baseline cumulative hazard estimate
   NumericVector lambda_hat(n_timesteps);
   NumericVector delta_lambda_hat(n_timesteps);
@@ -150,16 +149,17 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_, Rcpp::List k_,
     denom = 0;
     for (int i = 0; i < n_clusters; ++i) {
       Rcpp::NumericMatrix X_i = X_[i];
-      Rcpp::NumericVector k_i = k_[i];
       
       Rcpp::NumericMatrix Y_i = Y_[i];
       Rcpp::NumericVector N_dot_i = N_dot[i];
-      
-      Rcpp::NumericMatrix H_i = H_[i];
       Rcpp::NumericVector H_dot_i = H_dot[i];
       
-//       denom += psi(theta, N_dot_i[k-1], H_dot_i[k-1], frailty_distr) * \
-//                 sum(Y_i(j, k) * sum(exp(beta) * X_i(j, _)));
+      double tmp = 0;
+      for (int j = 0; j < X_i.nrow(); ++j) {
+        tmp += Y_i(j, k) * exp(sum(beta * X_i(j, _)));
+      }
+      
+      denom += tmp * psi(theta, N_dot_i[k-1], H_dot_i[k-1], frailty_distr);
     }
     
     delta_lambda_hat[k] = d_[k]/denom;
@@ -173,9 +173,10 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_, Rcpp::List k_,
       Rcpp::NumericMatrix H_i = H_[i];
       Rcpp::NumericVector H_dot_i = H_dot[i];
       
-      for (int j = 0; j < H_i.nrow(); ++j) {
-        int k_min = min(NumericVector::create(k_i[j], k));
-        H_i[j, k] = lambda_hat[k_min] * sum(exp(beta) * X_i(j, _));
+      for (int j = 0; j < X_i.nrow(); ++j) {
+        // k_i[j] - 1 since k_ is the rank of failure as an R index
+        int k_min = min(NumericVector::create(k_i[j] - 1, k));
+        H_i(j, k) = lambda_hat[k_min] * exp(sum(beta * X_i(j, _)));
       }
       
       H_dot_i[k] = sum(H_i( _ , k));

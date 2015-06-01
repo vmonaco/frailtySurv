@@ -5,7 +5,7 @@ sum_by_cluster <- function(A_) {
   }, simplify = FALSE, USE.NAMES = TRUE)
   
   for (i in names(A_)) {
-    A_dot[[i]] <- colSums(A_[[i]])
+    A_dot[[i]] <- as.double(colSums(A_[[i]]))
   }
   
   A_dot
@@ -170,8 +170,9 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty,
     beta <- gamma[1:n_beta]
     theta <- gamma[(n_beta+1):(n_beta+n_theta)]
     cat("Iteration ", iter, " : ", "beta <- ", beta, ", theta <- ", theta, "\n")
-    
+    iter <<- iter + 1
     estimator <- estimate_lambda_hat(beta, theta)
+    # estimator <- baseline_hazard_estimator(spx, spk, d_, Y_, N_dot, beta, theta, "gamma")
     H_ <- estimator$H_
     H_dot <- estimator$H_dot
     

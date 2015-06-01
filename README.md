@@ -111,7 +111,7 @@ fitfrail(Surv(time, status) ~ Z1 + cluster(family), data, frailty="gamma")
 #> [1] "fitfrail"
 proc.time() - ptm
 #>    user  system elapsed 
-#>  90.232   0.325  90.483
+#>  92.419   0.301  92.757
 ```
 
 These results can be compared to existing shared frailty models.
