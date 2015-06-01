@@ -11,6 +11,11 @@ sum_by_cluster <- function(A_) {
   A_dot
 }
 
+Rank<-function(d) {
+  j<-unique(sort(d));
+  return(sapply(d,function(dd) which(dd==j)));
+}
+
 sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty, 
                               deriv_dfrailty, control, rownames) {
   
@@ -41,7 +46,7 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty,
   }
   
   # The order of failure (or time index) for the data, where fail_idx==1 is t==0
-  fail_idx <- 1 + rank(time)
+  fail_idx <- 1 + Rank(time)
   # Unique time steps. This is where the baseline hazard actually increases
   time_steps <- c(0, sort(unique(time)))
   # End of the observation period
@@ -79,106 +84,27 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, dfrailty,
     sum(status[time == time_steps[k]])
   }, 0)
   
-  # Create psi_i for each cluster. Depends on theta, N_i.(t) and H_i.(t)
-  psi_ <- function(theta, N_dot_ik, H_dot_ik) {
-    phi_1 <- function (w) {
-      ( w ^ N_dot_ik ) * exp(-w*H_dot_ik) * dfrailty(w, theta)
-    }
-    phi_2 <- function (w) {
-      ( w ^ (N_dot_ik + 1) ) * exp(-w*H_dot_ik) * dfrailty(w, theta)
-    }
-    # TODO: use GSL for integration?
-    integrate(Vectorize(phi_2), 0, Inf, stop.on.error = FALSE)$value/
-      integrate(Vectorize(phi_1), 0, Inf, stop.on.error = FALSE)$value
-    # TODO: use this shortcut for gamma when possible. Others? 
-#       (N_dot_ik + 1/theta)/(H_dot_ik + 1/theta)
-  }
-  
-  H_ <- sapply(cluster_names, function(i) {
-    matrix(0, cluster_sizes[[i]], length(time_steps))
-  }, simplify = FALSE, USE.NAMES = TRUE)
-  
-  H_dot <- sapply(cluster_names, function(i) {
-    rep(0, length(time_steps))
-  }, simplify = FALSE, USE.NAMES = TRUE)
-
-  # Step function for baseline hazard
-  estimate_lambda_hat <- function(beta, theta) {
-    # delta_lambda_hat[1] = 0, since at t_0 there is no chance of failure
-    delta_lambda_hat = rep(0, length(time_steps))
-    lambda_hat = rep(0, length(time_steps))
-    
-    for (k in 2:length(time_steps)) {
-      # Denom for delta_lambda_hat[k]
-      denom <- sum(sapply(cluster_names, function(i) {
-        psi_(theta, N_dot[[i]][k-1], H_dot[[i]][k-1]) * 
-          sum(vapply(1:cluster_sizes[[i]], function(j) {
-            Y_[[i]][j, k] * exp(t(beta) %*% spx[[i]][j,])
-          }, 0))
-      }))
-      
-      delta_lambda_hat[k] <- d_[k]/denom
-      
-      # Update the cumsum since it's needed several times in the next iteration
-      lambda_hat[k] <- lambda_hat[k-1] + delta_lambda_hat[k]
-      
-      # Determine H_ij(t) and H_i.(t)
-      for (i in cluster_names) {
-        for (j in 1:cluster_sizes[[i]]) {
-          k_min = min(spk[[i]][j], k)
-          H_[[i]][j, k] <- lambda_hat[k_min] * exp(t(beta) %*% spx[[i]][j,])
-        }
-        H_dot[[i]][k] <- sum(H_[[i]][,k])
-      }
-    }
-    
-    list(lambda_hat=lambda_hat, H_=H_, H_dot=H_dot)
-  }
-  
-  U_r <- function(H_, H_dot, beta_idx, theta) {
-    term1 <- mean(sapply(cluster_names, function(i) {
-      sum(sapply(1:cluster_sizes[[i]], function(j) {
-          spstatus[[i]][j] * spx[[i]][j,beta_idx]
-          }))
-    }))
-    
-    term2 <- mean(sapply(cluster_names, function(i) {
-      sum(sapply(1:cluster_sizes[[i]], function(j) {
-        H_[[i]][j, spk[[i]][j]] * spx[[i]][j,beta_idx]})) *
-          psi_(theta, N_dot[[i]][tau_k], H_dot[[i]][tau_k])
-    }))
-    term1 - term2
-  }
-  
-  U_p <- function(H_dot, theta_idx, theta) {
-    mean(sapply(cluster_names, function(i) {
-      # TODO: use GSL for integration?
-      numer <- integrate(function (w) {
-        ( w ^ N_dot[[i]][tau_k] ) * exp(-w*H_dot[[i]][tau_k]) * Vectorize(function(wi) deriv_dfrailty(wi, theta, theta_idx))(w)
-      }, 0, Inf, stop.on.error = FALSE)$value
-      
-      denom <- integrate(function (w) {
-        ( w ^ N_dot[[i]][tau_k] ) * exp(-w*H_dot[[i]][tau_k]) * dfrailty(w, theta)
-      }, 0, Inf, stop.on.error = FALSE)$value
-      
-      numer/denom
-    }))
-  }
   iter <- 1
   # Build the system of equations where gamma is c(beta, theta)
   U <- function(gamma) {
     beta <- gamma[1:n_beta]
     theta <- gamma[(n_beta+1):(n_beta+n_theta)]
     cat("Iteration ", iter, " : ", "beta <- ", beta, ", theta <- ", theta, "\n")
+    # estimator <- estimate_lambda_hat(beta, theta)
+    
+    estimator <- baseline_hazard_estimator(spx, spk, d_, Y_, N_dot, beta, theta, "gamma")
+    H_ <<- estimator$H_
+    H_dot <<- estimator$H_dot
+    
     iter <<- iter + 1
-    estimator <- estimate_lambda_hat(beta, theta)
-    # estimator <- baseline_hazard_estimator(spx, spk, d_, Y_, N_dot, beta, theta, "gamma")
-    H_ <- estimator$H_
-    H_dot <- estimator$H_dot
     
     # TODO: This could be done in parallel
-    c(sapply(1:n_beta, function(beta_idx) U_r(H_, H_dot, beta_idx, theta)),
-      sapply(1:n_theta, function(theta_idx) U_p(H_dot, theta_idx, theta)))
+    c(sapply(1:n_beta,
+             function(beta_idx)
+               U_r(spk, N_dot, spstatus, spx, H_, H_dot, beta, theta, beta_idx, "gamma")),
+      sapply(1:n_theta, 
+             function(theta_idx) 
+               U_p(spk, N_dot, spstatus, spx, H_, H_dot, beta, theta, theta_idx, tau_k, "gamma")))
   }
   
   fit <- nleqslv(c(beta_init, theta_init), U)

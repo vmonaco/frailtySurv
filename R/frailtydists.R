@@ -3,21 +3,21 @@
 #' Gamma density
 #' 
 #' @export
-dgamma_ <- function(x, theta) {
-  dgamma(x, 1/theta, 1/theta)
-}
+# dgamma_ <- function(x, theta) {
+#   dgamma(x, 1/theta, 1/theta)
+# }
 
 #' 
 #' Deriv of gamma density wrt. theta
 #' 
 #' @export
-deriv_dgamma <- function(x, theta, deriv_idx) {
-  # deriv_idx ignored here since there is only one parameter
-  term1 <- (x/theta)^(1/theta - 1)
-  term2 <- exp(-x/theta)
-  term3 <- log(theta/x) + digamma(1/theta) + x - 1
-  (term1 * term2 * term3)/(gamma(1/theta)*theta^3)
-}
+# deriv_dgamma <- function(x, theta, deriv_idx) {
+#   # deriv_idx ignored here since there is only one parameter
+#   term1 <- (x/theta)^(1/theta - 1)
+#   term2 <- exp(-x/theta)
+#   term3 <- log(theta/x) + digamma(1/theta) + x - 1
+#   (term1 * term2 * term3)/(gamma(1/theta)*theta^3)
+# }
 
 #' 
 #' Positive stable density

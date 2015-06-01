@@ -95,7 +95,7 @@ fitfrail <- function(formula, data, control, frailty=c("gamma","lognormal"), ...
                           offset=NULL, init=NULL, 
                           control=coxph.control(), weights=NULL, 
                           method="efron", row.names(mf))$coefficients
-  theta_init = c(1)
+  theta_init = c(0.1)
   fit <- sharedfrailty.fit(X, Y, cluster, 
                            beta_init, theta_init, 
                            dfrailty, deriv_dfrailty,
