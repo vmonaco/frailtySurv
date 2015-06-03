@@ -158,9 +158,9 @@ is given by
 \begin{equation}
 \frac{\partial LN(\omega;\theta)}{\partial \theta}=
 \frac{\ln^{2}\left(\omega \right)
-\exp\left\{ \frac{-\ln^{2}\omega}{2\theta}\right\} }
+\exp\left\( \frac{-\ln^{2}\omega}{2\theta}\right\) }
 {2\sqrt{2\pi}\theta^{5/2}\omega}-
-\frac{\exp \left\{ \frac{-\ln^{2}\omega}{2\theta}\right\} }
+\frac{\exp \left\( \frac{-\ln^{2}\omega}{2\theta}\right\) }
 {2\sqrt{2\pi}\theta^{3/2}\omega}
 \label{eq:deriv-log-norm}
 \end{equation}
@@ -243,9 +243,9 @@ with density
 
 \[
 PVF\left(\omega;\alpha,\delta,\theta \right)=
-\exp \left\{ 
+\exp \left\( 
   -\theta\omega+\frac{\delta^{\alpha}}{\alpha}
-  \right\}
+  \right\)
 \frac{1}{\pi}
 \sum_{k=1}^{\infty}
 \frac{\Gamma\left(k\alpha+1\right)}{k!}
@@ -259,7 +259,7 @@ and get the one-parameter PVF density
 
 \begin{equation}
 PVF\left(\omega;\alpha \right)=
-\exp \left\{ -\omega+\alpha^{-1}\right\} 
+\exp \left\( -\omega+\alpha^{-1}\right\)
 \frac{1}{\pi}
 \sum_{k=1}^{\infty}
 \frac{\Gamma\left(k\alpha+1\right)}{k!}

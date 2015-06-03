@@ -200,7 +200,7 @@ Similar to the gamma distribution, the special case of
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-\frac{\partial LN(\omega;\theta)}{\partial\theta}=\frac{\ln^{2}\left(\omega\right)\exp\left\{ \frac{-\ln^{2}\omega}{2\theta}\right\} }{2\sqrt{2\pi}\theta^{5/2}\omega}-\frac{\exp\left\{ \frac{-\ln^{2}\omega}{2\theta}\right\} }{2\sqrt{2\pi}\theta^{3/2}\omega}\label{eq:deriv-log-norm}
+\frac{\partial LN(\omega;\theta)}{\partial\theta}=\frac{\ln^{2}\left(\omega\right)\exp\left(\frac{-\ln^{2}\omega}{2\theta}\right)}{2\sqrt{2\pi}\theta^{5/2}\omega}-\frac{\exp\left(\frac{-\ln^{2}\omega}{2\theta}\right)}{2\sqrt{2\pi}\theta^{3/2}\omega}\label{eq:deriv-log-norm}
 \end{equation}
 
 \end_inset
@@ -360,7 +360,7 @@ The power variance function (PVF) distribution is denoted
 \begin_layout Standard
 \begin_inset Formula 
 \[
-PVF\left(\omega;\alpha,\delta,\theta\right)=\exp\left\{ -\theta\omega+\frac{\delta^{\alpha}}{\alpha}\right\} \frac{1}{\pi}\sum_{k=1}^{\infty}\frac{\Gamma\left(k\alpha+1\right)}{k!}\left(-\frac{1}{\omega}\right)^{\alpha k+1}\sin\left(\alpha k\pi\right)
+PVF\left(\omega;\alpha,\delta,\theta\right)=\exp\left(-\theta\omega+\frac{\delta^{\alpha}}{\alpha}\right)\frac{1}{\pi}\sum_{k=1}^{\infty}\frac{\Gamma\left(k\alpha+1\right)}{k!}\left(-\frac{1}{\omega}\right)^{\alpha k+1}\sin\left(\alpha k\pi\right)
 \]
 
 \end_inset
@@ -387,7 +387,7 @@ key "hanagal2009modeling"
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-PVF\left(\omega;\alpha\right)=\exp\left\{ -\omega+\alpha^{-1}\right\} \frac{1}{\pi}\sum_{k=1}^{\infty}\frac{\Gamma\left(k\alpha+1\right)}{k!}\left(-\frac{1}{\omega}\right)^{\alpha k+1}\sin\left(\alpha k\pi\right)\label{eq:density-pvf}
+PVF\left(\omega;\alpha\right)=\exp\left(-\omega+\alpha^{-1}\right)\frac{1}{\pi}\sum_{k=1}^{\infty}\frac{\Gamma\left(k\alpha+1\right)}{k!}\left(-\frac{1}{\omega}\right)^{\alpha k+1}\sin\left(\alpha k\pi\right)\label{eq:density-pvf}
 \end{equation}
 
 \end_inset
