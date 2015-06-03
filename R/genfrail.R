@@ -13,7 +13,7 @@
 #'
 #'@export
 genfrail <- function(beta = c(log(2)), # Covariate coefficients
-                      frailty = c("gamma", "log.normal"), # Frailty distribution
+                      frailty = c("gamma", "lognormal", "posstab"), # Frailty distribution
                       censor.mu = 130, # Gaussian distribution for censoring
                       censor.sigma = 15,
                       theta = 2, # Frailty distribution parameter
@@ -42,12 +42,18 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
       w <- rep(rgamma(N, 1/theta, 1/theta), rep(K, N))
     }
     rate <- exp(betaZ)*w 
-  } else if (frailty=="log.normal") {
+  } else if (frailty=="lognormal") {
     w <- 1
     if ( theta != 0 ) {
       w <- rep(rnorm(N, 0, sqrt(theta)), rep(K, N))
     }
     rate <- exp(betaZ + w)
+  } else if (frailty=="posstab") {
+    w <- 1
+    if ( theta != 0 ) {
+      w <- rep(rposstab(N, theta), rep(K, N))
+    }
+    rate <- exp(betaZ)*w 
   }
   
   # Survival time is similar to that of a late onset disease with default params

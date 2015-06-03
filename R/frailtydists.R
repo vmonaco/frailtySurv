@@ -28,15 +28,38 @@ dposstab <- function(x, alpha, K) {
       (-x ^ (-alpha)) ^ k * sin(alpha * k * pi))
 }
 
+#' Random generation from a positive stable distribution
+#'
+#' \code{rposstab} generates data.
+#'
+#' Based on Chambers
+#' 
+#' @param n number of samples to generate
+#' @param alpha index of the distribution, where 0 < alpha < 1
+#' @return w
+#' 
+#'@export
+rposstab <- function(n, alpha) {
+  w <- rexp(n)
+  theta <- runif(n)*pi
+  
+  num1 <- sin((1 - alpha) * theta )
+  num2 <- sin(alpha * theta)^( alpha/(1 - alpha) )
+  den <- sin(theta)^( 1/(1 - alpha) ) 
+  num3 <- num1 * num2/den
+  
+  (num3/w)^( (1 - alpha)/alpha )
+}
+
 #' 
 #' Positive stable density
 #' 
-dpvf_sp_approx <- function(x, alpha, delta, theta) {
-  v <- -(2 - alpha)/(2 * (1 - alpha))
-  (2 * pi * (1 - alpha))^(1/2) * delta^(1/(2*(1 - alpha))) * x^v * 
-    exp(-theta * x - delta^(1/(1 - alpha)) * (1/alpha - 1) * 
-          x^(-alpha/(1 - alpha)) + (delta * theta^alpha)/alpha)
-}
+# dpvf_sp_approx <- function(x, alpha, delta, theta) {
+#   v <- -(2 - alpha)/(2 * (1 - alpha))
+#   (2 * pi * (1 - alpha))^(1/2) * delta^(1/(2*(1 - alpha))) * x^v * 
+#     exp(-theta * x - delta^(1/(1 - alpha)) * (1/alpha - 1) * 
+#           x^(-alpha/(1 - alpha)) + (delta * theta^alpha)/alpha)
+# }
 
 # 
 # dlnorm_dtheta <- function(x, sigma) {

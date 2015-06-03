@@ -252,28 +252,7 @@ PS\left(\omega;\alpha\right)=-\frac{1}{\pi\omega}\sum_{k=1}^{\infty}\frac{\Gamma
 
 \end_inset
 
-For small 
-\begin_inset Formula $\omega$
-\end_inset
-
-, the density is approximated by
-\begin_inset Formula 
-\begin{equation}
-\left\{ 2\pi\left(1-\alpha\right)\right\} ^{1/2}\delta^{1/\left\{ 2\left(1-\alpha\right)\right\} }\omega^{\mathit{v}}\exp\left\{ -\theta\omega-\delta^{1/\left(1-\alpha\right)}\left(\frac{1}{\alpha}-1\right)\omega^{-\alpha/\left(1-\alpha\right)}+\frac{\delta\theta^{\alpha}}{\alpha}\right\} \label{eq:pvf-saddle-point-approx}
-\end{equation}
-
-\end_inset
-
-with 
-\begin_inset Formula $\theta=0$
-\end_inset
-
- and 
-\begin_inset Formula $\delta=\alpha$
-\end_inset
-
-.
- When 
+When 
 \begin_inset Formula $\alpha=1$
 \end_inset
 

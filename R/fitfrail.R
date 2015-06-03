@@ -11,7 +11,7 @@
 #' fitfrail(genfrail())
 #' 
 #' @export
-fitfrail <- function(formula, data, control, frailty=c("gamma","lognormal"), ...) {
+fitfrail <- function(formula, data, control, frailty=c("gamma","lognormal","posstab"), ...) {
   
   Call <- match.call()
   
