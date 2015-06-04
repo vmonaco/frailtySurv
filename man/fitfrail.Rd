@@ -21,7 +21,7 @@ fitfrail(formula, data, control,
 a fitfrail object representing the shared frailty model
 }
 \description{
-\code{fitfrail} fits a model.
+\code{fitfrail} fits a Cox proportional hazards model with hidden shared frailty.
 }
 \details{
 This function ...
