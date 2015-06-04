@@ -79,7 +79,7 @@ fitfrail <- function(formula, data, control,
   # TODO: theta should initialize to a zero vector, dependening the num density args
   theta_init <- c(1)
   
-  fit <- sharedfrailty.fit(X, Y, cluster, 
+  fit <- fitfrail.fit(X, Y, cluster, 
                            beta_init, theta_init, 
                            frailty,
                            control, row.names(mf))

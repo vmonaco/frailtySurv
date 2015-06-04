@@ -11,51 +11,55 @@ sum_by_cluster <- function(A_) {
   A_dot
 }
 
-Rank<-function(d) {
-  j<-unique(sort(d));
+# Helper fn to get the rank, where duplicates have the same rank
+increasing_rank <- function(d) {
+  j <- unique(sort(d));
   return(sapply(d,function(dd) which(dd==j)));
 }
 
-sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control, rownames) {
+fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control, rownames) {
   
-  n_theta <- 1
-  
+  # Num observations
   n <- nrow(y)
+  
+  # Num frailty distribution params
+  n_theta <- length(theta_init)
+  
+  # Num coefs
   if (is.matrix(x)) {
     n_beta <- ncol(x)
   } else {
     if (length(x)==0) n_beta <-0
-    else n_beta <-1
+    else n_beta <- 1
   }
+  
   time <- y[,1]
   status <- y[,2]
-
-  maxiter <- control$iter.max
   
-  if (!missing(beta_init) && length(beta_init)>0) {
-    if (length(beta_init) != n_beta) stop("Wrong length for coefficient inital values")
-  } else {
-    beta_init <- rep(0,n_beta)
-  }
-
-  if (!missing(theta_init) && length(theta_init)>0) {
+  # Initialize theta and beta to zero vectors if initial params are missing
+  if (!missing(theta_init) && length(theta_init) > 0) {
     if (length(theta_init) != n_theta) stop("Wrong length for frality distribution inital values")
   } else {
     theta_init <- rep(0,n_theta)
   }
   
-  # The order of failure (or time index) for the data, where fail_idx==1 is t==0
-  fail_idx <- 1 + Rank(time)
-  # Unique time steps. This is where the baseline hazard actually increases
+  if (!missing(beta_init) && length(beta_init) > 0) {
+    if (length(beta_init) != n_beta) stop("Wrong length for coefficient inital values")
+  } else {
+    beta_init <- rep(0,n_beta)
+  }
+  
+  # Unique time steps, including t=0. This is where the baseline hazard actually increases
   time_steps <- c(0, sort(unique(time)))
-  # End of the observation period
+  # Index of the end of the observation period
   tau_k <- length(time_steps)
   
-  # Split the time, status into their respective clusters
-  sptime <- split(time, cluster)
-  spstatus <- split(status, cluster)
-  spk <- split(fail_idx, cluster)
-  spx <- split.data.frame(x, cluster)
+  # The _ variables are all lists, indexed by the cluster name
+  X_ <- split.data.frame(x, cluster) # Covariates
+  T_ <- split(time, cluster) # Followup time
+  I_ <- split(status, cluster) # Failure indicator
+  # Failure rank + 1, where time_steps[R_[i][j]] is the failure time of member j in cluster i
+  R_ <- split(1 + increasing_rank(time), cluster) 
   
   # Cluster names and sizes are needed in several places, so get these now
   cluster_names <- levels(cluster)
@@ -64,7 +68,7 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, frailty, con
   # N_[[i]][j, k] indicates whether individual j in cluster i failed at time <= tau_k
   N_ <- sapply(cluster_names, function(i) {
     t(sapply(1:cluster_sizes[[i]], function(j) {
-      as.numeric((spstatus[[i]][j] > 0) & (sptime[[i]][j] <= time_steps))
+      as.numeric((I_[[i]][j] > 0) & (T_[[i]][j] <= time_steps))
     }))
   }, simplify = FALSE, USE.NAMES = TRUE)
   
@@ -74,7 +78,7 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, frailty, con
   # Y_[[i]][j,k] indicates whether individual j in cluster i failed at time >= tau_k
   Y_ <- sapply(cluster_names, function(i) {
     t(sapply(1:cluster_sizes[[i]], function(j) {
-      as.numeric(sptime[[i]][j] >= time_steps)
+      as.numeric(T_[[i]][j] >= time_steps)
     }))
   }, simplify = FALSE, USE.NAMES = TRUE)
   
@@ -83,39 +87,48 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, frailty, con
     sum(status[time == time_steps[k]])
   }, 0)
   
-  iter <- 1
+  verbose = control$verbose
+  if (verbose)
+    cat(c("Iter", paste("beta_", 1:n_beta, sep=""), paste("theta_", 1:n_beta, sep=""), "\n"), sep="\t")
+  
+  iter <- 0
   # Build the system of equations where gamma is c(beta, theta)
   U <- function(gamma) {
     beta <- gamma[1:n_beta]
     theta <- gamma[(n_beta+1):(n_beta+n_theta)]
-    cat("Iteration ", iter, " : ", "beta <- ", beta, ", theta <- ", theta, "\n")
     
-    estimator <- baseline_hazard_estimator(spx, spk, d_, Y_, N_dot, beta, theta, frailty)
+    estimator <- baseline_hazard_estimator(X_, R_, d_, Y_, N_dot, beta, theta, frailty)
     H_ <<- estimator$H_
     H_dot <<- estimator$H_dot
     lambda_hat <<- estimator$lambda_hat
     
-    iter <<- iter + 1
+    if (verbose) {
+      iter <<- iter + 1
+      cat(c(signif(c(iter, beta, theta), 3), "\n"), sep="\t")
+    }
     
     # TODO: This could be done in parallel, not much gain though.
     c(sapply(1:n_beta,
              function(beta_idx)
-               U_r(spk, N_dot, spstatus, spx, H_, H_dot, beta, theta, beta_idx, frailty)),
+               U_r(R_, N_dot, I_, X_, H_, H_dot, beta, theta, beta_idx, frailty)),
       sapply(1:n_theta, 
              function(theta_idx) 
-               U_p(spk, N_dot, spstatus, spx, H_, H_dot, beta, theta, theta_idx, tau_k, frailty)))
+               U_p(R_, N_dot, I_, X_, H_, H_dot, beta, theta, theta_idx, tau_k, frailty)))
   }
   
-  fit <- nleqslv(c(beta_init, theta_init), U)
+  fit <- nleqslv(c(beta_init, theta_init), U, control=list(maxit=control$iter.max))
+  
+  if (verbose)
+    cat("Converged after", iter, "iterations\n")
+  
   gamma_hat <- fit$x
   beta_hat <- gamma_hat[1:n_beta]
   theta_hat <- gamma_hat[(n_beta+1):(n_beta+n_theta)]
-  loglik <- log_likelihood(beta_hat, theta_hat, lambda_hat, H_dot, spstatus, spk, spx, N_dot, frailty)
+  loglik <- log_likelihood(beta_hat, theta_hat, lambda_hat, H_dot, I_, R_, X_, N_dot, frailty)
   
   list(beta = beta_hat,
        theta = theta_hat,
        loglik = loglik,
        method='fitfrail'
-       
        )
 }
