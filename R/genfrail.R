@@ -1,28 +1,12 @@
-
-#' Generate shared frailty survival data
-#'
-#' \code{genfrail} generates data.
-#'
-#' This function ...
-#' 
-#' @param ... model
-#' @return parameters
-#'   \url{} for more details.
-#' @examples
-#' genfrail()
-#'
-#'@export
 genfrail <- function(beta = c(log(2)), # Covariate coefficients
-                      frailty = c("gamma", "lognormal", "posstab"), # Frailty distribution
-                      censor.mu = 130, # Gaussian distribution for censoring
-                      censor.sigma = 15,
-                      theta = 2, # Frailty distribution parameter
-                      N = 300, K = 2, # Number of families and family size
-                      tau = 4.6,
-                      C = 0.01,
-                      covariates = c("normal", "uniform")
-)
-{
+                     frailty = c("gamma", "lognormal", "posstab"), # Frailty distribution
+                     censor.mu = 130, # Gaussian distribution for censoring
+                     censor.sigma = 15,
+                     theta = 2, # Frailty distribution parameter
+                     N = 300, K = 2, # Number of families and family size
+                     tau = 4.6,
+                     C = 0.01,
+                     covariates = c("normal", "uniform") ) {
   # Generate the covariates
   p <- length(beta)
   Z <- matrix(0, nrow=N*K, ncol=p)
