@@ -25,3 +25,7 @@ U_p <- function(R_, N_dot, I_, X_, H_, H_dot, beta, theta, theta_idx, tau_k, fra
     .Call('frailtyr_U_p', PACKAGE = 'frailtyr', R_, N_dot, I_, X_, H_, H_dot, beta, theta, theta_idx, tau_k, frailty_distr)
 }
 
+log_likelihood <- function(beta, theta, lambda, H_dot, I_, R_, X_, N_dot, frailty_distr) {
+    .Call('frailtyr_log_likelihood', PACKAGE = 'frailtyr', beta, theta, lambda, H_dot, I_, R_, X_, N_dot, frailty_distr)
+}
+

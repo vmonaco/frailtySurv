@@ -201,7 +201,7 @@ double U_r(Rcpp::List R_, Rcpp::List N_dot,
     Rcpp::NumericMatrix X_i = X_[i];
     Rcpp::NumericMatrix H_i = H_[i];
     Rcpp::NumericVector I_i = I_[i]; // Failure indicator
-    Rcpp::NumericVector R_i = R_[i];
+    Rcpp::NumericVector R_i = R_[i]; // Failure rank, whare T[r] = failure time
     Rcpp::NumericVector N_dot_i = N_dot[i];
     Rcpp::NumericVector H_dot_i = H_dot[i];
     
@@ -257,4 +257,38 @@ double U_p(Rcpp::List R_, Rcpp::List N_dot,
   out = out/n_clusters;
   
   return out;
+}
+
+// [[Rcpp::export]]
+double log_likelihood(NumericVector beta, double theta, 
+                      NumericVector lambda, List H_dot,
+                      List I_, List R_, List X_, List N_dot,
+                      String frailty_distr) {
+  
+  int n_clusters = X_.size();
+  
+  double term1 = 0;
+  double term2 = 0;
+  for (int i = 0; i < n_clusters; ++i) {
+    Rcpp::NumericMatrix X_i = X_[i];
+    Rcpp::NumericVector I_i = I_[i]; // Failure indicator
+    Rcpp::NumericVector R_i = R_[i]; // Failure rank, whare T[r] = failure time
+    Rcpp::NumericVector N_dot_i = N_dot[i];
+    Rcpp::NumericVector H_dot_i = H_dot[i];
+    
+    double term1_tmp = 0;
+    for (int j = 0; j < X_i.nrow(); j++) {
+      term1_tmp += I_i(j) * log(lambda(R_i[j] - 1) * exp(sum(beta * X_i[j])));
+    }
+    
+    term1 += term1_tmp;
+    
+    double data[3];
+    data[0] = N_dot_i[N_dot_i.size() - 1];
+    data[1] = H_dot_i[H_dot_i.size() - 1];
+    data[2] = theta;
+    term2 += log(integrate(&phi_1, &data));
+  }
+  
+  return term1 + term2;
 }

@@ -103,3 +103,22 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// log_likelihood
+double log_likelihood(NumericVector beta, double theta, NumericVector lambda, List H_dot, List I_, List R_, List X_, List N_dot, String frailty_distr);
+RcppExport SEXP frailtyr_log_likelihood(SEXP betaSEXP, SEXP thetaSEXP, SEXP lambdaSEXP, SEXP H_dotSEXP, SEXP I_SEXP, SEXP R_SEXP, SEXP X_SEXP, SEXP N_dotSEXP, SEXP frailty_distrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericVector >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< double >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< List >::type H_dot(H_dotSEXP);
+    Rcpp::traits::input_parameter< List >::type I_(I_SEXP);
+    Rcpp::traits::input_parameter< List >::type R_(R_SEXP);
+    Rcpp::traits::input_parameter< List >::type X_(X_SEXP);
+    Rcpp::traits::input_parameter< List >::type N_dot(N_dotSEXP);
+    Rcpp::traits::input_parameter< String >::type frailty_distr(frailty_distrSEXP);
+    __result = Rcpp::wrap(log_likelihood(beta, theta, lambda, H_dot, I_, R_, X_, N_dot, frailty_distr));
+    return __result;
+END_RCPP
+}

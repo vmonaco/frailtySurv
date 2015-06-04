@@ -4,7 +4,8 @@
 \alias{fitfrail}
 \title{Fit a Shared Frailty model}
 \usage{
-fitfrail(formula, data, control, frailty = c("gamma", "lognormal"), ...)
+fitfrail(formula, data, control, frailty = c("gamma", "lognormal", "posstab"),
+  ...)
 }
 \arguments{
 \item{...}{model}

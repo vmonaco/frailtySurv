@@ -93,6 +93,7 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, frailty, con
     estimator <- baseline_hazard_estimator(spx, spk, d_, Y_, N_dot, beta, theta, frailty)
     H_ <<- estimator$H_
     H_dot <<- estimator$H_dot
+    lambda_hat <<- estimator$lambda_hat
     
     iter <<- iter + 1
     
@@ -109,8 +110,12 @@ sharedfrailty.fit <- function(x, y, cluster, beta_init, theta_init, frailty, con
   gamma_hat <- fit$x
   beta_hat <- gamma_hat[1:n_beta]
   theta_hat <- gamma_hat[(n_beta+1):(n_beta+n_theta)]
+  loglik <- log_likelihood(beta_hat, theta_hat, lambda_hat, H_dot, spstatus, spk, spx, N_dot, frailty)
   
   list(beta = beta_hat,
        theta = theta_hat,
-       method='fitfrail')
+       loglik = loglik,
+       method='fitfrail'
+       
+       )
 }

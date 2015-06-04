@@ -99,7 +99,7 @@ fitfrail <- function(formula, data, control, frailty=c("gamma","lognormal","poss
                            beta_init, theta_init, 
                            frailty,
                            control, row.names(mf))
-#   class(fit) <- 'fitfrail'
-#   fit$call <- Call
+  class(fit) <- 'fitfrail'
+  fit$call <- Call
   fit
 }
