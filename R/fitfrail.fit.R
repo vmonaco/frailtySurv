@@ -131,6 +131,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
        lambda = lambda_hat,
        loglik = loglik,
        method='fitfrail',
+       frailty=frailty,
        loglikfn = function(beta, theta, frailty) {
          estimator <- baseline_hazard_estimator(X_, R_, d_, Y_, N_dot, beta, theta, frailty)
          H_ <<- estimator$H_
