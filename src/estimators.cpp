@@ -108,10 +108,13 @@ double psi(int N_dot, double H_dot, double* theta, String frailty) {
 }
 
 // [[Rcpp::export]]
-Rcpp::List baseline_hazard_estimator(Rcpp::List X_, Rcpp::List k_,
+Rcpp::List baseline_hazard_estimator(Rcpp::List X_, 
+                                     Rcpp::List R_,
                                      NumericVector d_,
-                                     Rcpp::List Y_, Rcpp::List N_dot,
-                                     NumericVector beta, NumericVector theta, 
+                                     Rcpp::List Y_, 
+                                     Rcpp::List N_dot,
+                                     NumericVector beta, 
+                                     NumericVector theta, 
                                      String frailty) {
   int n_timesteps = d_.size();
   int n_clusters = X_.size();
@@ -162,13 +165,13 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_, Rcpp::List k_,
     
     for (int i = 0; i < n_clusters; ++i) {
       Rcpp::NumericMatrix X_i = X_[i];
-      Rcpp::NumericVector k_i = k_[i];
+      Rcpp::NumericVector k_i = R_[i];
       
       Rcpp::NumericMatrix H_i = H_[i];
       Rcpp::NumericVector H_dot_i = H_dot[i];
       
       for (int j = 0; j < X_i.nrow(); ++j) {
-        // k_i[j] - 1 since k_ is the rank of failure as an R index
+        // R_ is the rank of failure as an R index
         int k_min = min(NumericVector::create(k_i[j] - 1, k));
         H_i(j, k) = lambda_hat[k_min] * exp(sum(beta * X_i(j, _)));
       }

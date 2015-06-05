@@ -118,20 +118,20 @@ BEGIN_RCPP
 END_RCPP
 }
 // baseline_hazard_estimator
-Rcpp::List baseline_hazard_estimator(Rcpp::List X_, Rcpp::List k_, NumericVector d_, Rcpp::List Y_, Rcpp::List N_dot, NumericVector beta, NumericVector theta, String frailty);
-RcppExport SEXP frailtyr_baseline_hazard_estimator(SEXP X_SEXP, SEXP k_SEXP, SEXP d_SEXP, SEXP Y_SEXP, SEXP N_dotSEXP, SEXP betaSEXP, SEXP thetaSEXP, SEXP frailtySEXP) {
+Rcpp::List baseline_hazard_estimator(Rcpp::List X_, Rcpp::List R_, NumericVector d_, Rcpp::List Y_, Rcpp::List N_dot, NumericVector beta, NumericVector theta, String frailty);
+RcppExport SEXP frailtyr_baseline_hazard_estimator(SEXP X_SEXP, SEXP R_SEXP, SEXP d_SEXP, SEXP Y_SEXP, SEXP N_dotSEXP, SEXP betaSEXP, SEXP thetaSEXP, SEXP frailtySEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< Rcpp::List >::type X_(X_SEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type k_(k_SEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type R_(R_SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type d_(d_SEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type Y_(Y_SEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type N_dot(N_dotSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type theta(thetaSEXP);
     Rcpp::traits::input_parameter< String >::type frailty(frailtySEXP);
-    __result = Rcpp::wrap(baseline_hazard_estimator(X_, k_, d_, Y_, N_dot, beta, theta, frailty));
+    __result = Rcpp::wrap(baseline_hazard_estimator(X_, R_, d_, Y_, N_dot, beta, theta, frailty));
     return __result;
 END_RCPP
 }

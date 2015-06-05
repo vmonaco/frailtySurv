@@ -37,8 +37,8 @@ lt_dpvf_c <- function(p, s, theta) {
     .Call('frailtyr_lt_dpvf_c', PACKAGE = 'frailtyr', p, s, theta)
 }
 
-baseline_hazard_estimator <- function(X_, k_, d_, Y_, N_dot, beta, theta, frailty) {
-    .Call('frailtyr_baseline_hazard_estimator', PACKAGE = 'frailtyr', X_, k_, d_, Y_, N_dot, beta, theta, frailty)
+baseline_hazard_estimator <- function(X_, R_, d_, Y_, N_dot, beta, theta, frailty) {
+    .Call('frailtyr_baseline_hazard_estimator', PACKAGE = 'frailtyr', X_, R_, d_, Y_, N_dot, beta, theta, frailty)
 }
 
 U_r <- function(X_, R_, I_, N_dot, H_, H_dot, beta, theta, beta_idx, frailty) {
