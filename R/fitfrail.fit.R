@@ -113,7 +113,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
                U_r(R_, N_dot, I_, X_, H_, H_dot, beta, theta, beta_idx, frailty)),
       sapply(1:n_theta, 
              function(theta_idx) 
-               U_p(R_, N_dot, I_, X_, H_, H_dot, beta, theta, theta_idx, tau_k, frailty)))
+               U_p(R_, N_dot, I_, X_, H_, H_dot, beta, theta, theta_idx, frailty)))
   }
   
   fit <- nleqslv(c(beta_init, theta_init), U, control=list(maxit=control$iter.max))
@@ -128,7 +128,15 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   
   list(beta = beta_hat,
        theta = theta_hat,
+       lambda = lambda_hat,
        loglik = loglik,
-       method='fitfrail'
-       )
+       method='fitfrail',
+       loglikfn = function(beta, theta) {
+         estimator <- baseline_hazard_estimator(X_, R_, d_, Y_, N_dot, beta, theta, frailty)
+         H_ <<- estimator$H_
+         H_dot <<- estimator$H_dot
+         lambda_hat <<- estimator$lambda_hat
+         log_likelihood(beta, theta, lambda_hat, H_dot, I_, R_, X_, N_dot, frailty)
+         }
+      )
 }

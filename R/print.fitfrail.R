@@ -15,5 +15,9 @@ print.fitfrail <- function(fit, digits=max(options()$digits - 4, 3), ...) {
   cat(signif(fit$theta, digits))
   cat("\n")
   
+  cat("Log likelihood:\n")
+  cat(signif(fit$loglik, digits))
+  cat("\n")
+  
   invisible()
 }

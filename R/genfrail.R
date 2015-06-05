@@ -23,19 +23,19 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
   if (frailty=="gamma") {
     w <- 1
     if ( theta != 0 ) {
-      w <- rep(rgamma(N, 1/theta, 1/theta), rep(K, N))
+      w <- rep(rgamma_r(N, theta), rep(K, N))
     }
     rate <- exp(betaZ)*w 
   } else if (frailty=="lognormal") {
     w <- 1
     if ( theta != 0 ) {
-      w <- rep(rnorm(N, 0, sqrt(theta)), rep(K, N))
+      w <- rep(rnorm_r(N, theta), rep(K, N))
     }
     rate <- exp(betaZ + w)
   } else if (frailty=="posstab") {
     w <- 1
     if ( theta != 0 ) {
-      w <- rep(rposstab(N, theta), rep(K, N))
+      w <- rep(rposstab_r(N, theta), rep(K, N))
     }
     rate <- exp(betaZ)*w 
   }
