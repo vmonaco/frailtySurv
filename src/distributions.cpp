@@ -43,18 +43,6 @@ double dgamma(double x, double *p) {
   return gsl_ran_gamma_pdf(x, 1/theta, theta);
 }
 
-double lt_dgamma(int p, double s, double* params) {
-  double theta = params[0];
-  return pow(-1, p) * pow(1/theta, 1/theta) * 
-    pow((1/theta) + s, -((1/theta) + p)) * 
-    tgamma((1/theta) + p)/tgamma((1/theta));
-}
-
-// [[Rcpp::export]]
-double lt_dgamma_c(int p, double s, double theta) {
-  return lt_dgamma(p, s, &theta);
-}
-
 double deriv_dgamma(double x, double *p, int deriv_idx) {
   double theta = p[0];
   double term1, term2, term3;
@@ -62,6 +50,13 @@ double deriv_dgamma(double x, double *p, int deriv_idx) {
   term2 = exp(-x/theta);
   term3 = log(theta/x) + gsl_sf_psi(1/theta) + x - 1;
   return (term1 * term2 * term3)/(tgamma(1/theta)*pow(theta,3));
+}
+
+double lt_dgamma(int p, double s, double* params) {
+  double theta = params[0];
+  return pow(-1, p) * pow(1/theta, 1/theta) * 
+    pow((1/theta) + s, -((1/theta) + p)) * 
+    tgamma((1/theta) + p)/tgamma((1/theta));
 }
 
 // [[Rcpp::export]]
@@ -74,19 +69,85 @@ NumericVector deriv_dgamma_c(NumericVector x, NumericVector theta) {
   return vectorized_deriv_density(&x, &theta, deriv_dgamma, 0);
 }
 
-
+// [[Rcpp::export]]
+double lt_dgamma_c(int p, double s, double theta) {
+  return lt_dgamma(p, s, &theta);
+}
 ///////////////////////////////////////////////////////////////////////////////
 // Log-normal (LN)
+double dlognormal(double x, double *p) {
+  double theta = p[0];
+  return 0;
+}
 
+double deriv_dlognormal(double x, double *p, int deriv_idx) {
+  double theta = p[0];
+  return 0;
+}
+
+// [[Rcpp::export]]
+NumericVector dlognormal_c(NumericVector x, NumericVector theta) {
+  return vectorized_density(&x, &theta, dlognormal);
+}
+
+// [[Rcpp::export]]
+NumericVector deriv_dlognormal_c(NumericVector x, NumericVector theta) {
+  return vectorized_deriv_density(&x, &theta, deriv_dlognormal, 0);
+}
 ///////////////////////////////////////////////////////////////////////////////
 // Inverse Gaussian (IG)
+double dinvgauss(double x, double *p) {
+  double theta = p[0];
+  return 0;
+}
+
+double deriv_dinvgauss(double x, double *p, int deriv_idx) {
+  double theta = p[0];
+  return 0;
+}
+
+// [[Rcpp::export]]
+NumericVector dinvgauss_c(NumericVector x, NumericVector theta) {
+  return vectorized_density(&x, &theta, dinvgauss);
+}
+
+// [[Rcpp::export]]
+NumericVector deriv_dinvgauss_c(NumericVector x, NumericVector theta) {
+  return vectorized_deriv_density(&x, &theta, deriv_dinvgauss, 0);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Positive stable (PS)
+double dposstab(double x, double *p) {
+  double alpha = p[0];
+  return 0;
+}
 
+double lt_dposstab(int p, double s, double* params) {
+  double alpha = params[0];
+  return 0;
+}
+
+// [[Rcpp::export]]
+double lt_dposstab_c(int p, double s, double theta) {
+  return lt_dposstab(p, s, &theta);
+}
 ///////////////////////////////////////////////////////////////////////////////
 // Power-variance function (PVF)
+double dpvf(double x, double *p) {
+  double alpha = p[0];
+  return 0;
+}
 
+double lt_dpvf(int p, double s, double* params) {
+  double alpha = params[0];
+  return 0;
+}
+
+// [[Rcpp::export]]
+double lt_dpvf_c(int p, double s, double theta) {
+  return lt_dpvf(p, s, &theta);
+}
 ///////////////////////////////////////////////////////////////////////////////
 // Log-normal mixture (LNM)
 

@@ -21,6 +21,14 @@ struct phi_prime_params {
 };
 
 double dgamma(double, double*);
-double lt_dgamma(int, double, double*);
 double deriv_dgamma(double, double*, int);
-double phi(double, void*);
+
+double lt_dgamma(int, double, double*);
+double lt_dposstab(int, double, double*);
+double lt_dpvf(int, double, double*);
+
+double dlognormal(double, double*);
+double deriv_dlognormal(double, double*, int);
+
+double dinvgauss(double, double*);
+double deriv_dinvgauss(double, double*, int);

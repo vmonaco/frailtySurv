@@ -110,10 +110,10 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     # TODO: This could be done in parallel, not much gain though.
     c(sapply(1:n_beta,
              function(beta_idx)
-               U_r(R_, N_dot, I_, X_, H_, H_dot, beta, theta, beta_idx, frailty)),
+               U_r(X_, R_, I_, N_dot, H_, H_dot, beta, theta, beta_idx, frailty)),
       sapply(1:n_theta, 
              function(theta_idx) 
-               U_p(R_, N_dot, I_, X_, H_, H_dot, beta, theta, theta_idx, frailty)))
+               U_p(X_, R_, I_, N_dot, H_, H_dot, beta, theta, theta_idx, frailty)))
   }
   
   fit <- nleqslv(c(beta_init, theta_init), U, control=list(maxit=control$iter.max))
@@ -124,19 +124,18 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   gamma_hat <- fit$x
   beta_hat <- gamma_hat[1:n_beta]
   theta_hat <- gamma_hat[(n_beta+1):(n_beta+n_theta)]
-  loglik <- log_likelihood(beta_hat, theta_hat, lambda_hat, H_dot, I_, R_, X_, N_dot, frailty)
+  loglik <- log_likelihood(X_, R_, I_, N_dot, H_dot, lambda_hat, beta_hat, theta_hat, frailty)
   
   list(beta = beta_hat,
        theta = theta_hat,
        lambda = lambda_hat,
        loglik = loglik,
        method='fitfrail',
-       loglikfn = function(beta, theta) {
+       loglikfn = function(beta, theta, frailty) {
          estimator <- baseline_hazard_estimator(X_, R_, d_, Y_, N_dot, beta, theta, frailty)
          H_ <<- estimator$H_
          H_dot <<- estimator$H_dot
          lambda_hat <<- estimator$lambda_hat
-         log_likelihood(beta, theta, lambda_hat, H_dot, I_, R_, X_, N_dot, frailty)
-         }
+         log_likelihood(X_, R_, I_, N_dot, H_dot, lambda_hat, beta, theta, frailty)}
       )
 }

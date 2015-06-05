@@ -52,15 +52,22 @@ double phi_prime_deriv(double w, void* data) {
 // here, with the respective density and deriv density functions (or LT)
 
 double phi(int k, int N_dot, double H_dot, double *theta, String frailty) {
-  // Laplace transform solutions first
+  // Laplace transform integrals
+  if (frailty == "gamma") {
+    return lt_dgamma(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
+    // phi_p = (struct phi_params){k, N_dot, H_dot, theta, dgamma};
+  } else if (frailty == "posstab") {
+    return lt_dposstab(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
+  } else if (frailty == "pvf") {
+    return lt_dpvf(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
+  }
   
   // Numerical integration
   phi_params phi_p;
-  if (frailty == "gamma") {
-    return lt_dgamma(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
-    phi_p = (struct phi_params){k, N_dot, H_dot, theta, dgamma};
-  } else if (frailty == "lognormal") {
-    // phi_params phi_p = {1, N_dot, H_dot, theta, dlognormal};
+  if (frailty == "lognormal") {
+    phi_p = (struct phi_params){k, N_dot, H_dot, theta, dlognormal};
+  } if (frailty == "invgauss") {
+    phi_p = (struct phi_params){k, N_dot, H_dot, theta, dinvgauss};
   } else {
     throw std::range_error("Unsupported frailty distribution");
   }
@@ -70,24 +77,21 @@ double phi(int k, int N_dot, double H_dot, double *theta, String frailty) {
 
 // phi using the derivative of the density wrt. parameter p[derive_idx]
 double phi_prime(int k, int N_dot, double H_dot, double *theta, String frailty, int deriv_idx) {
-  // Laplace transform solutions first
-  
+  // TODO: Laplace transform integrals?
   if (frailty == "posstab") {
-    
+    throw std::range_error("Unsupported frailty distribution");
   } else if (frailty == "pvf") {
-    
+    throw std::range_error("Unsupported frailty distribution");
   }
   
   // Numerical integration
   phi_prime_params phi_p;
   if (frailty == "gamma") {
-    // return lt_dgamma(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
     phi_p = (struct phi_prime_params){k, N_dot, H_dot, theta, deriv_dgamma, deriv_idx};
-  }
-  else if (frailty == "lognormal") {
-    // phi_params phi_p = {1, N_dot, H_dot, theta, dlognormal};
+  } else if (frailty == "lognormal") {
+    phi_p = (struct phi_prime_params){k, N_dot, H_dot, theta, deriv_dlognormal, deriv_idx};
   } else if (frailty == "invgauss") {
-    
+    phi_p = (struct phi_prime_params){k, N_dot, H_dot, theta, deriv_dinvgauss, deriv_idx};
   } else {
     throw std::range_error("Unsupported frailty distribution");
   }
@@ -96,7 +100,7 @@ double phi_prime(int k, int N_dot, double H_dot, double *theta, String frailty, 
 }
 
 double psi(int N_dot, double H_dot, double* theta, String frailty) {
-  // a shortcut for gamma frailty
+  // Shortcut for gamma frailty
 //   if (frailty == "gamma") {
 //     return (N_dot + 1/theta[0])/(H_dot + 1/theta[0]);
 //   }
@@ -178,11 +182,15 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_, Rcpp::List k_,
 }
 
 // [[Rcpp::export]]
-double U_r(Rcpp::List R_, Rcpp::List N_dot,
-               Rcpp::List I_, Rcpp::List X_,
-               Rcpp::List H_, Rcpp::List H_dot,
-               NumericVector beta, NumericVector theta, 
-               int beta_idx, String frailty) {
+double U_r(Rcpp::List X_,
+           Rcpp::List R_, 
+           Rcpp::List I_, 
+           Rcpp::List N_dot,
+           Rcpp::List H_, 
+           Rcpp::List H_dot,
+           NumericVector beta, 
+           NumericVector theta,
+           int beta_idx, String frailty) {
   
   int n_clusters = X_.size();
   
@@ -212,10 +220,14 @@ double U_r(Rcpp::List R_, Rcpp::List N_dot,
 }
 
 // [[Rcpp::export]]
-double U_p(Rcpp::List R_, Rcpp::List N_dot,
-           Rcpp::List I_, Rcpp::List X_,
-           Rcpp::List H_, Rcpp::List H_dot,
-           NumericVector beta, NumericVector theta,
+double U_p(Rcpp::List X_,
+           Rcpp::List R_, 
+           Rcpp::List I_, 
+           Rcpp::List N_dot,
+           Rcpp::List H_, 
+           Rcpp::List H_dot,
+           NumericVector beta, 
+           NumericVector theta,
            int theta_idx, String frailty) {
   
   int n_clusters = X_.size();
@@ -251,9 +263,14 @@ double U_p(Rcpp::List R_, Rcpp::List N_dot,
 }
 
 // [[Rcpp::export]]
-double log_likelihood(NumericVector beta, NumericVector theta, 
-                      NumericVector lambda, List H_dot,
-                      List I_, List R_, List X_, List N_dot,
+double log_likelihood(List X_, 
+                      List R_, 
+                      List I_, 
+                      List N_dot,
+                      List H_dot,
+                      NumericVector lambda, 
+                      NumericVector beta, 
+                      NumericVector theta, 
                       String frailty) {
   
   int n_clusters = X_.size();
