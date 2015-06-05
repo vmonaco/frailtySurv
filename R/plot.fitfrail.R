@@ -1,5 +1,5 @@
 
-plot.fitfrail <- function(fit, frailty=fit$frailty, resolution=20) {
+plot.fitfrail <- function(fit, frailty=fit$frailty, resolution=30) {
   
   fn <- Vectorize(function(beta, theta) fit$loglikfn(beta, theta, frailty))
   beta <- seq(-5, 5, length.out=resolution)
