@@ -265,6 +265,7 @@ double U_p(Rcpp::List X_,
 
 // [[Rcpp::export]]
 double loglikelihood(List X_, 
+                      NumericVector tau,
                       List R_, 
                       List I_, 
                       List N_dot,
@@ -288,7 +289,12 @@ double loglikelihood(List X_,
     
     for (int j = 0; j < X_i.nrow(); j++) {
       // R_i[i] is an R index
-      term1 += I_i(j) * log(lambda(R_i(j) - 1) * exp(sum(beta * X_i(j, _))));
+      if (I_i(j) > 0) { 
+        // TODO: bug, only *observed* failure times should be considered in
+        // the baseline hazard, cumulative baseline haz, etc.
+        term1 += I_i(j) * log(((lambda(R_i(j)-1)-lambda(R_i(j)-2))/(tau(R_i(j)-1)-tau(R_i(j)-2))) * 
+        exp(sum(beta * X_i(j, _))));
+      }
     }
     
     term2 += log(phi(1, 

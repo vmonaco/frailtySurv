@@ -2,8 +2,8 @@
 plot.fitfrail <- function(fit, frailty=fit$frailty, resolution=30) {
   
   fn <- Vectorize(function(beta, theta) fit$loglikfn(beta, theta, frailty))
-  beta <- seq(-1.3, -0.5, length.out=resolution)
-  theta <- seq(0.4, 1.2, length.out=resolution)
+  beta <- seq(-2, 2, length.out=resolution)
+  theta <- seq(0.1, 2.1, length.out=resolution)
   z <- outer(beta, theta, fn)
   
   image2D(z, beta, theta, clab='L', NAcol = "black", 

@@ -124,7 +124,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   gamma_hat <- fit$x
   beta_hat <- gamma_hat[1:n_beta]
   theta_hat <- gamma_hat[(n_beta+1):(n_beta+n_theta)]
-  loglik <- loglikelihood(X_, R_, I_, N_dot, H_dot, lambda_hat, beta_hat, theta_hat, frailty)
+  loglik <- loglikelihood(X_, time_steps, R_, I_, N_dot, H_dot, lambda_hat, beta_hat, theta_hat, frailty)
   
   list(beta = beta_hat,
        theta = theta_hat,
@@ -134,6 +134,6 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
        frailty=frailty,
        loglikfn = function(beta, theta, frailty) {
          estimator <- baseline_hazard_estimator(X_, R_, d_, Y_, N_dot, beta, theta, frailty)
-         loglikelihood(X_, R_, I_, N_dot, estimator$H_dot, estimator$lambda_hat, beta, theta, frailty)}
+         loglikelihood(X_, time_steps, R_, I_, N_dot, estimator$H_dot, estimator$lambda_hat, beta, theta, frailty)}
       )
 }

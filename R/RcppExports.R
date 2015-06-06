@@ -49,7 +49,7 @@ U_p <- function(X_, R_, I_, N_dot, H_, H_dot, beta, theta, theta_idx, frailty) {
     .Call('frailtyr_U_p', PACKAGE = 'frailtyr', X_, R_, I_, N_dot, H_, H_dot, beta, theta, theta_idx, frailty)
 }
 
-loglikelihood <- function(X_, R_, I_, N_dot, H_dot, lambda, beta, theta, frailty) {
-    .Call('frailtyr_loglikelihood', PACKAGE = 'frailtyr', X_, R_, I_, N_dot, H_dot, lambda, beta, theta, frailty)
+loglikelihood <- function(X_, tau, R_, I_, N_dot, H_dot, lambda, beta, theta, frailty) {
+    .Call('frailtyr_loglikelihood', PACKAGE = 'frailtyr', X_, tau, R_, I_, N_dot, H_dot, lambda, beta, theta, frailty)
 }
 
