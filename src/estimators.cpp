@@ -199,10 +199,10 @@ double U_r(Rcpp::List X_,
   double term2 = 0;
   for (int i = 0; i < n_clusters; ++i) {
     Rcpp::NumericMatrix X_i = X_(i);
-    Rcpp::NumericMatrix H_i = H_(i);
-    Rcpp::NumericVector I_i = I_(i); // Failure indicator
     Rcpp::NumericVector R_i = R_(i); // Failure rank, whare T[r] = failure time
+    Rcpp::NumericVector I_i = I_(i); // Failure indicator
     Rcpp::NumericVector N_dot_i = N_dot(i);
+    Rcpp::NumericMatrix H_i = H_(i);
     Rcpp::NumericVector H_dot_i = H_dot(i);
     int tau_k = N_dot_i.size() - 1;
     
@@ -236,10 +236,10 @@ double U_p(Rcpp::List X_,
   double out = 0;
   for (int i = 0; i < n_clusters; ++i) {
     Rcpp::NumericMatrix X_i = X_(i);
-    Rcpp::NumericMatrix H_i = H_(i);
-    Rcpp::NumericVector I_i = I_(i); // Failure indicator
     Rcpp::NumericVector R_i = R_(i);
+    Rcpp::NumericVector I_i = I_(i); // Failure indicator
     Rcpp::NumericVector N_dot_i = N_dot(i);
+    Rcpp::NumericMatrix H_i = H_(i);
     Rcpp::NumericVector H_dot_i = H_dot(i);
     int tau_k = N_dot_i.size() - 1;
     
@@ -264,7 +264,7 @@ double U_p(Rcpp::List X_,
 }
 
 // [[Rcpp::export]]
-double log_likelihood(List X_, 
+double loglikelihood(List X_, 
                       List R_, 
                       List I_, 
                       List N_dot,
