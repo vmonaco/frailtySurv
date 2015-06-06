@@ -133,7 +133,7 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_,
       for (int j = 0; j < H_i.nrow(); ++j) {
         H_i(j, k) = 0;
       }
-      H_dot_i[k] = 0;
+      H_dot_i(k) = 0;
     }
   }
   // lambda_hat is the baseline cumulative hazard estimate
@@ -145,38 +145,36 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_,
   for (int k = 1; k < n_timesteps; ++k) {
     denom = 0;
     for (int i = 0; i < n_clusters; ++i) {
-      Rcpp::NumericMatrix X_i = X_[i];
-      
-      Rcpp::NumericMatrix Y_i = Y_[i];
-      Rcpp::NumericVector N_dot_i = N_dot[i];
-      Rcpp::NumericVector H_dot_i = H_dot[i];
+      Rcpp::NumericMatrix X_i = X_(i);
+      Rcpp::NumericMatrix Y_i = Y_(i);
+      Rcpp::NumericVector N_dot_i = N_dot(i);
+      Rcpp::NumericVector H_dot_i = H_dot(i);
       
       double tmp = 0;
       for (int j = 0; j < X_i.nrow(); ++j) {
         tmp += Y_i(j, k) * exp(sum(beta * X_i(j, _)));
       }
       
-      denom += tmp * psi(N_dot_i[k-1], H_dot_i[k-1], theta.begin(), frailty);
+      denom += tmp * psi(N_dot_i(k-1), H_dot_i(k-1), theta.begin(), frailty);
     }
     
-    delta_lambda_hat[k] = d_[k]/denom;
+    delta_lambda_hat[k] = d_(k)/denom;
     
-    lambda_hat[k] = lambda_hat[k-1] + delta_lambda_hat[k];
+    lambda_hat(k) = lambda_hat(k-1) + delta_lambda_hat[k];
     
     for (int i = 0; i < n_clusters; ++i) {
-      Rcpp::NumericMatrix X_i = X_[i];
-      Rcpp::NumericVector k_i = R_[i];
-      
-      Rcpp::NumericMatrix H_i = H_[i];
-      Rcpp::NumericVector H_dot_i = H_dot[i];
+      Rcpp::NumericMatrix X_i = X_(i);
+      Rcpp::NumericVector R_i = R_(i);
+      Rcpp::NumericMatrix H_i = H_(i);
+      Rcpp::NumericVector H_dot_i = H_dot(i);
       
       for (int j = 0; j < X_i.nrow(); ++j) {
         // R_ is the rank of failure as an R index
-        int k_min = min(NumericVector::create(k_i[j] - 1, k));
-        H_i(j, k) = lambda_hat[k_min] * exp(sum(beta * X_i(j, _)));
+        int R_min = min(NumericVector::create(R_i(j) - 1, k));
+        H_i(j, k) = lambda_hat(R_min) * exp(sum(beta * X_i(j, _)));
       }
       
-      H_dot_i[k] = sum(H_i( _ , k));
+      H_dot_i(k) = sum(H_i( _ , k));
     }
   }
   return Rcpp::List::create(Rcpp::Named("H_") = H_,
@@ -288,13 +286,10 @@ double log_likelihood(List X_,
     Rcpp::NumericVector H_dot_i = H_dot(i);
     int tau_k = N_dot_i.size() - 1;
     
-    double term1_tmp = 0;
     for (int j = 0; j < X_i.nrow(); j++) {
       // R_i[i] is an R index
-      term1_tmp += I_i(j) * log(lambda(R_i(j) - 1) * exp(sum(beta * X_i(j, _))));
+      term1 += I_i(j) * log(lambda(R_i(j) - 1) * exp(sum(beta * X_i(j, _))));
     }
-    
-    term1 += term1_tmp;
     
     term2 += log(phi(1, 
                      N_dot_i(tau_k), 
