@@ -120,15 +120,15 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_,
   int n_clusters = X_.size();
   
   // H_ is a list of matrices
-  Rcpp::List H_ = clone(Y_); //Rcpp::List::create();
+  Rcpp::List H_ = clone(Y_);
   
   // H_dot is a list of numeric vectors
   Rcpp::List H_dot = clone(N_dot);
   
   for (int i = 0; i < n_clusters; ++i) {
     // H_[i](NumericMatrix(n_members, n_timesteps));
-    Rcpp::NumericMatrix H_i = H_[i];
-    Rcpp::NumericVector H_dot_i = H_dot[i];
+    Rcpp::NumericMatrix H_i = H_(i);
+    Rcpp::NumericVector H_dot_i = H_dot(i);
     for (int k = 0; k < n_timesteps; ++k) {
       for (int j = 0; j < H_i.nrow(); ++j) {
         H_i(j, k) = 0;
@@ -155,12 +155,15 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_,
         tmp += Y_i(j, k) * exp(sum(beta * X_i(j, _)));
       }
       
-      denom += tmp * psi(N_dot_i(k-1), H_dot_i(k-1), theta.begin(), frailty);
+      denom += tmp * psi(N_dot_i(k - 1), 
+                         H_dot_i(k - 1), 
+                         theta.begin(), 
+                         frailty);
     }
     
     delta_lambda_hat[k] = d_(k)/denom;
     
-    lambda_hat(k) = lambda_hat(k-1) + delta_lambda_hat[k];
+    lambda_hat(k) = lambda_hat(k-1) + delta_lambda_hat(k);
     
     for (int i = 0; i < n_clusters; ++i) {
       Rcpp::NumericMatrix X_i = X_(i);
@@ -170,13 +173,14 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_,
       
       for (int j = 0; j < X_i.nrow(); ++j) {
         // R_ is the rank of failure as an R index
-        int R_min = min(NumericVector::create(R_i(j) - 1, k));
-        H_i(j, k) = lambda_hat(R_min) * exp(sum(beta * X_i(j, _)));
+        int k_min = min(NumericVector::create(R_i(j) - 1, k));
+        H_i(j, k) = lambda_hat(k_min) * exp(sum(beta * X_i(j, _)));
       }
       
       H_dot_i(k) = sum(H_i( _ , k));
     }
   }
+  
   return Rcpp::List::create(Rcpp::Named("H_") = H_,
                             Rcpp::Named("H_dot") = H_dot,
                             Rcpp::Named("lambda_hat") = lambda_hat);
@@ -213,7 +217,8 @@ double U_r(Rcpp::List X_,
     }
     term2 += tmp * psi(N_dot_i(tau_k), 
                        H_dot_i(tau_k), 
-                       theta.begin(), "gamma");
+                       theta.begin(), 
+                       frailty);
   }
   term1 = term1/n_clusters;
   term2 = term2/n_clusters;
@@ -264,8 +269,7 @@ double U_p(Rcpp::List X_,
 }
 
 // [[Rcpp::export]]
-double loglikelihood(List X_, 
-                      NumericVector tau,
+double loglikelihood(List X_,
                       List R_, 
                       List I_, 
                       List N_dot,
@@ -282,25 +286,23 @@ double loglikelihood(List X_,
   for (int i = 0; i < n_clusters; ++i) {
     Rcpp::NumericMatrix X_i = X_(i);
     Rcpp::NumericVector I_i = I_(i); // Failure indicator
-    Rcpp::NumericVector R_i = R_(i); // Failure rank, whare T[r] = failure time
+    Rcpp::NumericVector R_i = R_(i); // Failure rank, where T[r] = failure time
     Rcpp::NumericVector N_dot_i = N_dot(i);
     Rcpp::NumericVector H_dot_i = H_dot(i);
     int tau_k = N_dot_i.size() - 1;
     
     for (int j = 0; j < X_i.nrow(); j++) {
-      // R_i[i] is an R index
+      // R_i[j] is an R index
       if (I_i(j) > 0) { 
-        // TODO: bug, only *observed* failure times should be considered in
-        // the baseline hazard, cumulative baseline haz, etc.
-        term1 += I_i(j) * log(((lambda(R_i(j)-1)-lambda(R_i(j)-2))/(tau(R_i(j)-1)-tau(R_i(j)-2))) * 
-        exp(sum(beta * X_i(j, _))));
+        term1 += log(lambda(R_i(j)-1) - lambda(R_i(j)-2)) + sum(beta * X_i(j, _));
       }
     }
     
     term2 += log(phi(1, 
                      N_dot_i(tau_k), 
                      H_dot_i(tau_k), 
-                     theta.begin(), frailty));
+                     theta.begin(), 
+                     frailty));
   }
   
   return term1 + term2;

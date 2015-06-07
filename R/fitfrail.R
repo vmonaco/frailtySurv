@@ -77,7 +77,7 @@ fitfrail <- function(formula, data, control,
                           method="efron", row.names(mf))$coefficients
   
   # TODO: theta should initialize to a zero vector, dependening the num density args
-  theta_init <- c(1)
+  theta_init <- c(0.1)
   
   fit <- fitfrail.fit(X, Y, cluster, 
                            beta_init, theta_init, 

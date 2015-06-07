@@ -51,8 +51,6 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   
   # Unique time steps, including t=0. This is where the baseline hazard actually increases
   time_steps <- c(0, sort(unique(time)))
-  # Index of the end of the observation period
-  tau_k <- length(time_steps)
   
   # The _ variables are all lists, indexed by the cluster name
   X_ <- split.data.frame(x, cluster) # Covariates
@@ -104,7 +102,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     
     if (verbose) {
       iter <<- iter + 1
-      cat(c(signif(c(iter, beta, theta), 3), "\n"), sep="\t")
+      cat(c(signif(c(iter, beta, theta), 4), "\n"), sep="\t")
     }
     
     # TODO: This could be done in parallel, not much gain though.
@@ -116,15 +114,34 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
                U_p(X_, R_, I_, N_dot, H_, H_dot, beta, theta, theta_idx, frailty)))
   }
   
-  fit <- nleqslv(c(beta_init, theta_init), U, control=list(maxit=control$iter.max))
+  loglikfn = function(beta, theta, frailty) {
+    if (verbose) {
+      iter <<- iter + 1
+      cat(c(signif(c(iter, beta, theta), 4), "\n"), sep="\t")
+    }
+    estimator <- baseline_hazard_estimator(X_, R_, d_, Y_, N_dot, beta, theta, frailty)
+    H_ <<- estimator$H_
+    H_dot <<- estimator$H_dot
+    lambda_hat <<- estimator$lambda_hat
+    loglikelihood(X_, R_, I_, N_dot, estimator$H_dot, estimator$lambda_hat, beta, theta, frailty)
+  }
+  
+#   # Example of optim with loglike fn
+#   fitter <- optim(c(0, 0.01), function(x) loglikfn(x[1], x[2], frailty), 
+#                lower=c(-4,0.05), upper=c(4,10), method="L-BFGS-B",
+#                control=list(fnscale=-1, factr=1e8, pgtol=1e-8))
+#   gamma_hat <- fitter$par
+  
+  fitter <- nleqslv(c(beta_init, theta_init), U, 
+                    control=list(maxit=control$iter.max,xtol=1e-8,ftol=1e-8,btol=1e-3))
+  gamma_hat <- fitter$x
   
   if (verbose)
     cat("Converged after", iter, "iterations\n")
   
-  gamma_hat <- fit$x
   beta_hat <- gamma_hat[1:n_beta]
   theta_hat <- gamma_hat[(n_beta+1):(n_beta+n_theta)]
-  loglik <- loglikelihood(X_, time_steps, R_, I_, N_dot, H_dot, lambda_hat, beta_hat, theta_hat, frailty)
+  loglik <- loglikfn(beta_hat, theta_hat, frailty)
   
   list(beta = beta_hat,
        theta = theta_hat,
@@ -132,8 +149,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
        loglik = loglik,
        method='fitfrail',
        frailty=frailty,
-       loglikfn = function(beta, theta, frailty) {
-         estimator <- baseline_hazard_estimator(X_, R_, d_, Y_, N_dot, beta, theta, frailty)
-         loglikelihood(X_, time_steps, R_, I_, N_dot, estimator$H_dot, estimator$lambda_hat, beta, theta, frailty)}
+       loglikfn=loglikfn,
+       fitter=fitter
       )
 }
