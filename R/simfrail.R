@@ -31,9 +31,23 @@ simfrail <- function(reps, genfrail.args, fitfrail.args,
   results <- t(simplify2array(results))
   
   # Summarize everything
-  results <- apply(results, 2, function(x) c(mean=mean(x), sd=sd(x)))
+  # results <- apply(results, 2, function(x) c(mean=mean(x), sd=sd(x)))
   
-  results
+  data.frame(results)
+}
+
+fitfrail_residuals <- function(reps, beta, theta, formula, N=c(50,60,70,80,90,100,500,1000)) {
+  
+  results <- lapply(N, function(Ni) {
+    r <- simfrail(reps, list(beta=beta, censor.mu=130, frailty="gamma", N=Ni, K=2, 
+                         theta=theta, covariates="uniform"), 
+             list(formula=formula, frailty="gamma", verbose=FALSE))
+    
+    cbind(N=Ni, r, 
+               res.theta=theta-r[,"theta"],
+               res=beta-r[, grepl("beta", names(r))])})
+  
+  do.call("rbind", results)
 }
 
 # A wrapper for coxph, gathers the coeffs, theta, censoring, runtime
