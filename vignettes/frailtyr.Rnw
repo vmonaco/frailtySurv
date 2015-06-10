@@ -78,6 +78,56 @@ options(prompt = "R> ", continue = "+   ")
 
 Based on \cite{gorfine2006prospective}.
 
+Background, other packages available, motivation
+
+\begin{table}[h]
+\protect\caption{R functions for fitting survival models. P=parametric, NP=nonparametric,
+PPL=partial penalized likelihood, MML=maximum marginal likelihood, DLs=downloads.}
+\centering{}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline 
+Package::function & $\lambda_{0}$ & Estimation & Gen? & Frailty distr & Weekly DLs\tabularnewline
+\hline 
+\hline 
+survival::coxph & NP & PPL & No & $\Gamma$, $LN$, $LT$ & 2003.1\tabularnewline
+\hline 
+coxme::coxme & NP & PPL & No & $LN$ & 167.4\tabularnewline
+\hline 
+frailtypack::frailtyPenal & P or NP & PPL & No & $\Gamma$, $LN$, & 80.3\tabularnewline
+\hline 
+phmm::phmm & NP & EM & No & $LN$, & 46\tabularnewline
+\hline 
+parfm::parfm & P & MML & No & $\Gamma$, $PS$, $IG$ & 45.9\tabularnewline
+\hline 
+survBayes::survBayes & NP & Bayes & No & $\Gamma$, $LN$ & 35.7\tabularnewline
+\hline 
+\end{tabular}
+\end{table}
+
+
+\section{Model estimation}
+
+Model description, overview of estimation procedure.
+
+Two methods of estimation, use of LT to solve integrals, performance
+
+fitfrail arguments, return value
+
+\section{Simulation}
+
+Generating data, genfrail arguments. Example generating data and fitting model
+
+Analytic and empirical asymptotic results.
+
+Correlation with existing packages for gamma, log-normal frailty.
+
+\section{Case study}
+
+Using real-world data, various frailty distributions.
+
+\section{Discussion}
+
+
 
 \section*{Acknowledgments}
 
@@ -95,6 +145,8 @@ The development of \pkg{frailtyr} was supported by Google Summer of Code 2015.
 All frailty distributions have support $\omega\in\left(0,\infty\right)$.
 It is usually necessary to place constraints on the parameters to
 avoid identifiability problems.
+
+TODO: For each frailty distribution: density, Laplace transform, method to generate random samples
 
 
 \subsection{Gamma}

@@ -4,7 +4,7 @@ simfrail <- function(reps, genfrail.args, fitfrail.args,
   
   # To make the result reproducable when parallelized, seed each run from 
   # a list of random seeds sampled from a meta seed
-  set.seed(seed)
+  # set.seed(seed)
   seeds <- sample(1:1e7, reps, replace=TRUE)
   
   fn <- function(s) {
@@ -44,11 +44,18 @@ fitfrail_residuals <- function(reps, beta, theta, formula, N=c(50,60,70,80,90,10
              list(formula=formula, frailty="gamma", verbose=FALSE))
     
     cbind(N=Ni, r, 
-               res.theta=theta-r[,"theta"],
-               res=beta-r[, grepl("beta", names(r))])})
+               res.theta=theta - r[,"theta"],
+               res.beta=matrix(rep(beta, each=reps), nrow=reps) - 
+            unname(data.matrix(r[, grepl("beta", names(r))]))) })
   
   do.call("rbind", results)
 }
+
+# r1.stacked = melt(r1[,c("N","res.theta","res.beta.1","res.beta.2")], id = c('N'))
+# r2.stacked <- melt(r2[,c("N","res.theta","res.beta")], id = c('N'))
+# boxplot(value~N+variable, data=r1.stacked, notch=TRUE, col=rep(1:3, each=8), names=rep(c(50,60,70,80,90,100,500,1000), 3), xlab="N", ylab="Residual", ylim=c(-3, 3))
+# abline(h=0)
+# legend(x=20,y=3, legend=c("theta=2","beta.Z1=log(2)", "beta.Z1=log(3)"), fill=1:3)
 
 # A wrapper for coxph, gathers the coeffs, theta, censoring, runtime
 simfrailcoxph <- function(reps, genfrail.args, coxph.args, seed=2015) 

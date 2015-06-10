@@ -1,0 +1,972 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass jss
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+Background, motivation, survival packages.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+R functions for fitting survival models.
+ P=parametric, NP=nonparametric, PPL=partial penalized likelihood, MML=maximum
+ marginal likelihood, DLs=downloads.
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:survival-analysis-functions"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="7" columns="6">
+<features rotate="0" tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Package::function
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\lambda_{0}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Estimation
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Gen?
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Frailty distr
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Weekly DLs
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+survival::coxph
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+NP
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+PPL
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+No
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\Gamma$
+\end_inset
+
+, 
+\begin_inset Formula $LN$
+\end_inset
+
+, 
+\begin_inset Formula $LT$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2003.1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+coxme::coxme
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+NP
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+PPL
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+No
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $LN$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+167.4
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+frailtypack::frailtyPenal
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+P or NP
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+PPL
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+No
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\Gamma$
+\end_inset
+
+, 
+\begin_inset Formula $LN$
+\end_inset
+
+,
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+80.3
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+phmm::phmm
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+NP
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+EM
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+No
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $LN$
+\end_inset
+
+,
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+46
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+parfm::parfm
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+P
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+MML
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+No
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\Gamma$
+\end_inset
+
+, 
+\begin_inset Formula $PS$
+\end_inset
+
+, 
+\begin_inset Formula $IG$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+45.9
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+survBayes::survBayes
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+NP
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Bayes
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+No
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\Gamma$
+\end_inset
+
+, 
+\begin_inset Formula $LN$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+35.7
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Additional: survMisc, survsim, MST.
+\end_layout
+
+\begin_layout Section
+Data generation
+\end_layout
+
+\begin_layout Standard
+Generating data, genfrail arguments.
+\end_layout
+
+\begin_layout Standard
+Generating survival data from a model with known parameters.
+\end_layout
+
+\begin_layout Section
+Model estimation
+\end_layout
+
+\begin_layout Standard
+Maximize likelihood vs score equations
+\end_layout
+
+\begin_layout Standard
+LT to solve integrals
+\end_layout
+
+\begin_layout Standard
+Performance remarks
+\end_layout
+
+\begin_layout Standard
+fitfrail arguments, return value
+\end_layout
+
+\begin_layout Standard
+Analytic and empirical asymptotic results.
+\end_layout
+
+\begin_layout Standard
+Correlation with existing packages for gamma, log-normal frailty.
+\end_layout
+
+\begin_layout Section
+Example
+\end_layout
+
+\begin_layout Standard
+Example generating data and fitting model, displaying and interpreting results
+\end_layout
+
+\begin_layout Section
+Case study
+\end_layout
+
+\begin_layout Standard
+Application to DRS data, maybe HD failure
+\end_layout
+
+\begin_layout Section
+Discussion
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "frailtyr"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+\start_of_appendix
+Frailty distributions
+\end_layout
+
+\begin_layout Standard
+All frailty distributions have support 
+\begin_inset Formula $\omega\in\left(0,\infty\right)$
+\end_inset
+
+.
+ It is usually necessary to place constraints on the parameters to avoid
+ identifiability problems.
+\end_layout
+
+\begin_layout Standard
+TODO: For each frailty distribution: density, Laplace transform, method
+ to generate random samples
+\end_layout
+
+\begin_layout Subsection
+Gamma
+\end_layout
+
+\begin_layout Standard
+Frailty values from a gamma distribution are denoted by 
+\begin_inset Formula $\omega\sim\Gamma(\frac{1}{\theta},\frac{1}{\theta})$
+\end_inset
+
+, where 
+\begin_inset Formula $E[\omega]=1$
+\end_inset
+
+ and 
+\begin_inset Formula $Var[\omega]=\theta$
+\end_inset
+
+.
+ The frailtyr package uses a one-parameter gamma distribution with shape
+ and scale both 
+\begin_inset Formula $\frac{1}{\theta}$
+\end_inset
+
+ and density given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\Gamma(\omega;\theta)=\frac{\omega^{\frac{1}{\theta}-1}\exp\left(\frac{-\omega}{\theta}\right)}{\theta^{\frac{1}{\theta}}\Gamma(\frac{1}{\theta})}\label{eq:density-gamma}
+\end{equation}
+
+\end_inset
+
+The special case when 
+\begin_inset Formula $\theta=0$
+\end_inset
+
+ is taken to be a degenerate distribution where 
+\begin_inset Formula $\omega=1$
+\end_inset
+
+, i.e.
+ there is no hidden frailty in the hazard function.
+ The partial derivative, with respect to the single parameter 
+\begin_inset Formula $\theta$
+\end_inset
+
+, has closed form solution
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial\Gamma(\omega;\theta)}{\partial\theta}=\frac{\left(\frac{\omega}{\theta}\right)^{\frac{1}{\theta}-1}\exp\left(\frac{-\omega}{\theta}\right)\left\{ \ln\left(\frac{\theta}{\omega}\right)+\psi^{(0)}\left(\frac{1}{\theta}\right)+\omega-1\right\} }{\theta^{3}\Gamma\left(\frac{1}{\theta}\right)}\label{eq:deriv-gamma}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Log-normal
+\end_layout
+
+\begin_layout Standard
+Frailty values from a log-normal distribution are denoted 
+\begin_inset Formula $\omega\sim LN(\theta)$
+\end_inset
+
+, where the log-mean and log-variance of 
+\begin_inset Formula $\omega$
+\end_inset
+
+ are 0 and 
+\begin_inset Formula $\theta$
+\end_inset
+
+, respectively.
+ This distribution has 
+\begin_inset Formula $E[\omega]=\exp\frac{\theta}{2}$
+\end_inset
+
+ and 
+\begin_inset Formula $Var[\omega]=\exp2\theta-\exp\theta$
+\end_inset
+
+, with density given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+LN(\omega;\theta)=\frac{1}{\omega\sqrt{\theta2\pi}}\exp\left\{ \frac{-\left(\ln\omega\right)^{2}}{2\theta}\right\} \label{eq:density-log-norm}
+\end{equation}
+
+\end_inset
+
+Similar to the gamma distribution, the special case of 
+\begin_inset Formula $\theta=0$
+\end_inset
+
+ indicates 
+\begin_inset Formula $\omega=1$
+\end_inset
+
+.
+ The partial derivative with respect to 
+\begin_inset Formula $\theta$
+\end_inset
+
+ is given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial LN(\omega;\theta)}{\partial\theta}=\frac{\ln^{2}\left(\omega\right)\exp\left(\frac{-\ln^{2}\omega}{2\theta}\right)}{2\sqrt{2\pi}\theta^{5/2}\omega}-\frac{\exp\left(\frac{-\ln^{2}\omega}{2\theta}\right)}{2\sqrt{2\pi}\theta^{3/2}\omega}\label{eq:deriv-log-norm}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Positive stable
+\end_layout
+
+\begin_layout Standard
+The one-parameter positive stable distribution is given by 
+\begin_inset Formula $\omega\sim PS(\alpha)$
+\end_inset
+
+, where 
+\begin_inset Formula $\beta=1$
+\end_inset
+
+, 
+\begin_inset Formula $\mu=0$
+\end_inset
+
+, 
+\begin_inset Formula $0<\alpha<1$
+\end_inset
+
+, and 
+\begin_inset Formula $\delta=\alpha$
+\end_inset
+
+ as defined in Hougaard 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hougaard2000analysis"
+
+\end_inset
+
+.
+ The density is given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+PS\left(\omega;\alpha\right)=-\frac{1}{\pi\omega}\sum_{k=1}^{\infty}\frac{\Gamma\left(k\alpha+1\right)}{k!}\left(-\omega^{-\alpha}\right)^{k}\sin\left(\alpha k\pi\right)\label{eq:density-posstab}
+\end{equation}
+
+\end_inset
+
+When 
+\begin_inset Formula $\alpha=1$
+\end_inset
+
+, a degenerate distribution at 1 is obtained and there is no shared frailty.
+\end_layout
+
+\begin_layout Subsection
+Inverse Gaussian
+\end_layout
+
+\begin_layout Standard
+Frailty values from an inverse Gaussian distribution are denoted by 
+\begin_inset Formula $\omega\sim IG(\theta)$
+\end_inset
+
+, where 
+\begin_inset Formula $\frac{1}{\theta}$
+\end_inset
+
+ is the scale and the mean is fixed at 1.
+ The density is given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+IG\left(\omega;\theta\right)=\left(2\pi\theta\omega^{3}\right)^{-1/2}\exp\left\{ \frac{-\left(\omega-1\right)^{2}}{2\theta\omega}\right\} \label{eq:density-inverse-gaussian}
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $\theta>0$
+\end_inset
+
+.
+ The IG has 
+\begin_inset Formula $E[\omega]=1$
+\end_inset
+
+ and 
+\begin_inset Formula $Var[\omega]=\theta$
+\end_inset
+
+.
+ Similar to the gamma and log-normal, 
+\begin_inset Formula $\omega$
+\end_inset
+
+ is taken to be 1 when 
+\begin_inset Formula $\theta=0$
+\end_inset
+
+.
+ The derivative wrt.
+ 
+\begin_inset Formula $\theta$
+\end_inset
+
+ is given by 
+\begin_inset Formula 
+\[
+\frac{\partial IG\left(\omega;\theta\right)}{\partial\theta}=\frac{\left(\omega-1\right)^{2}\exp\left\{ -\frac{\left(\omega-1\right){}^{2}}{2\theta\omega}\right\} }{2\sqrt{2\pi}\theta^{2}\omega\sqrt{\theta\omega^{3}}}-\frac{\omega^{3}\exp\left\{ -\frac{\left(\omega-1\right)^{2}}{2\theta\omega}\right\} }{2\sqrt{2\pi}\left(\theta\omega^{3}\right){}^{3/2}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Power variance function
+\end_layout
+
+\begin_layout Standard
+The power variance function (PVF) distribution is denoted 
+\begin_inset Formula $PVF(\alpha,\delta,\theta)$
+\end_inset
+
+ with density
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+PVF\left(\omega;\alpha,\delta,\theta\right)=\exp\left(-\theta\omega+\frac{\delta^{\alpha}}{\alpha}\right)\frac{1}{\pi}\sum_{k=1}^{\infty}\frac{\Gamma\left(k\alpha+1\right)}{k!}\left(-\frac{1}{\omega}\right)^{\alpha k+1}\sin\left(\alpha k\pi\right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $0<\alpha\le1,\theta\ge0,\delta>0$
+\end_inset
+
+.
+ To avoid identifiability problems, we let 
+\begin_inset Formula $\delta=\theta=1$
+\end_inset
+
+ as in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hanagal2009modeling"
+
+\end_inset
+
+, and get the one-parameter PVF density
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+PVF\left(\omega;\alpha\right)=\exp\left(-\omega+\alpha^{-1}\right)\frac{1}{\pi}\sum_{k=1}^{\infty}\frac{\Gamma\left(k\alpha+1\right)}{k!}\left(-\frac{1}{\omega}\right)^{\alpha k+1}\sin\left(\alpha k\pi\right)\label{eq:density-pvf}
+\end{equation}
+
+\end_inset
+
+When 
+\begin_inset Formula $\alpha=1$
+\end_inset
+
+, the degenerate distribution with 
+\begin_inset Formula $\omega=1$
+\end_inset
+
+ is obtained.
+ The PVF has 
+\begin_inset Formula $E[\omega]=1$
+\end_inset
+
+ and 
+\begin_inset Formula $Var[\omega]=\left(1-\alpha\right)$
+\end_inset
+
+.
+\end_layout
+
+\end_body
+\end_document
