@@ -8,8 +8,8 @@
 using namespace Rcpp;
 
 // Args to the adaptive quadrature integration
-// integrate from (LOWER, infty), which is mapped to (0, 1] by  x = a + (1-t)/t
-#define LOWER 0 
+// integrate from (INT_LOWER, infty), which is mapped to (0, 1] by  x = a + (1-t)/t
+#define INT_LOWER 0 
 
 // Convergence of integration reached when either the absolute or relative error 
 // is within these tolerances
@@ -28,7 +28,7 @@ double integrate(double (*f)(double,void*), void* data) {
   F.function = f;
   F.params = data;
   
-  int ret = gsl_integration_qagiu(&F, LOWER, EPSABS, EPSREL, LIMIT, work, &result, &error);
+  int ret = gsl_integration_qagiu(&F, INT_LOWER, EPSABS, EPSREL, LIMIT, work, &result, &error);
   gsl_integration_workspace_free(work);
   return result;
 }

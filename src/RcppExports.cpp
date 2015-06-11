@@ -91,6 +91,19 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// lt_dpvf_coef
+double lt_dpvf_coef(int p, int j, double alpha);
+RcppExport SEXP frailtyr_lt_dpvf_coef(SEXP pSEXP, SEXP jSEXP, SEXP alphaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type j(jSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    __result = Rcpp::wrap(lt_dpvf_coef(p, j, alpha));
+    return __result;
+END_RCPP
+}
 // dposstab_c
 NumericVector dposstab_c(NumericVector x, NumericVector alpha);
 RcppExport SEXP frailtyr_dposstab_c(SEXP xSEXP, SEXP alphaSEXP) {
@@ -104,15 +117,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // lt_dposstab_c
-double lt_dposstab_c(int p, double s, double theta);
-RcppExport SEXP frailtyr_lt_dposstab_c(SEXP pSEXP, SEXP sSEXP, SEXP thetaSEXP) {
+double lt_dposstab_c(int p, double s, double alpha);
+RcppExport SEXP frailtyr_lt_dposstab_c(SEXP pSEXP, SEXP sSEXP, SEXP alphaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
     Rcpp::traits::input_parameter< double >::type s(sSEXP);
-    Rcpp::traits::input_parameter< double >::type theta(thetaSEXP);
-    __result = Rcpp::wrap(lt_dposstab_c(p, s, theta));
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    __result = Rcpp::wrap(lt_dposstab_c(p, s, alpha));
     return __result;
 END_RCPP
 }
@@ -129,15 +142,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // lt_dpvf_c
-double lt_dpvf_c(int p, double s, double theta);
-RcppExport SEXP frailtyr_lt_dpvf_c(SEXP pSEXP, SEXP sSEXP, SEXP thetaSEXP) {
+double lt_dpvf_c(int p, double s, double alpha);
+RcppExport SEXP frailtyr_lt_dpvf_c(SEXP pSEXP, SEXP sSEXP, SEXP alphaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
     Rcpp::traits::input_parameter< double >::type s(sSEXP);
-    Rcpp::traits::input_parameter< double >::type theta(thetaSEXP);
-    __result = Rcpp::wrap(lt_dpvf_c(p, s, theta));
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    __result = Rcpp::wrap(lt_dpvf_c(p, s, alpha));
     return __result;
 END_RCPP
 }

@@ -1,12 +1,13 @@
 genfrail <- function(beta = c(log(2)), # Covariate coefficients
-                     frailty = c("gamma", "lognormal", "posstab"), # Frailty distribution
+                     frailty = c("gamma", "lognormal", "invgauss", "posstab", "pvf"), # Frailty distribution
                      censor.mu = 130, # Gaussian distribution for censoring
                      censor.sigma = 15,
                      theta = 2, # Frailty distribution parameter
                      N = 300, K = 2, # Number of families and family size
                      tau = 4.6,
                      C = 0.01,
-                     covariates = c("normal", "uniform") ) {
+                     covariates = c("normal", "uniform")) {
+  
   # Generate the covariates
   p <- length(beta)
   Z <- matrix(0, nrow=N*K, ncol=p)

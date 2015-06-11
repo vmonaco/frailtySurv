@@ -2,19 +2,17 @@
 #' Initialize control parameters
 #' 
 #' @export
-fitfrail.control <- function(eps=1e-9, 
+fitfrail.control <- function(fitmethod='score',
+                             eps=1e-9, 
                              toler.chol=.Machine$double.eps^.75, 
                              iter.max=20,
                              toler.inf=sqrt(eps),
                              verbose=TRUE) {
-  if (iter.max <0) stop("Invalid value for iterations")
-  if (eps <=0) stop ("Invalid convergence criteria")
-  if (eps <= toler.chol) 
-    warning("For numerical accuracy, tolerance should be < eps")
-  if (toler.inf <=0) stop ("The inf.warn setting must be >0")
-  list(eps=eps, 
-       toler.chol=toler.chol, 
+  if (!fitmethod %in% c("score", "like")) stop("fitmethod must be one of: score, like")
+  if (iter.max < 0) stop("Invalid value for iterations")
+  if (eps <= 0) stop ("Invalid convergence criteria")
+  list(fitmethod=fitmethod,
+       eps=eps,
        iter.max=as.integer(iter.max),
-       toler.inf=toler.inf,
        verbose=as.logical(verbose))
 }

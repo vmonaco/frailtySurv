@@ -29,20 +29,24 @@ deriv_dinvgauss_c <- function(x, theta) {
     .Call('frailtyr_deriv_dinvgauss_c', PACKAGE = 'frailtyr', x, theta)
 }
 
+lt_dpvf_coef <- function(p, j, alpha) {
+    .Call('frailtyr_lt_dpvf_coef', PACKAGE = 'frailtyr', p, j, alpha)
+}
+
 dposstab_c <- function(x, alpha) {
     .Call('frailtyr_dposstab_c', PACKAGE = 'frailtyr', x, alpha)
 }
 
-lt_dposstab_c <- function(p, s, theta) {
-    .Call('frailtyr_lt_dposstab_c', PACKAGE = 'frailtyr', p, s, theta)
+lt_dposstab_c <- function(p, s, alpha) {
+    .Call('frailtyr_lt_dposstab_c', PACKAGE = 'frailtyr', p, s, alpha)
 }
 
 dpvf_c <- function(x, alpha) {
     .Call('frailtyr_dpvf_c', PACKAGE = 'frailtyr', x, alpha)
 }
 
-lt_dpvf_c <- function(p, s, theta) {
-    .Call('frailtyr_lt_dpvf_c', PACKAGE = 'frailtyr', p, s, theta)
+lt_dpvf_c <- function(p, s, alpha) {
+    .Call('frailtyr_lt_dpvf_c', PACKAGE = 'frailtyr', p, s, alpha)
 }
 
 baseline_hazard_estimator <- function(X_, R_, d_, Y_, N_dot, beta, theta, frailty) {
