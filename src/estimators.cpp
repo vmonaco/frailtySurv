@@ -61,12 +61,11 @@ double phi(int k, int N_dot, double H_dot, double *theta, String frailty) {
   } else if (frailty == "pvf") {
     return lt_dpvf(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
   }
-  
   // Numerical integration
   phi_params phi_p;
   if (frailty == "lognormal") {
     phi_p = (struct phi_params){k, N_dot, H_dot, theta, dlognormal};
-  } if (frailty == "invgauss") {
+  } else if (frailty == "invgauss") {
     phi_p = (struct phi_params){k, N_dot, H_dot, theta, dinvgauss};
   } else {
     throw std::range_error("Unsupported frailty distribution");

@@ -21,12 +21,16 @@ dgamma_r <- function(x, theta) {
 #' 
 #' Deriv of gamma density wrt. theta
 #' 
-deriv_dgamma_r <- function(x, theta, deriv_idx) {
+deriv_dgamma_r <- function(x, theta) {
   # deriv_idx ignored here since there is only one parameter
   term1 <- (x/theta)^(1/theta - 1)
   term2 <- exp(-x/theta)
   term3 <- log(theta/x) + digamma(1/theta) + x - 1
   (term1 * term2 * term3)/(gamma(1/theta)*theta^3)
+}
+
+deriv_dgamma_r_numeric <- function(x, theta) {
+  grad(function(theta) dgamma_r(x, theta), theta)
 }
 
 #'
@@ -77,6 +81,7 @@ dposstab_r <- function(x, alpha, K=100) {
       gamma(k * alpha + 1) / factorial(k) * 
         (-x ^ (-alpha)) ^ k * sin(alpha * k * pi))
   }
+  
   Vectorize(f)(x)
 }
 
@@ -109,7 +114,7 @@ lt_dposstab_r <- function(p, s, alpha) {
   }
   
   (-1)^p * lt_dposstab_r(0, s, alpha) * sum(vapply(1:p, function(j)
-    lt_dpvf_coef(p, j, alpha) * alpha^j * s^(j*alpha - p), 0
+    lt_dpvf_coef_r(p, j, alpha) * alpha^j * s^(j*alpha - p), 0
   ))
 }
 
@@ -137,7 +142,7 @@ dpvf_r <- function(x, alpha, K=100) {
   })(x)
 }
 
-lt_dpvf_coef <- function(p, j, alpha) {
+lt_dpvf_coef_r <- function(p, j, alpha) {
   if (p == 2 && j == 1) {
     return(1 - alpha)
   }
@@ -166,7 +171,7 @@ lt_dpvf_coef <- function(p, j, alpha) {
     return(1)
   }
   
-  return(lt_dpvf_coef(p-1, j-1, alpha) + lt_dpvf_coef(p-1, j, alpha)*((p-1) - j*alpha))
+  return(lt_dpvf_coef_r(p - 1, j - 1, alpha) + lt_dpvf_coef_r(p - 1, j, alpha)*((p - 1) - j*alpha))
 }
 
 lt_dpvf_r <- function(p, s, alpha) {
@@ -175,7 +180,7 @@ lt_dpvf_r <- function(p, s, alpha) {
   }
   
   (-1)^p * lt_dpvf_r(0, s, alpha) * sum(vapply(1:p, function(j)
-    lt_dpvf_coef(p, j, alpha) * (1 + s)^(j*alpha - p), 0
+    lt_dpvf_coef_r(p, j, alpha) * (1 + s)^(j*alpha - p), 0
     ))
 }
 
@@ -202,6 +207,26 @@ phi_dpvf <- function(k, H_dot, N_dot, alpha) {
 #' 
 rnorm_r <- function(n, theta) {
   rnorm(n, 0, sqrt(theta))
+}
+
+rlognormal_r <- function(n, theta) {
+  rlnorm(n, 0, sqrt(theta))
+}
+
+dlognormal_r <- function(x, theta) {
+  dlnorm(x, 0, sqrt(theta))
+}
+
+deriv_dlognormal_r <- function(x, theta) {
+  term1_numer <- log(x)^2 * exp(-(log(x)^2)/(2*theta))
+  term1_denom <- 2 * sqrt(2*pi) * theta^(5/2) * x
+  term2_numer <- exp(-(log(x)^2)/(2*theta))
+  term2_denom <- 2 * sqrt(2*pi) * theta^(3/2) * x
+  term1_numer/term1_denom - term2_numer/term2_denom
+}
+
+deriv_dlognormal_r_numeric <- function(x, theta) {
+  grad(function(theta) dlognormal_r(x, theta), theta)
 }
 
 ################################################################################

@@ -1,5 +1,5 @@
 fitfrail <- function(formula, data, control, 
-                     frailty=c("gamma","lognormal","posstab"), ...) {
+                     frailty=c("gamma","lognormal","invgauss", "posstab", "pvf"), ...) {
   
   Call <- match.call()
   
@@ -32,7 +32,7 @@ fitfrail <- function(formula, data, control,
   # Default to the fitfrail.control defaults
   if (missing(control)) control <- fitfrail.control(...)
   
-  if (!match(frailty,c("gamma","lognormal","posstab"), nomatch=0))
+  if (!match(frailty,c("gamma","lognormal","invgauss", "posstab", "pvf"), nomatch=0))
     stop("frailty distribution", frailty, "not supported yet.")
   
   Y <- model.extract(mf, "response")

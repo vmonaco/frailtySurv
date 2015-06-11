@@ -29,8 +29,16 @@ deriv_dinvgauss_c <- function(x, theta) {
     .Call('frailtyr_deriv_dinvgauss_c', PACKAGE = 'frailtyr', x, theta)
 }
 
+dposstab_c <- function(x, alpha) {
+    .Call('frailtyr_dposstab_c', PACKAGE = 'frailtyr', x, alpha)
+}
+
 lt_dposstab_c <- function(p, s, theta) {
     .Call('frailtyr_lt_dposstab_c', PACKAGE = 'frailtyr', p, s, theta)
+}
+
+dpvf_c <- function(x, alpha) {
+    .Call('frailtyr_dpvf_c', PACKAGE = 'frailtyr', x, alpha)
 }
 
 lt_dpvf_c <- function(p, s, theta) {

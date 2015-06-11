@@ -91,6 +91,18 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// dposstab_c
+NumericVector dposstab_c(NumericVector x, NumericVector alpha);
+RcppExport SEXP frailtyr_dposstab_c(SEXP xSEXP, SEXP alphaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
+    __result = Rcpp::wrap(dposstab_c(x, alpha));
+    return __result;
+END_RCPP
+}
 // lt_dposstab_c
 double lt_dposstab_c(int p, double s, double theta);
 RcppExport SEXP frailtyr_lt_dposstab_c(SEXP pSEXP, SEXP sSEXP, SEXP thetaSEXP) {
@@ -101,6 +113,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type s(sSEXP);
     Rcpp::traits::input_parameter< double >::type theta(thetaSEXP);
     __result = Rcpp::wrap(lt_dposstab_c(p, s, theta));
+    return __result;
+END_RCPP
+}
+// dpvf_c
+NumericVector dpvf_c(NumericVector x, NumericVector alpha);
+RcppExport SEXP frailtyr_dpvf_c(SEXP xSEXP, SEXP alphaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
+    __result = Rcpp::wrap(dpvf_c(x, alpha));
     return __result;
 END_RCPP
 }
