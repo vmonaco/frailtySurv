@@ -590,6 +590,110 @@ Maximize likelihood vs score equations
 \end_layout
 
 \begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+L=\prod_{i=1}^{n}\prod_{j=1}^{m_{i}}\left\{ \lambda_{0}\left(T_{ij}\right)\exp\left(\beta^{T}Z_{ij}\right)\right\} ^{\delta_{ij}}\prod_{i=1}^{n}\int\omega^{N_{i.}\left(\tau\right)+1}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega\label{eq:likelihood}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+l=\sum_{i=1}^{n}\sum_{j=1}^{m_{i}}\delta_{ij}\log\left\{ \lambda_{0}\left(T_{ij}\right)\exp\left(\beta^{T}Z_{ij}\right)\right\} +\sum_{i=1}^{n}\log\left[\int\omega^{N_{i.}\left(\tau\right)+1}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega\right]\label{eq:loglikelihood}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+U_{r}=\frac{1}{n}\sum_{i=1}^{n}\sum_{j=1}^{m_{i}}\delta_{ij}Z_{ijr}-\frac{1}{n}\sum_{i=1}^{n}\frac{\left\{ \sum_{j=1}^{m_{i}}H_{ij}\left(T_{ij}\right)Z_{ijr}\right\} \int\omega^{N_{i.}\left(\tau\right)+1}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega}{\int\omega^{N_{i.}\left(\tau\right)}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+or
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+U_{r}=\frac{1}{n}\sum_{i=1}^{n}\sum_{j=1}^{m_{i}}\delta_{ij}Z_{ijr}-\frac{1}{n}\sum_{i=1}^{n}\left\{ \sum_{j=1}^{m_{i}}H_{ij}\left(T_{ij}\right)Z_{ijr}\right\} \psi_{i}\left(\gamma,\Lambda,\tau\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+U_{p+1}=\frac{1}{n}\sum_{i=1}^{n}\frac{\int\omega^{N_{i.}\left(\tau\right)}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f'\left(\omega\right)d\omega}{\int\omega^{N_{i.}\left(\tau\right)}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\psi_{i}\left(\gamma,\Lambda,t\right)=\phi_{2i}\left(\gamma,\Lambda,t\right)/\phi_{1i}\left(\gamma,\Lambda,t\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\phi_{ki}\left(\gamma,\Lambda_{0},t\right)=\int\omega^{N_{i.}\left(\tau\right)+\left(k-1\right)}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega\quad1\le k\le4
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Likelihood and score functions are function of
+\begin_inset Formula 
+\[
+H_{i.}\left(\tau\right)=\sum_{i=1}^{m_{i}}\Lambda_{0}\left(T_{ij}\right)\exp\left(\beta^{T}Z_{ij}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+H_{i.}\left(\tau_{k-1}\right)=\sum_{i=1}^{m_{i}}\Lambda_{0}\left\{ \min\left(T_{ij},\tau_{k-1}\right)\right\} \exp\left(\beta^{T}Z_{ij}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 LT to solve integrals
 \end_layout
 

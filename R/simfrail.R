@@ -38,24 +38,38 @@ simfrail <- function(reps, genfrail.args, fitfrail.args,
 
 fitfrail_residuals <- function(reps, beta, theta, formula, N=c(50,60,70,80,90,100,500,1000)) {
   
-  results <- lapply(N, function(Ni) {
+  res <- lapply(N, function(Ni) {
     r <- simfrail(reps, list(beta=beta, censor.mu=130, frailty="gamma", N=Ni, K=2, 
                          theta=theta, covariates="uniform"), 
              list(formula=formula, frailty="gamma", verbose=FALSE))
     
     cbind(N=Ni, r, 
-               res.theta=theta - r[,"theta"],
-               res.beta=matrix(rep(beta, each=reps), nrow=reps) - 
-            unname(data.matrix(r[, grepl("beta", names(r))]))) })
+               res.theta=r[,"theta"] - theta,
+               res.beta=unname(data.matrix(r[, grepl("beta", names(r))])) - 
+                          matrix(rep(beta, each=reps), nrow=reps)
+          ) })
   
-  do.call("rbind", results)
+  do.call("rbind", res)
 }
 
-# r1.stacked = melt(r1[,c("N","res.theta","res.beta.1","res.beta.2")], id = c('N'))
-# r2.stacked <- melt(r2[,c("N","res.theta","res.beta")], id = c('N'))
-# boxplot(value~N+variable, data=r1.stacked, notch=TRUE, col=rep(1:3, each=8), names=rep(c(50,60,70,80,90,100,500,1000), 3), xlab="N", ylab="Residual", ylim=c(-3, 3))
-# abline(h=0)
-# legend(x=20,y=3, legend=c("theta=2","beta.Z1=log(2)", "beta.Z1=log(3)"), fill=1:3)
+plot_residuals <- function(res) {
+  # Select N and residuals columns, start with res
+  var_names <- sapply(names(res)[grepl("res", names(res))], 
+                      function(w) gsub("res\\.", "", w),
+                      USE.NAMES=FALSE)
+  n_vars <- length(var_names)
+  res.stacked <- melt(res[,grepl("N|res", names(res))], id = c("N"))
+  cases <- c(t(unique(res.stacked["N"])))
+  max_res <- max(abs(res.stacked["value"]))
+  bp_ylim <- max_res + 0.25*max_res
+  boxplot(value~N+variable, data=res.stacked, notch=TRUE, 
+          col=rep(1:n_vars, each=length(cases)), 
+          names=rep(cases, n_vars), 
+          xlab="N", ylab="Residual", 
+          ylim=c(-bp_ylim, bp_ylim))
+  abline(h=0)
+  legend(x=0,y=bp_ylim, legend=var_names, fill=1:n_vars, ncol=n_vars)
+}
 
 # A wrapper for coxph, gathers the coeffs, theta, censoring, runtime
 simfrailcoxph <- function(reps, genfrail.args, coxph.args, seed=2015) 
