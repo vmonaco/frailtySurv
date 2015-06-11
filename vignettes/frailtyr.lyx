@@ -891,57 +891,6 @@ Similar to the gamma distribution, the special case of
 \end_layout
 
 \begin_layout Subsection
-Positive stable
-\end_layout
-
-\begin_layout Standard
-The one-parameter positive stable distribution is given by 
-\begin_inset Formula $\omega\sim PS(\alpha)$
-\end_inset
-
-, where 
-\begin_inset Formula $\beta=1$
-\end_inset
-
-, 
-\begin_inset Formula $\mu=0$
-\end_inset
-
-, 
-\begin_inset Formula $0<\alpha<1$
-\end_inset
-
-, and 
-\begin_inset Formula $\delta=\alpha$
-\end_inset
-
- as defined in Hougaard 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "hougaard2000analysis"
-
-\end_inset
-
-.
- The density is given by
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{equation}
-PS\left(\omega;\alpha\right)=-\frac{1}{\pi\omega}\sum_{k=1}^{\infty}\frac{\Gamma\left(k\alpha+1\right)}{k!}\left(-\omega^{-\alpha}\right)^{k}\sin\left(\alpha k\pi\right)\label{eq:density-posstab}
-\end{equation}
-
-\end_inset
-
-When 
-\begin_inset Formula $\alpha=1$
-\end_inset
-
-, a degenerate distribution at 1 is obtained and there is no shared frailty.
-\end_layout
-
-\begin_layout Subsection
 Inverse Gaussian
 \end_layout
 
@@ -1003,6 +952,57 @@ where
 \end_inset
 
 
+\end_layout
+
+\begin_layout Subsection
+Positive stable
+\end_layout
+
+\begin_layout Standard
+The one-parameter positive stable distribution is given by 
+\begin_inset Formula $\omega\sim PS(\alpha)$
+\end_inset
+
+, where 
+\begin_inset Formula $\beta=1$
+\end_inset
+
+, 
+\begin_inset Formula $\mu=0$
+\end_inset
+
+, 
+\begin_inset Formula $0<\alpha<1$
+\end_inset
+
+, and 
+\begin_inset Formula $\delta=\alpha$
+\end_inset
+
+ as defined in Hougaard 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hougaard2000analysis"
+
+\end_inset
+
+.
+ The density is given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+PS\left(\omega;\alpha\right)=-\frac{1}{\pi\omega}\sum_{k=1}^{\infty}\frac{\Gamma\left(k\alpha+1\right)}{k!}\left(-\omega^{-\alpha}\right)^{k}\sin\left(\alpha k\pi\right)\label{eq:density-posstab}
+\end{equation}
+
+\end_inset
+
+When 
+\begin_inset Formula $\alpha=1$
+\end_inset
+
+, a degenerate distribution at 1 is obtained and there is no shared frailty.
 \end_layout
 
 \begin_layout Subsection
