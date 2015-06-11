@@ -204,16 +204,6 @@ rnorm_r <- function(n, theta) {
   rnorm(n, 0, sqrt(theta))
 }
 
-#' 
-#' Deriv of log norm density wrt. theta
-#' 
-dlnorm_dtheta_r <- function(x, theta) {
-  term1 <- log(x)^2 * exp(-(log(x)^2)/(2*theta^2)) / (x*sqrt(2*pi)*theta^4)
-  term2 <- exp(-(log(x)^2)/(2*theta^2)) / (x*sqrt(2*pi)*theta^2)
-  
-  term1 - term2
-}
-
 ################################################################################
 # Inverse Gaussian
 

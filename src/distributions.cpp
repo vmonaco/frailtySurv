@@ -77,12 +77,18 @@ double lt_dgamma_c(int p, double s, double theta) {
 // Log-normal (LN)
 double dlognormal(double x, double *p) {
   double theta = p[0];
-  return 0;
+  double factor1 = 1/(x*sqrt(theta*2*PI));
+  double factor2 = exp(-pow(log(x),2)/(2*theta));
+  return factor1*factor2;
 }
 
 double deriv_dlognormal(double x, double *p, int deriv_idx) {
   double theta = p[0];
-  return 0;
+  double term1_numer = pow(log(x),2) * exp(-pow(log(x),2)/(2*theta));
+  double term1_denom = 2 * sqrt(2*PI) * pow(theta, 5/2) * x;
+  double term2_numer = exp(-pow(log(x),2)/(2*theta));
+  double term2_denom = 2 * sqrt(2*PI) * pow(theta, 3/2) * x;
+  return term1_numer/term1_denom - term2_numer/term2_denom;
 }
 
 // [[Rcpp::export]]
@@ -98,12 +104,18 @@ NumericVector deriv_dlognormal_c(NumericVector x, NumericVector theta) {
 // Inverse Gaussian (IG)
 double dinvgauss(double x, double *p) {
   double theta = p[0];
-  return 0;
+  double numer = exp(-pow(x - 1, 2)/(2*theta*x));
+  double denom = sqrt(2*PI*theta*pow(x,3));
+  return numer/denom;
 }
 
 double deriv_dinvgauss(double x, double *p, int deriv_idx) {
   double theta = p[0];
-  return 0;
+  double term1_numer = pow(x - 1, 2) * exp(-pow(x - 1, 2)/(2*theta*x));
+  double term1_denom = 2 * sqrt(2*PI) * pow(theta, 2) * x * sqrt(theta * pow(x, 3));
+  double term2_numer = pow(x, 3) * exp(-pow(x - 1, 2)/(2*theta*x));
+  double term2_denom = 2 * sqrt(2*PI) * pow(theta * pow(x, 3), 3/2);
+  return term1_numer/term1_denom - term2_numer/term2_denom;
 }
 
 // [[Rcpp::export]]
@@ -123,15 +135,64 @@ double dposstab(double x, double *p) {
   return 0;
 }
 
+// LT coefficients for PS and PVF distributions
+double lt_dpvf_coef(int p, int j, double alpha) {
+  // Base cases
+  if ((p == 2) && (j == 1)) {
+    return(1 - alpha);
+  }
+  
+  if ((p == 2) && (j == 2)) {
+    return(1);
+  }
+  
+  if ((p == 3) && (j == 1)) {
+    return((1 - alpha)*(2 - alpha));
+  }
+  
+  if ((p == 3) && (j == 2)) {
+    return(3*(1 - alpha));
+  }
+  
+  if ((p == 3) && (j == 3)) {
+    return(1);
+  }
+  
+  if (j == 1) {
+    return(gamma(p - alpha)/gamma(1 - alpha));
+  }
+  
+  if (p == j) {
+    return(1);
+  }
+  
+  // Not tail recursive. TODO: iterative version of this function
+  return lt_dpvf_coef(p - 1, j - 1, alpha) + 
+    lt_dpvf_coef(p - 1, j, alpha) * ((p - 1) - j*alpha);
+}
+
+// Laplace transform of positive stable
 double lt_dposstab(int p, double s, double* params) {
   double alpha = params[0];
-  return 0;
+  if (p < 1) {
+    return exp(-alpha*pow(s, alpha)/alpha);
+  }
+  
+  double factor1 = lt_dposstab(0, s, params);
+  
+  double factor2 = 0;
+  for (int j = 0; j < p; ++j) {
+    factor2 += lt_dpvf_coef(p, j, alpha) * pow(alpha, j) * pow(s, (j*alpha - p));
+  }
+  
+  return pow(-1, p)*factor1*factor2;
 }
 
 // [[Rcpp::export]]
 double lt_dposstab_c(int p, double s, double theta) {
   return lt_dposstab(p, s, &theta);
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 // Power-variance function (PVF)
 double dpvf(double x, double *p) {
@@ -141,7 +202,18 @@ double dpvf(double x, double *p) {
 
 double lt_dpvf(int p, double s, double* params) {
   double alpha = params[0];
-  return 0;
+  if (p < 1) {
+    return exp(-(pow(1 + s, alpha) - 1)/alpha);
+  }
+  
+  double factor1 = lt_dpvf(0, s, params);
+  
+  double factor2 = 0;
+  for (int j = 0; j < p; ++j) {
+    factor2 += lt_dpvf_coef(p, j, alpha) * pow(1 + s, j*alpha - p);
+  }
+  
+  return pow(-1, p)*factor1*factor2;
 }
 
 // [[Rcpp::export]]
