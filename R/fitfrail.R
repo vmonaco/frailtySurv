@@ -33,7 +33,7 @@ fitfrail <- function(formula, data, control,
   if (missing(control)) control <- fitfrail.control(...)
   
   if (!match(frailty,c("gamma","lognormal","invgauss", "posstab", "pvf"), nomatch=0))
-    stop("frailty distribution", frailty, "not supported yet.")
+    stop("frailty distribution ", frailty, " not supported yet.")
   
   Y <- model.extract(mf, "response")
   if (!inherits(Y, "Surv")) stop("Response must be a survival object")
@@ -77,7 +77,7 @@ fitfrail <- function(formula, data, control,
                           method="efron", row.names(mf))$coefficients
   
   # TODO: theta should initialize to a zero vector, dependening the num density args
-  theta_init <- c(0.1)
+  theta_init <- c(0.5)
   
   fit <- fitfrail.fit(X, Y, cluster, 
                            beta_init, theta_init, 

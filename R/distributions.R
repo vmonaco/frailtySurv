@@ -6,7 +6,7 @@
 #'
 #' Example of calculating phi_ with numerical integrals
 #' 
-phi_numerical <- function(k, H_dot, N_dot, density_params, density_fn) {
+phi_numerical <- function(k, N_dot, H_dot, density_params, density_fn) {
   f <- function(w) {
     w^(N_dot + k - 1) * exp(-w*H_dot) * density_fn(w, density_params)
   }
@@ -16,7 +16,7 @@ phi_numerical <- function(k, H_dot, N_dot, density_params, density_fn) {
 #' 
 #' Example of calculating phi_ with the LT
 #' 
-phi_laplace <- function(k, H_dot, N_dot, density_params, density_LT) {
+phi_laplace <- function(k, N_dot, H_dot, density_params, density_LT) {
   density_LT(N_dot + k - 1, H_dot, density_params)*(-1)^(N_dot + k - 1)
 }
 
@@ -204,10 +204,18 @@ lt_dposstab_moment_r <- function(alpha, p) {
 
 #'
 #' See comments from dposstab_r, same convergence issue applies here
+#' 
 dpvf_r <- function(x, alpha, K=100) {
   Vectorize(function(x) {
     dposstab_r(x*alpha^(1/alpha), alpha, K)*alpha^(1/alpha)*exp(-x)*exp(1/alpha)
   })(x)
+}
+
+#' 
+#' 
+#' 
+rpvf_r <- function(n, alpha) {
+  
 }
 
 #'

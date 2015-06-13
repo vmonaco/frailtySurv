@@ -4,7 +4,7 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_sf_psi.h>
 #include <gsl/gsl_sf_gamma.h>
-
+#include <gsl/gsl_deriv.h>
 #include "distributions.h"
 
 using namespace Rcpp;
@@ -40,6 +40,27 @@ NumericVector vectorized_deriv_density(NumericVector *x, NumericVector *p,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Numerical derivatives of LT functions
+double lt_deriv(double w, void* data) {
+  struct lt_params *params = (struct lt_params *)data;
+  params->theta[params->deriv_idx] = w;
+  return params->lt(params->p, params->s, params->theta);
+}
+
+double derivative(double (*f)(double,void*), void* data, double x) {
+  gsl_function F;
+  double result, abserr;
+  
+  F.function = f;
+  F.params = data;
+  
+  gsl_deriv_central(&F, x, 1e-8, &result, &abserr);
+  
+  return result;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Gamma (Γ)
 double dgamma(double x, double *p) {
   double theta = p[0];
@@ -62,6 +83,31 @@ double lt_dgamma(int p, double s, double* params) {
     tgamma((1/theta) + p)/tgamma((1/theta));
 }
 
+double deriv_lt_dgamma(int p, double s, double* params, int deriv_idx) {
+  // deriv_idx is ignored since there's only one parameter, theta
+  double theta = params[0];
+  // TODO: maybe clean this up a bit?
+  double tmp1 = pow(1/theta, 1/theta);
+  double tmp2 = pow(-1, p);
+  double tmp3 = tgamma(p + 1/theta);
+  double tmp4 = (1/theta + s);
+  double tmp5 = (-1/theta - p);
+  
+  double term1 = tmp1 * tmp2 * tmp3 * pow(tmp4, tmp5) * 
+                  (log(tmp4)/pow(theta, 2) - tmp5/(pow(theta, 2) * tmp4) );
+    
+  double term2 = tmp1 * tmp2 * (-1/pow(theta, 2) - 
+                  log(1/theta)/pow(theta, 2)) * tmp3 * pow(tmp4, tmp5);
+    
+  double term3 = pow(1/theta, 1/theta + 2) * tmp2 * 
+                  tmp3 * gsl_sf_psi(p + 1/theta) * pow(tmp4, tmp5);
+    
+  double term4 = pow(1/theta, 1/theta + 2) * tmp2 * 
+                  gsl_sf_psi(1/theta) * tmp3 * pow(tmp4, tmp5);
+    
+  return (term1 + term2 - term3 + term4)/tgamma(1/theta);
+}
+
 // [[Rcpp::export]]
 NumericVector dgamma_c(NumericVector x, NumericVector theta) {
   return vectorized_density(&x, &theta, dgamma);
@@ -76,6 +122,12 @@ NumericVector deriv_dgamma_c(NumericVector x, NumericVector theta) {
 double lt_dgamma_c(int p, double s, double theta) {
   return lt_dgamma(p, s, &theta);
 }
+
+// [[Rcpp::export]]
+double deriv_lt_dgamma_c(int p, double s, double theta) {
+  return deriv_lt_dgamma(p, s, &theta, 0);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Log-normal (LN)
 double dlognormal(double x, double *params) {
@@ -103,6 +155,7 @@ NumericVector dlognormal_c(NumericVector x, NumericVector theta) {
 NumericVector deriv_dlognormal_c(NumericVector x, NumericVector theta) {
   return vectorized_deriv_density(&x, &theta, deriv_dlognormal, 0);
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 // Inverse Gaussian (IG)
 double dinvgauss(double x, double *p) {
@@ -165,7 +218,12 @@ double lt_dpvf_coef(int p, int j, double alpha) {
 // Laplace transform of positive stable
 double lt_dposstab(int p, double s, double* params) {
   double alpha = params[0];
-  if (p < 1) {
+  
+//   if (s <= 0) {
+//     return pow(-1, p);
+//   }
+  
+  if (p == 0) {
     return exp(-alpha*pow(s, alpha)/alpha);
   }
   
@@ -179,6 +237,19 @@ double lt_dposstab(int p, double s, double* params) {
   return pow(-1, p)*factor1*factor2;
 }
 
+// Derivative wrt. alpha of the Laplace transform of positive stable
+double deriv_lt_dposstab(int p, double s, double* params, int deriv_idx) {
+  // deriv_idx ignored since only one parameter
+  double alpha = params[0];
+  
+  if (p == 0) {
+    return -exp(-pow(s, alpha)) * pow(s, alpha) * log(s);
+  }
+  
+  lt_params lt_p = (struct lt_params){p, s, params, lt_dposstab, deriv_idx};
+  return derivative(&lt_deriv, &lt_p, params[deriv_idx]);
+}
+
 // [[Rcpp::export]]
 NumericVector dposstab_c(NumericVector x, NumericVector alpha) {
   return vectorized_density(&x, &alpha, dposstab);
@@ -187,6 +258,11 @@ NumericVector dposstab_c(NumericVector x, NumericVector alpha) {
 // [[Rcpp::export]]
 double lt_dposstab_c(int p, double s, double alpha) {
   return lt_dposstab(p, s, &alpha);
+}
+
+// [[Rcpp::export]]
+double deriv_lt_dposstab_c(int p, double s, double alpha) {
+  return deriv_lt_dposstab(p, s, &alpha, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -200,7 +276,8 @@ double dpvf(double x, double *params) {
 
 double lt_dpvf(int p, double s, double* params) {
   double alpha = params[0];
-  if (p < 1) {
+  
+  if (p == 0) {
     return exp(-(pow(1 + s, alpha) - 1)/alpha);
   }
   
@@ -214,6 +291,21 @@ double lt_dpvf(int p, double s, double* params) {
   return pow(-1, p)*factor1*factor2;
 }
 
+double deriv_lt_dpvf(int p, double s, double* params, int deriv_idx) {
+  // deriv_idx ignored since only one parameter
+  double alpha = params[0];
+  
+  if (p == 0) {
+    double factor1 = exp((1 - pow(s + 1, alpha))/alpha);
+    double factor2_term1 = -(1 - pow(s + 1, alpha))/pow(alpha, 2);
+    double factor2_term2 = -(pow(s + 1, alpha) * log(s + 1))/alpha;
+    return factor1*(factor2_term1 + factor2_term2);
+  }
+  
+  lt_params lt_p = (struct lt_params){p, s, params, lt_dpvf, deriv_idx};
+  return derivative(&lt_deriv, &lt_p, params[deriv_idx]);
+}
+
 // [[Rcpp::export]]
 NumericVector dpvf_c(NumericVector x, NumericVector alpha) {
   return vectorized_density(&x, &alpha, dpvf);
@@ -222,6 +314,11 @@ NumericVector dpvf_c(NumericVector x, NumericVector alpha) {
 // [[Rcpp::export]]
 double lt_dpvf_c(int p, double s, double alpha) {
   return lt_dpvf(p, s, &alpha);
+}
+
+// [[Rcpp::export]]
+double deriv_lt_dpvf_c(int p, double s, double alpha) {
+  return deriv_lt_dpvf(p, s, &alpha, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

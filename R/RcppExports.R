@@ -13,6 +13,10 @@ lt_dgamma_c <- function(p, s, theta) {
     .Call('frailtyr_lt_dgamma_c', PACKAGE = 'frailtyr', p, s, theta)
 }
 
+deriv_lt_dgamma_c <- function(p, s, theta) {
+    .Call('frailtyr_deriv_lt_dgamma_c', PACKAGE = 'frailtyr', p, s, theta)
+}
+
 dlognormal_c <- function(x, theta) {
     .Call('frailtyr_dlognormal_c', PACKAGE = 'frailtyr', x, theta)
 }
@@ -41,12 +45,28 @@ lt_dposstab_c <- function(p, s, alpha) {
     .Call('frailtyr_lt_dposstab_c', PACKAGE = 'frailtyr', p, s, alpha)
 }
 
+deriv_lt_dposstab_c <- function(p, s, alpha) {
+    .Call('frailtyr_deriv_lt_dposstab_c', PACKAGE = 'frailtyr', p, s, alpha)
+}
+
 dpvf_c <- function(x, alpha) {
     .Call('frailtyr_dpvf_c', PACKAGE = 'frailtyr', x, alpha)
 }
 
 lt_dpvf_c <- function(p, s, alpha) {
     .Call('frailtyr_lt_dpvf_c', PACKAGE = 'frailtyr', p, s, alpha)
+}
+
+deriv_lt_dpvf_c <- function(p, s, alpha) {
+    .Call('frailtyr_deriv_lt_dpvf_c', PACKAGE = 'frailtyr', p, s, alpha)
+}
+
+phi_c <- function(k, N_dot, H_dot, theta, frailty) {
+    .Call('frailtyr_phi_c', PACKAGE = 'frailtyr', k, N_dot, H_dot, theta, frailty)
+}
+
+phi_prime_c <- function(k, N_dot, H_dot, theta, frailty, deriv_idx) {
+    .Call('frailtyr_phi_prime_c', PACKAGE = 'frailtyr', k, N_dot, H_dot, theta, frailty, deriv_idx)
 }
 
 baseline_hazard_estimator <- function(X_, R_, d_, Y_, N_dot, beta, theta, frailty) {

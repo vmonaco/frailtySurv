@@ -5,6 +5,7 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_sf_psi.h>
 #include "distributions.h"
+
 using namespace Rcpp;
 
 // Args to the adaptive quadrature integration
@@ -55,7 +56,6 @@ double phi(int k, int N_dot, double H_dot, double *theta, String frailty) {
   // Laplace transform integrals
   if (frailty == "gamma") {
     return lt_dgamma(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
-    // phi_p = (struct phi_params){k, N_dot, H_dot, theta, dgamma};
   } else if (frailty == "posstab") {
     return lt_dposstab(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
   } else if (frailty == "pvf") {
@@ -76,18 +76,21 @@ double phi(int k, int N_dot, double H_dot, double *theta, String frailty) {
 
 // phi using the derivative of the density wrt. parameter p[derive_idx]
 double phi_prime(int k, int N_dot, double H_dot, double *theta, String frailty, int deriv_idx) {
-  // TODO: Laplace transform integrals?
-  if (frailty == "posstab") {
-    throw std::range_error("Unsupported frailty distribution");
+  // Laplace transform integrals
+  if (frailty == "gamma") {
+    return deriv_lt_dgamma(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
+  } else if (frailty == "posstab") {
+    return deriv_lt_dposstab(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
   } else if (frailty == "pvf") {
-    throw std::range_error("Unsupported frailty distribution");
+    return deriv_lt_dpvf(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
   }
   
   // Numerical integration
   phi_prime_params phi_p;
-  if (frailty == "gamma") {
-    phi_p = (struct phi_prime_params){k, N_dot, H_dot, theta, deriv_dgamma, deriv_idx};
-  } else if (frailty == "lognormal") {
+//   if (frailty == "gamma") {
+//     phi_p = (struct phi_prime_params){k, N_dot, H_dot, theta, deriv_dgamma, deriv_idx};
+//   } else 
+  if (frailty == "lognormal") {
     phi_p = (struct phi_prime_params){k, N_dot, H_dot, theta, deriv_dlognormal, deriv_idx};
   } else if (frailty == "invgauss") {
     phi_p = (struct phi_prime_params){k, N_dot, H_dot, theta, deriv_dinvgauss, deriv_idx};
@@ -103,7 +106,21 @@ double psi(int N_dot, double H_dot, double* theta, String frailty) {
 //   if (frailty == "gamma") {
 //     return (N_dot + 1/theta[0])/(H_dot + 1/theta[0]);
 //   }
-  return phi(2, N_dot, H_dot, theta, frailty)/phi(1, N_dot, H_dot, theta, frailty);
+  // return phi(2, N_dot, H_dot, theta, frailty)/phi(1, N_dot, H_dot, theta, frailty);
+  double tmp1 = phi(1, N_dot, H_dot, theta, frailty);
+  double tmp2 = phi(2, N_dot, H_dot, theta, frailty);
+  // Rcout << tmp1 << " " << tmp2 << " " << N_dot << " " << H_dot << " " << theta << std::endl;
+  return tmp2/tmp1;
+}
+
+// [[Rcpp::export]]
+double phi_c(int k, int N_dot, double H_dot, double theta, String frailty) {
+  return phi(k, N_dot, H_dot, &theta, frailty);
+}
+
+// [[Rcpp::export]]
+double phi_prime_c(int k, int N_dot, double H_dot, double theta, String frailty, int deriv_idx) {
+  return phi_prime(k, N_dot, H_dot, &theta, frailty, deriv_idx);
 }
 
 // [[Rcpp::export]]
@@ -154,10 +171,17 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_,
         tmp += Y_i(j, k) * exp(sum(beta * X_i(j, _)));
       }
       
+//       Rcout << N_dot_i(k - 1) << std::endl;
+//       Rcout << H_dot_i(k - 1) << std::endl;
+//       Rcout << psi(N_dot_i(k - 1), 
+//                    H_dot_i(k - 1), 
+//                    theta.begin(), 
+//                    frailty) << std::endl;
       denom += tmp * psi(N_dot_i(k - 1), 
                          H_dot_i(k - 1), 
                          theta.begin(), 
                          frailty);
+      
     }
     
     delta_lambda_hat[k] = d_(k)/denom;
@@ -259,6 +283,7 @@ double U_p(Rcpp::List X_,
                              theta.begin(), 
                              frailty, 
                              theta_idx - 1); // theta_idx is an R index
+    
     out += numer/denom;
   }
   

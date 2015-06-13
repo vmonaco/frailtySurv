@@ -2,6 +2,7 @@
 
 typedef double (*density_fn)(double, double*);
 typedef double (*deriv_density_fn)(double, double*, int);
+typedef double (*lt_fn)(int, double, double*);
 
 struct phi_params {
   int k;
@@ -20,12 +21,24 @@ struct phi_prime_params {
   int deriv_idx;
 };
 
+struct lt_params {
+  int p;
+  double s;
+  double *theta;
+  lt_fn lt;
+  int deriv_idx;
+};
+
 double dgamma(double, double*);
 double deriv_dgamma(double, double*, int);
 
 double lt_dgamma(int, double, double*);
 double lt_dposstab(int, double, double*);
 double lt_dpvf(int, double, double*);
+
+double deriv_lt_dgamma(int, double, double*, int);
+double deriv_lt_dposstab(int, double, double*, int);
+double deriv_lt_dpvf(int, double, double*, int);
 
 double dlognormal(double, double*);
 double deriv_dlognormal(double, double*, int);
