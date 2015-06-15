@@ -219,10 +219,6 @@ double lt_dpvf_coef(int p, int j, double alpha) {
 double lt_dposstab(int p, double s, double* params) {
   double alpha = params[0];
   
-//   if (s <= 0) {
-//     return pow(-1, p);
-//   }
-  
   if (p == 0) {
     return exp(-alpha*pow(s, alpha)/alpha);
   }

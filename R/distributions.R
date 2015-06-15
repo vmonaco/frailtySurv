@@ -20,6 +20,11 @@ phi_laplace <- function(k, N_dot, H_dot, density_params, density_LT) {
   density_LT(N_dot + k - 1, H_dot, density_params)*(-1)^(N_dot + k - 1)
 }
 
+num_vs_lt <- function(k, N_dot, H_dot, density_params, density_fn, density_LT) {
+  list(phi_numerical(k, N_dot, H_dot, density_params, density_fn),
+      phi_laplace(k, N_dot, H_dot, density_params, density_LT))
+}
+
 
 ################################################################################
 # Gamma distribution
@@ -29,6 +34,9 @@ phi_laplace <- function(k, N_dot, H_dot, density_params, density_LT) {
 #'
 rgamma_r <- function(n, theta) {
   rgamma(n, 1/theta, 1/theta)
+  
+  # Or using rlaptrans:
+  # rlaptrans(n, lt_dgamma_r, p=0, theta=theta)
 }
 
 #' 
@@ -71,20 +79,20 @@ lt_dgamma_r <- function(p, s, theta) {
 #' pth derivative wrt. s
 #' 
 deriv_lt_dgamma_r <- function(p, s, theta) {
-  tiv2iv <- (1/theta)^(1/theta)
-  n12p <- (-1)^p
-  gptiv <- gamma(p + 1/theta)
-  ootps <- (1/theta + s)
-  n1otmp <- (-1/theta - p)
+  tmp1 <- (1/theta)^(1/theta)
+  tmp2 <- (-1)^p
+  tmp3 <- gamma(p + 1/theta)
+  tmp4 <- (1/theta + s)
+  tmp5 <- (-1/theta - p)
   
-  term1 <- tiv2iv * n12p * gptiv * ootps^n1otmp * 
-    ( log(ootps)/theta^2 - n1otmp/(theta^2 * ootps) )
+  term1 <- tmp1 * tmp2 * tmp3 * tmp4^tmp5 * 
+    ( log(tmp4)/theta^2 - tmp5/(theta^2 * tmp4) )
   
-  term2 <- tiv2iv * n12p * (-1/theta^2 - log(1/theta)/theta^2) * gptiv * ootps^n1otmp
+  term2 <- tmp1 * tmp2 * (-1/theta^2 - log(1/theta)/theta^2) * tmp3 * tmp4^tmp5
   
-  term3 <- (1/theta)^(1/theta + 2) * n12p * gptiv * digamma(p + 1/theta) * ootps^n1otmp
+  term3 <- (1/theta)^(1/theta + 2) * tmp2 * tmp3 * digamma(p + 1/theta) * tmp4^tmp5
   
-  term4 <- (1/theta)^(1/theta + 2) * n12p * digamma(1/theta) * gptiv * ootps^n1otmp
+  term4 <- (1/theta)^(1/theta + 2) * tmp2 * digamma(1/theta) * tmp3 * tmp4^tmp5
   
   (term1 + term2 - term3 + term4)/gamma(1/theta)
 }
@@ -113,17 +121,39 @@ lt_dgamma_moment_r <- function(p, theta) {
 #' eg. with alpha = 0.5, converges at x = 0.05, but not at 0.01
 #' 
 dposstab_r <- function(x, alpha, K=100) {
-  #   smallx <- x[x<thresh]
-  #   largex <- x[x>=thresh]
-  #   dposstab_approx(x, alpha, alpha, 0)
+  
   f <- function(x) {
-    k <- 1:K
-    -1 / (pi * x) * sum(
-      gamma(k * alpha + 1) / factorial(k) * 
-        (-x ^ (-alpha)) ^ k * sin(alpha * k * pi))
+#     if (x < exp(-5*(1-alpha))) {
+#       1e-3 # TODO: temporary
+#     } else {
+      k <- 1:K
+      -1 / (pi * x) * sum(
+        gamma(k * alpha + 1) / factorial(k) * 
+          (-x ^ (-alpha)) ^ k * sin(alpha * k * pi))
+    # }
   }
   
   Vectorize(f)(x)
+}
+
+# Where is dposstab divergent?
+dposstab_divergent <- function(alpha, K=100, resolution=1e-3, eps=1e-5) {
+  Vectorize(function(alpha) {
+    k <- 1:K
+    f <- Vectorize(function(x) {
+        gamma(k * alpha + 1) / factorial(k) * 
+          (-x ^ (-alpha)) ^ k * sin(alpha * k * pi)
+    })
+    
+    x <- seq(0, 1, by=resolution)
+    mindiff <- apply(f(x), 2, function(x) min(abs(diff((x)))))
+    
+    if (any(mindiff[!is.na(mindiff)] > eps)) {
+      return(x[max(which(mindiff > eps)) + 1])
+    } else {
+      return(x[2])
+    }
+  })(alpha)
 }
 
 #' Random generation from a positive stable distribution
@@ -138,15 +168,16 @@ dposstab_r <- function(x, alpha, K=100) {
 #' 
 #'@export
 rposstab_r <- function(n, alpha) {
-  w <- rexp(n)
-  theta <- runif(n)*pi
-  
-  num1 <- sin((1 - alpha) * theta )
-  num2 <- sin(alpha * theta)^( alpha/(1 - alpha) )
-  den <- sin(theta)^( 1/(1 - alpha) ) 
-  num3 <- num1 * num2/den
-  
-  (num3/w)^( (1 - alpha)/alpha )
+  rlaptrans(n, lt_dposstab_r, p=0, alpha=alpha)
+#   w <- rexp(n)
+#   theta <- runif(n)*pi
+#   
+#   num1 <- sin((1 - alpha) * theta )
+#   num2 <- sin(alpha * theta)^( alpha/(1 - alpha) )
+#   den <- sin(theta)^( 1/(1 - alpha) ) 
+#   num3 <- num1 * num2/den
+#   
+#   (num3/w)^( (1 - alpha)/alpha )
 }
 
 #'
@@ -211,11 +242,18 @@ dpvf_r <- function(x, alpha, K=100) {
   })(x)
 }
 
+#'
+#' 
+#' 
+deriv_dpvf_r_numeric <- function(x, alpha) {
+  Vectorize(function(x) grad(function(alpha) dpvf_r(x, alpha), alpha))(x)
+}
+
 #' 
 #' 
 #' 
 rpvf_r <- function(n, alpha) {
-  
+  rlaptrans(n, lt_dpvf_r, p=0, alpha=alpha)
 }
 
 #'
@@ -243,6 +281,7 @@ lt_deriv_dpvf_coef_r <- function(p, j, alpha) {
     factor2 <- sum(1/((1:(p-1)) - alpha))
     return(factor1*factor2)
   }
+  
   if (p == j) return(0)
   
   return(lt_deriv_dpvf_coef_r(p - 1, j - 1, alpha) + 
@@ -285,10 +324,10 @@ deriv_lt_dpvf_r <- function(p, s, alpha) {
     return(factor1*(factor2_term1 + factor2_term2))
   }
   
-  deriv_lt_dpvf_r_numeric(p, s, alpha)
-#   (-1)^p * deriv_lt_dpvf_r(0, s, alpha) * sum(vapply(1:p, function(j)
-#     lt_deriv_dpvf_coef_r(p, j, alpha) * (1 + s)^(j*alpha - p), 0
-#   ))
+  # deriv_lt_dpvf_r_numeric(p, s, alpha)
+   (-1)^p * deriv_lt_dpvf_r(0, s, alpha) * sum(vapply(1:p, function(j)
+     lt_deriv_dpvf_coef_r(p, j, alpha) * (1 + s)^(j*alpha - p), 0
+   ))
 }
 
 
@@ -323,8 +362,146 @@ deriv_dlognormal_r_numeric <- function(x, theta) {
 }
 
 ################################################################################
-# Inverse Gaussian
-
-# TODO:
+# TODO: Inverse Gaussian
 
 
+################################################################################
+
+#' 
+#' rlaptrans taken from Martin Ridout: 
+#' Ridout, M.S. (2009) Generating random numbers from a distribution specified 
+#' by its Laplace transform. Statistics and Computing, 19, 439-450.
+#' http://www.kent.ac.uk/smsas/personal/msr/rlaptrans.html
+#' 
+#======================================================================================
+rlaptrans <- function(n, ltpdf, ..., tol=1e-7, x0=1, xinc=2, m=11, L=1, A=19, nburn=38)
+#======================================================================================
+{
+  
+  #---------------------------------------------------------
+  # Function for generating a random sample of size n from a 
+  # distribution, given the Laplace transform of its p.d.f.
+  #---------------------------------------------------------
+  
+  maxiter = 500
+  
+  # -----------------------------------------------------
+  # Derived quantities that need only be calculated once,
+  # including the binomial coefficients
+  # -----------------------------------------------------
+  nterms = nburn + m*L
+  seqbtL = seq(nburn,nterms,L)
+  y = pi * (1i) * seq(1:nterms) / L
+  expy = exp(y)
+  A2L = 0.5 * A / L
+  expxt = exp(A2L) / L
+  coef = choose(m,c(0:m)) / 2^m
+  
+  
+  # --------------------------------------------------
+  # Generate sorted uniform random numbers. xrand will
+  # store the corresponding x values
+  # --------------------------------------------------
+  u = sort(runif(n), method="qu")
+  xrand = u
+  
+  #------------------------------------------------------------
+  # Begin by finding an x-value that can act as an upper bound
+  # throughout. This will be stored in upplim. Its value is
+  # based on the maximum value in u. We also use the first
+  # value calculated (along with its pdf and cdf) as a starting
+  # value for finding the solution to F(x) = u_min. (This is
+  # used only once, so doesn't need to be a good starting value
+  #------------------------------------------------------------
+  t = x0/xinc
+  cdf = 0   
+  kount0 = 0
+  set1st = FALSE
+  while (kount0 < maxiter & cdf < u[n]) {
+    t = xinc * t
+    kount0 = kount0 + 1
+    x = A2L / t
+    z = x + y/t
+    ltx = ltpdf(x, ...)
+    ltzexpy = ltpdf(z, ...) * expy
+    par.sum = 0.5*Re(ltx) + cumsum( Re(ltzexpy) )
+    par.sum2 = 0.5*Re(ltx/x) + cumsum( Re(ltzexpy/z) )
+    pdf = expxt * sum(coef * par.sum[seqbtL]) / t
+    cdf = expxt * sum(coef * par.sum2[seqbtL]) / t
+    if (!set1st & cdf > u[1]) {
+      cdf1 = cdf
+      pdf1 = pdf
+      t1 = t
+      set1st = TRUE
+    }
+  }
+  if (kount0 >= maxiter) {
+    stop('Cannot locate upper quantile')
+  }
+  upplim = t
+  
+  #--------------------------------
+  # Now use modified Newton-Raphson
+  #--------------------------------
+  
+  lower = 0
+  t = t1
+  cdf = cdf1
+  pdf = pdf1
+  kount = numeric(n)
+  
+  maxiter = 1000
+  
+  for (j in 1:n) {
+    
+    #-------------------------------
+    # Initial bracketing of solution
+    #-------------------------------
+    upper = upplim
+    
+    kount[j] = 0
+    while (kount[j] < maxiter & abs(u[j]-cdf) > tol) {
+      kount[j] = kount[j] + 1
+      
+      #-----------------------------------------------
+      # Update t. Try Newton-Raphson approach. If this 
+      # goes outside the bounds, use midpoint instead
+      #-----------------------------------------------
+      t = t - (cdf-u[j])/pdf 
+      if (t < lower | t > upper) {
+        t = 0.5 * (lower + upper)
+      }
+      
+      #----------------------------------------------------
+      # Calculate the cdf and pdf at the updated value of t
+      #----------------------------------------------------
+      x = A2L / t
+      z = x + y/t
+      ltx = ltpdf(x, ...)
+      ltzexpy = ltpdf(z, ...) * expy
+      par.sum = 0.5*Re(ltx) + cumsum( Re(ltzexpy) )
+      par.sum2 = 0.5*Re(ltx/x) + cumsum( Re(ltzexpy/z) )
+      pdf = expxt * sum(coef * par.sum[seqbtL]) / t
+      cdf = expxt * sum(coef * par.sum2[seqbtL]) / t
+      
+      #------------------
+      # Update the bounds 
+      #------------------
+      if (cdf <= u[j]) {
+        lower = t}
+      else {
+        upper = t}
+    }
+    if (kount[j] >= maxiter) {
+      warning('Desired accuracy not achieved for F(x)=u')
+    }
+    xrand[j] = t
+    lower = t
+  }
+  
+  if (n > 1) {
+    rsample <- sample(xrand) }
+  else {
+    rsample <- xrand} 
+  rsample
+}

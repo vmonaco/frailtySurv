@@ -1,6 +1,6 @@
 # A wrapper for coxph, gathers the coeffs, theta, censoring, runtime
 simfrail <- function(reps, genfrail.args, fitfrail.args, 
-                     mc.cores=detectCores()-1, seed=2015) { 
+                     mc.cores=detectCores(), seed=2015) { 
   
   # To make the result reproducable when parallelized, seed each run from 
   # a list of random seeds sampled from a meta seed
@@ -36,12 +36,12 @@ simfrail <- function(reps, genfrail.args, fitfrail.args,
   data.frame(results)
 }
 
-fitfrail_residuals <- function(reps, beta, theta, formula, N=c(50,60,70,80,90,100,500,1000)) {
+fitfrail_residuals <- function(reps, beta, theta, formula, frailty, N=c(50,100,500,1000)) {
   
   res <- lapply(N, function(Ni) {
-    r <- simfrail(reps, list(beta=beta, censor.mu=130, frailty="gamma", N=Ni, K=2, 
+    r <- simfrail(reps, list(beta=beta, censor.mu=130, frailty=frailty, N=Ni, K=2, 
                          theta=theta, covariates="uniform"), 
-             list(formula=formula, frailty="gamma", verbose=FALSE))
+             list(formula=formula, frailty=frailty, verbose=FALSE))
     
     cbind(N=Ni, r, 
                res.theta=r[,"theta"] - theta,
@@ -52,7 +52,7 @@ fitfrail_residuals <- function(reps, beta, theta, formula, N=c(50,60,70,80,90,10
   do.call("rbind", res)
 }
 
-plot_residuals <- function(res) {
+plot_residuals <- function(res, title) {
   # Select N and residuals columns, start with res
   var_names <- sapply(names(res)[grepl("res", names(res))], 
                       function(w) gsub("res\\.", "", w),
@@ -60,13 +60,14 @@ plot_residuals <- function(res) {
   n_vars <- length(var_names)
   res.stacked <- melt(res[,grepl("N|res", names(res))], id = c("N"))
   cases <- c(t(unique(res.stacked["N"])))
-  max_res <- max(abs(res.stacked["value"]))
-  bp_ylim <- max_res + 0.25*max_res
+  mean_res <- mean(c(t(abs(res.stacked["value"]))))
+  bp_ylim <- 3 #0.25*mean_res
   boxplot(value~N+variable, data=res.stacked, notch=TRUE, 
           col=rep(1:n_vars, each=length(cases)), 
           names=rep(cases, n_vars), 
           xlab="N", ylab="Residual", 
-          ylim=c(-bp_ylim, bp_ylim))
+          ylim=c(-bp_ylim, bp_ylim),
+          main=title)
   abline(h=0)
   legend(x=0,y=bp_ylim, legend=var_names, fill=1:n_vars, ncol=n_vars)
 }

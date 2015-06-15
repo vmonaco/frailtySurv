@@ -13,7 +13,7 @@ Description: TODO
 License: LGPL-2
 URL: https://github.com/vmonaco/frailtyr/
 BugReports: https://github.com/vmonaco/frailtyr/issues
-Suggests: knitr, testthat, plot3D, parallel
+Suggests: knitr, testthat, plot3D, parallel, reshape2
 Depends: R (>= 3.0.0), survival, nleqslv, RcppGSL(>= 0.2.4), Rcpp (>= 0.11.6)
 LinkingTo: RcppGSL, Rcpp
 LazyData: Yes

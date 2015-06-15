@@ -1,4 +1,4 @@
-genfrail <- function(beta = c(log(2)), # Covariate coefficients
+genfrail2 <- function(beta = c(log(2)), # Covariate coefficients
                      frailty = c("gamma", "lognormal", "invgauss", "posstab", "pvf"), # Frailty distribution
                      censor.mu = 130, # Gaussian distribution for censoring
                      censor.sigma = 15,
@@ -59,7 +59,7 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
   return(dat)
 }
 
-genfrail2 <- function(beta = c(log(2)), # Covariate coefficients
+genfrail <- function(beta = c(log(2)), # Covariate coefficients
                       theta = 2, # Frailty distribution parameter
                       frailty = c("gamma", "lognormal", "invgauss", "posstab", "pvf"), # Frailty distribution
                       censor.mu = 130, # Gaussian distribution for censoring

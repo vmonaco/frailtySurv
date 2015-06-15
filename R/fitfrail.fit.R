@@ -131,7 +131,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
 #                lower=c(-4,0.05), upper=c(4,10), method="L-BFGS-B",
 #                control=list(fnscale=-1, factr=1e8, pgtol=1e-8))
 #   gamma_hat <- fitter$par
-  
+  # return(list(U=U, loglikfn=loglikfn))
   fitter <- nleqslv(c(beta_init, theta_init), U, 
                     control=list(maxit=control$iter.max,xtol=1e-8,ftol=1e-8,btol=1e-3))
   gamma_hat <- fitter$x
