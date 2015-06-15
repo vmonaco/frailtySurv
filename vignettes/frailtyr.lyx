@@ -74,7 +74,15 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-Background, motivation, survival packages.
+Based on 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "gorfine2006prospective"
+
+\end_inset
+
+.
+ Background, motivation, survival packages.
 \end_layout
 
 \begin_layout Standard
@@ -575,6 +583,14 @@ Data generation
 
 \begin_layout Standard
 Generating data, genfrail arguments.
+ From baseline hazard based on 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "crowther2013simulating"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -590,6 +606,10 @@ Maximize likelihood vs score equations
 \end_layout
 
 \begin_layout Standard
+Likelihood
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
 L=\prod_{i=1}^{n}\prod_{j=1}^{m_{i}}\left\{ \lambda_{0}\left(T_{ij}\right)\exp\left(\beta^{T}Z_{ij}\right)\right\} ^{\delta_{ij}}\prod_{i=1}^{n}\int\omega^{N_{i.}\left(\tau\right)+1}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega\label{eq:likelihood}
@@ -598,6 +618,10 @@ L=\prod_{i=1}^{n}\prod_{j=1}^{m_{i}}\left\{ \lambda_{0}\left(T_{ij}\right)\exp\l
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+Loglikelihood
 \end_layout
 
 \begin_layout Standard
@@ -612,6 +636,10 @@ l=\sum_{i=1}^{n}\sum_{j=1}^{m_{i}}\delta_{ij}\log\left\{ \lambda_{0}\left(T_{ij}
 \end_layout
 
 \begin_layout Standard
+Coefficient score
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \[
 U_{r}=\frac{1}{n}\sum_{i=1}^{n}\sum_{j=1}^{m_{i}}\delta_{ij}Z_{ijr}-\frac{1}{n}\sum_{i=1}^{n}\frac{\left\{ \sum_{j=1}^{m_{i}}H_{ij}\left(T_{ij}\right)Z_{ijr}\right\} \int\omega^{N_{i.}\left(\tau\right)+1}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega}{\int\omega^{N_{i.}\left(\tau\right)}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega}
@@ -623,7 +651,7 @@ U_{r}=\frac{1}{n}\sum_{i=1}^{n}\sum_{j=1}^{m_{i}}\delta_{ij}Z_{ijr}-\frac{1}{n}\
 \end_layout
 
 \begin_layout Standard
-or
+Coefficient score, using psi?
 \end_layout
 
 \begin_layout Standard
@@ -638,6 +666,10 @@ U_{r}=\frac{1}{n}\sum_{i=1}^{n}\sum_{j=1}^{m_{i}}\delta_{ij}Z_{ijr}-\frac{1}{n}\
 \end_layout
 
 \begin_layout Standard
+Frailty parameter score
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \[
 U_{p+1}=\frac{1}{n}\sum_{i=1}^{n}\frac{\int\omega^{N_{i.}\left(\tau\right)}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f'\left(\omega\right)d\omega}{\int\omega^{N_{i.}\left(\tau\right)}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega}
@@ -646,6 +678,10 @@ U_{p+1}=\frac{1}{n}\sum_{i=1}^{n}\frac{\int\omega^{N_{i.}\left(\tau\right)}\exp\
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+Baseline hazard estimation
 \end_layout
 
 \begin_layout Standard
@@ -694,6 +730,10 @@ H_{i.}\left(\tau_{k-1}\right)=\sum_{i=1}^{m_{i}}\Lambda_{0}\left\{ \min\left(T_{
 \end_layout
 
 \begin_layout Standard
+TODO:
+\end_layout
+
+\begin_layout Standard
 LT to solve integrals
 \end_layout
 
@@ -726,7 +766,7 @@ Case study
 \end_layout
 
 \begin_layout Standard
-Application to DRS data, maybe HD failure
+TODO: Application to DRS data, maybe HD failure?
 \end_layout
 
 \begin_layout Section
@@ -734,9 +774,12 @@ Discussion
 \end_layout
 
 \begin_layout Standard
+TODO
+\end_layout
+
+\begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
-btprint "btPrintAll"
 bibfiles "frailtyr"
 options "plain"
 

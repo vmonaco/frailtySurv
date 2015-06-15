@@ -74,16 +74,18 @@ TODO
 options(prompt = "R> ", continue = "+   ")
 @
 
-\section{Introduction} \label{sec:intro}
+\section{Introduction}
 
-Based on \cite{gorfine2006prospective}.
-
-Background, other packages available, motivation
+Based on \cite{gorfine2006prospective}. Background, motivation, survival
+packages.
 
 \begin{table}[h]
 \protect\caption{R functions for fitting survival models. P=parametric, NP=nonparametric,
-PPL=partial penalized likelihood, MML=maximum marginal likelihood, DLs=downloads.}
-\centering{}
+PPL=partial penalized likelihood, MML=maximum marginal likelihood,
+DLs=downloads.\label{tab:survival-analysis-functions}}
+
+
+\centering{}%
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline 
 Package::function & $\lambda_{0}$ & Estimation & Gen? & Frailty distr & Weekly DLs\tabularnewline
@@ -105,40 +107,111 @@ survBayes::survBayes & NP & Bayes & No & $\Gamma$, $LN$ & 35.7\tabularnewline
 \end{table}
 
 
+Additional: survMisc, survsim, MST.
+
+
+\section{Data generation}
+
+Generating data, genfrail arguments. From baseline hazard based on
+\cite{crowther2013simulating}.
+
+Generating survival data from a model with known parameters.
+
+
 \section{Model estimation}
 
-Model description, overview of estimation procedure.
+Maximize likelihood vs score equations
 
-Two methods of estimation, use of LT to solve integrals, performance
+Likelihood
+
+\begin{equation}
+L=\prod_{i=1}^{n}\prod_{j=1}^{m_{i}}\left\{ \lambda_{0}\left(T_{ij}\right)\exp\left(\beta^{T}Z_{ij}\right)\right\} ^{\delta_{ij}}\prod_{i=1}^{n}\int\omega^{N_{i.}\left(\tau\right)+1}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega\label{eq:likelihood}
+\end{equation}
+
+
+Loglikelihood
+
+\begin{equation}
+l=\sum_{i=1}^{n}\sum_{j=1}^{m_{i}}\delta_{ij}\log\left\{ \lambda_{0}\left(T_{ij}\right)\exp\left(\beta^{T}Z_{ij}\right)\right\} +\sum_{i=1}^{n}\log\left[\int\omega^{N_{i.}\left(\tau\right)+1}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega\right]\label{eq:loglikelihood}
+\end{equation}
+
+
+Coefficient score
+
+\[
+U_{r}=\frac{1}{n}\sum_{i=1}^{n}\sum_{j=1}^{m_{i}}\delta_{ij}Z_{ijr}-\frac{1}{n}\sum_{i=1}^{n}\frac{\left\{ \sum_{j=1}^{m_{i}}H_{ij}\left(T_{ij}\right)Z_{ijr}\right\} \int\omega^{N_{i.}\left(\tau\right)+1}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega}{\int\omega^{N_{i.}\left(\tau\right)}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega}
+\]
+
+
+Coefficient score, using psi?
+
+\[
+U_{r}=\frac{1}{n}\sum_{i=1}^{n}\sum_{j=1}^{m_{i}}\delta_{ij}Z_{ijr}-\frac{1}{n}\sum_{i=1}^{n}\left\{ \sum_{j=1}^{m_{i}}H_{ij}\left(T_{ij}\right)Z_{ijr}\right\} \psi_{i}\left(\gamma,\Lambda,\tau\right)
+\]
+
+
+Frailty parameter score
+
+\[
+U_{p+1}=\frac{1}{n}\sum_{i=1}^{n}\frac{\int\omega^{N_{i.}\left(\tau\right)}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f'\left(\omega\right)d\omega}{\int\omega^{N_{i.}\left(\tau\right)}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega}
+\]
+
+
+Baseline hazard estimation
+
+\[
+\psi_{i}\left(\gamma,\Lambda,t\right)=\phi_{2i}\left(\gamma,\Lambda,t\right)/\phi_{1i}\left(\gamma,\Lambda,t\right)
+\]
+
+
+\[
+\phi_{ki}\left(\gamma,\Lambda_{0},t\right)=\int\omega^{N_{i.}\left(\tau\right)+\left(k-1\right)}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega\quad1\le k\le4
+\]
+
+
+Likelihood and score functions are function of
+\[
+H_{i.}\left(\tau\right)=\sum_{i=1}^{m_{i}}\Lambda_{0}\left(T_{ij}\right)\exp\left(\beta^{T}Z_{ij}\right)
+\]
+
+
+\[
+H_{i.}\left(\tau_{k-1}\right)=\sum_{i=1}^{m_{i}}\Lambda_{0}\left\{ \min\left(T_{ij},\tau_{k-1}\right)\right\} \exp\left(\beta^{T}Z_{ij}\right)
+\]
+
+
+TODO:
+
+LT to solve integrals
+
+Performance remarks
 
 fitfrail arguments, return value
-
-\section{Simulation}
-
-Generating data, genfrail arguments. Example generating data and fitting model
 
 Analytic and empirical asymptotic results.
 
 Correlation with existing packages for gamma, log-normal frailty.
 
+
+\section{Example}
+
+Example generating data and fitting model, displaying and interpreting
+results
+
+
 \section{Case study}
 
-Using real-world data, various frailty distributions.
+TODO: Application to DRS data, maybe HD failure?
+
 
 \section{Discussion}
 
-
-
-\section*{Acknowledgments}
-
-The development of \pkg{frailtyr} was supported by Google Summer of Code 2015.
-% TODO: DoD IASP acknowledgment
+TODO
 
 \bibliography{frailtyr}
 
-\clearpage
 
-\begin{appendix}
+\appendix
 
 \section{Frailty distributions}
 
@@ -146,7 +219,8 @@ All frailty distributions have support $\omega\in\left(0,\infty\right)$.
 It is usually necessary to place constraints on the parameters to
 avoid identifiability problems.
 
-TODO: For each frailty distribution: density, Laplace transform, method to generate random samples
+TODO: For each frailty distribution: density, Laplace transform, method
+to generate random samples
 
 
 \subsection{Gamma}
@@ -167,6 +241,13 @@ has closed form solution
 \begin{equation}
 \frac{\partial\Gamma(\omega;\theta)}{\partial\theta}=\frac{\left(\frac{\omega}{\theta}\right)^{\frac{1}{\theta}-1}\exp\left(\frac{-\omega}{\theta}\right)\left\{ \ln\left(\frac{\theta}{\omega}\right)+\psi^{(0)}\left(\frac{1}{\theta}\right)+\omega-1\right\} }{\theta^{3}\Gamma\left(\frac{1}{\theta}\right)}\label{eq:deriv-gamma}
 \end{equation}
+
+
+LT gamma
+
+\[
+L^{\left(p\right)}\left(s\right)=\left(-1\right)^{p}\theta^{-\frac{1}{\theta}}\left(\theta^{-1}+s\right)^{-\left(\frac{1}{\theta}+p\right)}\Gamma\left(\theta^{-1}+p\right)/\Gamma\left(\theta^{-1}\right)
+\]
 
 
 
@@ -190,20 +271,6 @@ is given by
 
 
 
-\subsection{Positive stable}
-
-The one-parameter positive stable distribution is given by $\omega\sim PS(\alpha)$,
-where $\beta=1$, $\mu=0$, $0<\alpha<1$, and $\delta=\alpha$ as
-defined in Hougaard \cite{hougaard2000analysis}. The density is given
-by
-
-\begin{equation}
-PS\left(\omega;\alpha\right)=-\frac{1}{\pi\omega}\sum_{k=1}^{\infty}\frac{\Gamma\left(k\alpha+1\right)}{k!}\left(-\omega^{-\alpha}\right)^{k}\sin\left(\alpha k\pi\right)\label{eq:density-posstab}
-\end{equation}
-When $\alpha=1$, a degenerate distribution at 1 is obtained and there
-is no shared frailty. 
-
-
 \subsection{Inverse Gaussian}
 
 Frailty values from an inverse Gaussian distribution are denoted by
@@ -215,11 +282,25 @@ IG\left(\omega;\theta\right)=\left(2\pi\theta\omega^{3}\right)^{-1/2}\exp\left\{
 \end{equation}
 where $\theta>0$. The IG has $E[\omega]=1$ and $Var[\omega]=\theta$.
 Similar to the gamma and log-normal, $\omega$ is taken to be 1 when
-$\theta=0$. The derivative wrt. $\theta$ is given by
+$\theta=0$. The derivative wrt. $\theta$ is given by 
 \[
 \frac{\partial IG\left(\omega;\theta\right)}{\partial\theta}=\frac{\left(\omega-1\right)^{2}\exp\left\{ -\frac{\left(\omega-1\right){}^{2}}{2\theta\omega}\right\} }{2\sqrt{2\pi}\theta^{2}\omega\sqrt{\theta\omega^{3}}}-\frac{\omega^{3}\exp\left\{ -\frac{\left(\omega-1\right)^{2}}{2\theta\omega}\right\} }{2\sqrt{2\pi}\left(\theta\omega^{3}\right){}^{3/2}}
 \]
 
+
+
+\subsection{Positive stable}
+
+The one-parameter positive stable distribution is given by $\omega\sim PS(\alpha)$,
+where $\beta=1$, $\mu=0$, $0<\alpha<1$, and $\delta=\alpha$ as
+defined in Hougaard \cite{hougaard2000analysis}. The density is given
+by
+
+\begin{equation}
+PS\left(\omega;\alpha\right)=-\frac{1}{\pi\omega}\sum_{k=1}^{\infty}\frac{\Gamma\left(k\alpha+1\right)}{k!}\left(-\omega^{-\alpha}\right)^{k}\sin\left(\alpha k\pi\right)\label{eq:density-posstab}
+\end{equation}
+When $\alpha=1$, a degenerate distribution at 1 is obtained and there
+is no shared frailty.
 
 
 \subsection{Power variance function}
@@ -240,6 +321,27 @@ PVF\left(\omega;\alpha\right)=\exp\left(-\omega+\alpha^{-1}\right)\frac{1}{\pi}\
 When $\alpha=1$, the degenerate distribution with $\omega=1$ is
 obtained. The PVF has $E[\omega]=1$ and $Var[\omega]=\left(1-\alpha\right)$.
 
-\end{appendix}
+Laplace transform
+
+\begin{equation}
+L\left(s\right)=\exp\left[-\left\{ \left(1+s\right)^{\alpha}-1\right\} /\alpha\right]\label{eq:lt-pvf}
+\end{equation}
+
+
+LT derivs
+
+\begin{equation}
+L^{\left(p\right)}\left(s\right)=\left(-1\right)^{p}L\left(s\right)\sum_{j=1}^{p}c_{p,j}\left(\alpha\right)\left(1+s\right)^{j\alpha-p}\label{eq:lt-pvf-deriv}
+\end{equation}
+
+
+LT deriv wrt alpha
+
+\begin{equation}
+\frac{\partial L\left(s\right)}{\partial\alpha}=\exp\left\{ \frac{1-\left(s+1\right)^{\alpha}}{\alpha}\right\} \left\{ -\frac{1-\left(s+1\right)^{\alpha}}{\alpha^{2}}-\frac{\left(s+1\right)^{\alpha}\log\left(s+1\right)}{\alpha}\right\} \label{eq:lt-pvf-deriv-alpha}
+\end{equation}
+
+
+LT higher deriv wrt alpha?
 
 \end{document}
