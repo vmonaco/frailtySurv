@@ -1,5 +1,5 @@
 fitfrail <- function(formula, data, control, 
-                     frailty=c("gamma","lognormal","invgauss", "posstab", "pvf"), ...) {
+                     frailty=c("gamma","lognormal","invgauss", "pvf"), ...) {
   
   Call <- match.call()
   

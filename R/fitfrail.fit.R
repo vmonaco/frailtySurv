@@ -62,6 +62,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   # Cluster names and sizes are needed in several places, so get these now
   cluster_names <- levels(cluster)
   cluster_sizes <- table(cluster)
+  n_clusters <- length(cluster_names)
   
   # N_[[i]][j, k] indicates whether individual j in cluster i failed at time <= tau_k
   N_ <- sapply(cluster_names, function(i) {
@@ -85,7 +86,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     sum(status[time == time_steps[k]])
   }, 0)
   
-  verbose = control$verbose
+  verbose <- control$verbose
   if (verbose)
     cat(c("Iter", paste("beta_", 1:n_beta, sep=""), paste("theta_", 1:n_beta, sep=""), "\n"), sep="\t")
   
@@ -108,13 +109,15 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     # TODO: This could be done in parallel, not much gain though.
     c(sapply(1:n_beta,
              function(beta_idx)
-               U_r(X_, R_, I_, N_dot, H_, H_dot, beta, theta, beta_idx, frailty)),
+               U_r(X_, R_, I_, N_dot, H_, H_dot, 
+                   beta, theta, beta_idx, frailty)),
       sapply(1:n_theta, 
              function(theta_idx) 
-               U_p(X_, R_, I_, N_dot, H_, H_dot, beta, theta, theta_idx, frailty)))
+               U_p(X_, R_, I_, N_dot, H_, H_dot, 
+                   beta, theta, theta_idx, frailty)))/n_clusters
   }
   
-  loglikfn = function(beta, theta, frailty) {
+  loglikfn <- function(beta, theta, frailty) {
     if (verbose) {
       iter <<- iter + 1
       cat(c(signif(c(iter, beta, theta), 4), "\n"), sep="\t")
@@ -126,15 +129,30 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     loglikelihood(X_, R_, I_, N_dot, estimator$H_dot, estimator$lambda_hat, beta, theta, frailty)
   }
   
-#   # Example of optim with loglike fn
+  jacobian <- function(gamma) {
+    beta <- gamma[1:n_beta]
+    theta <- gamma[(n_beta+1):(n_beta+n_theta)]
+    
+    estimator <- baseline_hazard_estimator(X_, R_, d_, Y_, N_dot, beta, theta, frailty)
+    H_ <<- estimator$H_
+    H_dot <<- estimator$H_dot
+    lambda_hat <<- estimator$lambda_hat
+    
+    # Build the jacobian matrix from the respective components
+    jacobian()
+  }
+  
+  if (control$fitmethod == 'score') {
+    fitter <- nleqslv(c(beta_init, theta_init), U, 
+                      control=list(maxit=control$iter.max,xtol=1e-8,ftol=1e-8,btol=1e-3))
+    gamma_hat <- fitter$x
+  } else if (control$fitmethod == 'like') {
+    stop("TODO")
 #   fitter <- optim(c(0, 0.01), function(x) loglikfn(x[1], x[2], frailty), 
 #                lower=c(-4,0.05), upper=c(4,10), method="L-BFGS-B",
 #                control=list(fnscale=-1, factr=1e8, pgtol=1e-8))
 #   gamma_hat <- fitter$par
-  # return(list(U=U, loglikfn=loglikfn))
-  fitter <- nleqslv(c(beta_init, theta_init), U, 
-                    control=list(maxit=control$iter.max,xtol=1e-8,ftol=1e-8,btol=1e-3))
-  gamma_hat <- fitter$x
+  }
   
   if (verbose)
     cat("Converged after", iter, "iterations\n")

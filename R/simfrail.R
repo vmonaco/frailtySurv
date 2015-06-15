@@ -36,7 +36,7 @@ simfrail <- function(reps, genfrail.args, fitfrail.args,
   data.frame(results)
 }
 
-fitfrail_residuals <- function(reps, beta, theta, formula, frailty, N=c(50,100)){#},500,1000)) {
+fitfrail_residuals <- function(reps, beta, theta, formula, frailty, N=c(50,100,500,1000)) {
   
   res <- lapply(N, function(Ni) {
     r <- simfrail(reps, list(beta=beta, censor.mu=130, frailty=frailty, N=Ni, K=2, 

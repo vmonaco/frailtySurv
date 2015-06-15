@@ -57,7 +57,6 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
     obs.time <- Lambda_0_inv(-log(u)/rate)
   # Otherwise, use the method described by Crowther
   } else {
-    
     if (!is.null(lambda_0)) {
       # numeric integral nested in the root finding
       Lambda_0 <- Vectorize(function(t) {

@@ -243,8 +243,8 @@ double U_r(Rcpp::List X_,
                        theta.begin(), 
                        frailty);
   }
-  term1 = term1/n_clusters;
-  term2 = term2/n_clusters;
+//   term1 = term1/n_clusters;
+//   term2 = term2/n_clusters;
   return term1 - term2;
 }
 
@@ -287,7 +287,7 @@ double U_p(Rcpp::List X_,
     out += numer/denom;
   }
   
-  out = out/n_clusters;
+  // out = out/n_clusters;
   
   return out;
 }
@@ -331,3 +331,83 @@ double loglikelihood(List X_,
   
   return term1 + term2;
 }
+
+// partial derivative of H_, H_dot, and Delta_Lambda_ wrt. beta
+List dH_dbeta(NumericVector d_,
+                            List X_,
+                            List R_, 
+                            List N_dot,
+                            List H_, 
+                            List H_dot,
+                            NumericVector Delta_Lambda,
+                            int beta_idx) {
+  
+  List dH_dbeta_ = clone(H_);
+  List dH_dot_dbeta_ = clone(H_dot);
+  NumericVector dDelta_Lambda_dbeta(Delta_Lambda.size());
+  
+  
+  return Rcpp::List::create(Rcpp::Named("dH_dbeta") = dH_dbeta_,
+                            Rcpp::Named("dH_dot_dbeta") = dH_dot_dbeta_,
+                            Rcpp::Named("dDelta_Lambda_dbeta") = dDelta_Lambda_dbeta);
+}
+
+
+// Eq. (34) in Gorfine (2008)
+double jacobian_beta_beta(NumericVector d_,
+                          Rcpp::List X_,
+                          Rcpp::List R_, 
+                          Rcpp::List I_, 
+                          Rcpp::List N_dot,
+                          Rcpp::List H_, 
+                          Rcpp::List H_dot,
+                          Rcpp::List dH_dbeta_, 
+                          Rcpp::List dH_dot_dbeta_,
+                          NumericVector beta, 
+                          NumericVector theta,
+                          int beta_idx_1, 
+                          int beta_idx_2, 
+                          String frailty) {
+  
+  int n_clusters = X_.size();
+  
+  double term1 = 0;
+  double term2 = 0;
+  for (int i = 0; i < n_clusters; ++i) {
+    Rcpp::NumericMatrix X_i = X_(i);
+    Rcpp::NumericVector R_i = R_(i); // Failure rank, whare T[r] = failure time
+    Rcpp::NumericVector I_i = I_(i); // Failure indicator
+    Rcpp::NumericVector N_dot_i = N_dot(i);
+    Rcpp::NumericMatrix H_i = H_(i);
+    Rcpp::NumericVector H_dot_i = H_dot(i);
+    Rcpp::NumericMatrix dH_dbeta_i = dH_dbeta_(i);
+    Rcpp::NumericVector dH_dot_dbeta_i = dH_dot_dbeta(i);
+    int tau_k = N_dot_i.size() - 1;
+    
+    // tmps for the inner loop sum in 1st and 2nd terms
+    double tmp_term1 = 0;
+    double tmp_term2 = 0;
+    
+    for (int j = 0; j < X_i.nrow(); j++) {
+      tmp_term1 += X_i(j, beta_idx_1 - 1) * part_H_i(j, R_i[j] - 1);
+      tmp_term2 += H_i(j, R_i[j] - 1) * X_i(j, beta_idx_1 - 1) * part_H_dot_i(tau_k);
+    }
+    
+    term1 += tmp_term1 * 
+      phi(2,N_dot_i(tau_k),H_dot_i(tau_k), theta.begin(), frailty)/
+      phi(1,N_dot_i(tau_k),H_dot_i(tau_k), theta.begin(), frailty);
+    
+    term2 += tmp_term2 * 
+      ( (phi(3,N_dot_i(tau_k),H_dot_i(tau_k), theta.begin(), frailty)/
+         phi(1,N_dot_i(tau_k),H_dot_i(tau_k), theta.begin(), frailty))
+       -(phi(2,N_dot_i(tau_k),H_dot_i(tau_k), theta.begin(), frailty)/
+         phi(1,N_dot_i(tau_k),H_dot_i(tau_k), theta.begin(), frailty)));
+    
+  }
+  
+  double out = -(term1 - term2)/n_clusters;
+  return out;
+}
+
+
+
