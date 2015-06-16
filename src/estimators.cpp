@@ -381,7 +381,7 @@ double jacobian_beta_beta(NumericVector d_,
     Rcpp::NumericMatrix H_i = H_(i);
     Rcpp::NumericVector H_dot_i = H_dot(i);
     Rcpp::NumericMatrix dH_dbeta_i = dH_dbeta_(i);
-    Rcpp::NumericVector dH_dot_dbeta_i = dH_dot_dbeta(i);
+    Rcpp::NumericVector dH_dot_dbeta_i = dH_dot_dbeta_(i);
     int tau_k = N_dot_i.size() - 1;
     
     // tmps for the inner loop sum in 1st and 2nd terms
@@ -389,8 +389,8 @@ double jacobian_beta_beta(NumericVector d_,
     double tmp_term2 = 0;
     
     for (int j = 0; j < X_i.nrow(); j++) {
-      tmp_term1 += X_i(j, beta_idx_1 - 1) * part_H_i(j, R_i[j] - 1);
-      tmp_term2 += H_i(j, R_i[j] - 1) * X_i(j, beta_idx_1 - 1) * part_H_dot_i(tau_k);
+      tmp_term1 += X_i(j, beta_idx_1 - 1) * dH_dbeta_i(j, R_i[j] - 1);
+      tmp_term2 += H_i(j, R_i[j] - 1) * X_i(j, beta_idx_1 - 1) * dH_dot_dbeta_i(tau_k);
     }
     
     term1 += tmp_term1 * 
