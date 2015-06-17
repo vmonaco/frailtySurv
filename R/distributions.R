@@ -364,6 +364,23 @@ deriv_dlognormal_r_numeric <- function(x, theta) {
 ################################################################################
 # TODO: Inverse Gaussian
 
+################################################################################
+# Pareto
+lddp <- function(v,x,cutoff=1){
+  pdf <- -v*log(x) - log(zeta(v))
+  if(cutoff>1){
+    c0 <- 1-sum(ddp(v=v,x=1:(cutoff-1)))
+    pdf <- pdf / c0
+  }
+  pdf
+}
+ddp <- function(v,x,cutoff=1){
+  exp(lddp(v,x,cutoff=cutoff))
+}
+simdp <- function(n=100, v=3.5, maxdeg=10000){
+  sample(x=1:maxdeg, size=n, replace=TRUE,
+         prob=ddp(v=v,x=1:maxdeg))
+}
 
 ################################################################################
 
