@@ -365,21 +365,41 @@ deriv_dlognormal_r_numeric <- function(x, theta) {
 # TODO: Inverse Gaussian
 
 ################################################################################
-# Pareto
-lddp <- function(v,x,cutoff=1){
-  pdf <- -v*log(x) - log(zeta(v))
-  if(cutoff>1){
-    c0 <- 1-sum(ddp(v=v,x=1:(cutoff-1)))
-    pdf <- pdf / c0
-  }
-  pdf
+# K-truncated Poisson
+
+# Sample from a k-truncated Poisson, where support is strictly greater than k
+# modifed from: https://stat.ethz.ch/pipermail/r-help/2005-May/070680.html
+rtpois <- function(n, lambda, k=0) {
+  qpois(runif(n, sum(dpois(0:k, lambda)), 1), lambda)
 }
-ddp <- function(v,x,cutoff=1){
-  exp(lddp(v,x,cutoff=cutoff))
+
+# Expected value of the k truncated Poisson
+etpois <- function(lambda, k=0) {
+  one2k <- 1:k
+  zero2k <- 0:k
+  
+  if (k > 0)
+    numer_factor2 <- sum(lambda^one2k / factorial(one2k - 1))
+  else
+    numer_factor2 <- 0
+  
+  numer <- lambda - exp(-lambda) * numer_factor2
+  denom <- 1 - exp(-lambda) * sum(lambda^zero2k / factorial(zero2k))
+  numer/denom
 }
-simdp <- function(n=100, v=3.5, maxdeg=10000){
-  sample(x=1:maxdeg, size=n, replace=TRUE,
-         prob=ddp(v=v,x=1:maxdeg))
+
+################################################################################
+# Discrete truncated Pareto
+
+# Density
+ddpareto <- function(x, alpha){
+  exp(-alpha*log(x) - log(zeta(alpha)))
+}
+
+# The "easy" way of simulating a discrete Pareto, but not exact
+rdpareto <- function(n, alpha, cuttoff=10000){
+  sample(x=1:x.max, size=n, replace=TRUE,
+         prob=ddpareto(alpha, x=1:cuttoff))
 }
 
 ################################################################################
