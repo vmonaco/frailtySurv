@@ -4,7 +4,7 @@ simfrail <- function(reps, genfrail.args, fitfrail.args,
   
   # To make the result reproducable when parallelized, seed each run from 
   # a list of random seeds sampled from a meta seed
-  # set.seed(seed)
+  set.seed(seed)
   seeds <- sample(1:1e7, reps, replace=TRUE)
   
   fn <- function(s) {
@@ -22,7 +22,8 @@ simfrail <- function(reps, genfrail.args, fitfrail.args,
     c(beta=fit$beta,
       theta=fit$theta,
       cens=1-sum(data$status)/length(data$status),
-      runtime)
+      runtime,
+      fit$Lambdafn(60))
   }
   
   # Run in parallel and make a row-observation matrix
@@ -30,23 +31,25 @@ simfrail <- function(reps, genfrail.args, fitfrail.args,
                       mc.set.seed=TRUE, mc.cores=mc.cores, mc.silent=FALSE)
   results <- t(simplify2array(results))
   
-  # Summarize everything
+  # TODO: Summarize everything somewhere else:
   # results <- apply(results, 2, function(x) c(mean=mean(x), sd=sd(x)))
   
   data.frame(results)
 }
 
-fitfrail_residuals <- function(reps, beta, theta, formula, frailty, N=c(50,100,500,1000)) {
+Lambda_0 <- function(t, tau=4.6, C=0.01) (C*t)^tau
+fitfrail_residuals <- function(reps, beta, theta, formula, frailty, N=c(50,100)){#},500,1000)) {
   
   res <- lapply(N, function(Ni) {
-    r <- simfrail(reps, list(beta=beta, censor.mu=130, frailty=frailty, N=Ni, K=2, 
+    r <- simfrail(reps, list(beta=beta, censor.params=c(130,15), frailty=frailty, N=Ni, K=2, 
                          theta=theta, covariates="uniform"), 
              list(formula=formula, frailty=frailty, verbose=FALSE))
     
     cbind(N=Ni, r, 
                res.theta=r[,"theta"] - theta,
                res.beta=unname(data.matrix(r[, grepl("beta", names(r))])) - 
-                          matrix(rep(beta, each=reps), nrow=reps)
+                          matrix(rep(beta, each=reps), nrow=reps),
+          res.Lambda.60=r$V5 - Lambda_0(60)
           ) })
   
   do.call("rbind", res)

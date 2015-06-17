@@ -100,6 +100,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     H_ <<- estimator$H_
     H_dot <<- estimator$H_dot
     lambda_hat <<- estimator$lambda_hat
+    Lambda_hat <<- estimator$Lambda_hat
     
     if (verbose) {
       iter <<- iter + 1
@@ -123,10 +124,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
       cat(c(signif(c(iter, beta, theta), 4), "\n"), sep="\t")
     }
     estimator <- baseline_hazard_estimator(X_, R_, d_, Y_, N_dot, beta, theta, frailty)
-    H_ <<- estimator$H_
-    H_dot <<- estimator$H_dot
-    lambda_hat <<- estimator$lambda_hat
-    loglikelihood(X_, R_, I_, N_dot, estimator$H_dot, estimator$lambda_hat, beta, theta, frailty)
+    loglikelihood(X_, R_, I_, N_dot, estimator$H_dot, estimator$Lambda_hat, beta, theta, frailty)
   }
   
   jacobian <- function(gamma) {
@@ -134,9 +132,6 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     theta <- gamma[(n_beta+1):(n_beta+n_theta)]
     
     estimator <- baseline_hazard_estimator(X_, R_, d_, Y_, N_dot, beta, theta, frailty)
-    H_ <<- estimator$H_
-    H_dot <<- estimator$H_dot
-    lambda_hat <<- estimator$lambda_hat
     
     # Build the jacobian matrix from the respective components
     jacobian()
@@ -161,13 +156,23 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   theta_hat <- gamma_hat[(n_beta+1):(n_beta+n_theta)]
   loglik <- loglikfn(beta_hat, theta_hat, frailty)
   
+  lambdafn <- Vectorize(function(t) {
+    lambda_hat[which.min(abs(time_steps - t))]
+  })
+  
+  Lambdafn <- Vectorize(function(t) {
+    Lambda_hat[which.min(abs(time_steps - t))]
+  })
+  
   list(beta = beta_hat,
        theta = theta_hat,
        lambda = lambda_hat,
        loglik = loglik,
-       method='fitfrail',
-       frailty=frailty,
+       frailty = frailty,
        loglikfn=loglikfn,
-       fitter=fitter
+       lambdafn = lambdafn,
+       Lambdafn = Lambdafn,
+       fitter = fitter,
+       method = 'fitfrail'
       )
 }

@@ -206,7 +206,8 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_,
   
   return Rcpp::List::create(Rcpp::Named("H_") = H_,
                             Rcpp::Named("H_dot") = H_dot,
-                            Rcpp::Named("lambda_hat") = lambda_hat);
+                            Rcpp::Named("Lambda_hat") = lambda_hat,
+                            Rcpp::Named("lambda_hat") = delta_lambda_hat);
 }
 
 // [[Rcpp::export]]
@@ -298,7 +299,7 @@ double loglikelihood(List X_,
                       List I_, 
                       List N_dot,
                       List H_dot,
-                      NumericVector lambda, 
+                      NumericVector Lambda, 
                       NumericVector beta, 
                       NumericVector theta, 
                       String frailty) {
@@ -318,7 +319,7 @@ double loglikelihood(List X_,
     for (int j = 0; j < X_i.nrow(); j++) {
       // R_i[j] is an R index
       if (I_i(j) > 0) { 
-        term1 += log(lambda(R_i(j)-1) - lambda(R_i(j)-2)) + sum(beta * X_i(j, _));
+        term1 += log(Lambda(R_i(j)-1) - Lambda(R_i(j)-2)) + sum(beta * X_i(j, _));
       }
     }
     
@@ -334,13 +335,13 @@ double loglikelihood(List X_,
 
 // partial derivative of H_, H_dot, and Delta_Lambda_ wrt. beta
 List dH_dbeta(NumericVector d_,
-                            List X_,
-                            List R_, 
-                            List N_dot,
-                            List H_, 
-                            List H_dot,
-                            NumericVector Delta_Lambda,
-                            int beta_idx) {
+              List X_,
+              List R_, 
+              List N_dot,
+              List H_, 
+              List H_dot,
+              NumericVector Delta_Lambda,
+              int beta_idx) {
   
   List dH_dbeta_ = clone(H_);
   List dH_dot_dbeta_ = clone(H_dot);
