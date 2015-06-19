@@ -61,6 +61,10 @@ deriv_lt_dpvf_c <- function(p, s, alpha) {
     .Call('frailtyr_deriv_lt_dpvf_c', PACKAGE = 'frailtyr', p, s, alpha)
 }
 
+zeta <- function(s) {
+    .Call('frailtyr_zeta', PACKAGE = 'frailtyr', s)
+}
+
 phi_c <- function(k, N_dot, H_dot, theta, frailty) {
     .Call('frailtyr_phi_c', PACKAGE = 'frailtyr', k, N_dot, H_dot, theta, frailty)
 }
@@ -81,7 +85,7 @@ U_p <- function(X_, R_, I_, N_dot, H_, H_dot, beta, theta, theta_idx, frailty) {
     .Call('frailtyr_U_p', PACKAGE = 'frailtyr', X_, R_, I_, N_dot, H_, H_dot, beta, theta, theta_idx, frailty)
 }
 
-loglikelihood <- function(X_, R_, I_, N_dot, H_dot, lambda, beta, theta, frailty) {
-    .Call('frailtyr_loglikelihood', PACKAGE = 'frailtyr', X_, R_, I_, N_dot, H_dot, lambda, beta, theta, frailty)
+loglikelihood <- function(X_, R_, I_, N_dot, H_dot, Lambda, beta, theta, frailty) {
+    .Call('frailtyr_loglikelihood', PACKAGE = 'frailtyr', X_, R_, I_, N_dot, H_dot, Lambda, beta, theta, frailty)
 }
 

@@ -193,6 +193,17 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// zeta
+double zeta(double s);
+RcppExport SEXP frailtyr_zeta(SEXP sSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< double >::type s(sSEXP);
+    __result = Rcpp::wrap(zeta(s));
+    return __result;
+END_RCPP
+}
 // phi_c
 double phi_c(int k, int N_dot, double H_dot, double theta, String frailty);
 RcppExport SEXP frailtyr_phi_c(SEXP kSEXP, SEXP N_dotSEXP, SEXP H_dotSEXP, SEXP thetaSEXP, SEXP frailtySEXP) {
@@ -283,8 +294,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // loglikelihood
-double loglikelihood(List X_, List R_, List I_, List N_dot, List H_dot, NumericVector lambda, NumericVector beta, NumericVector theta, String frailty);
-RcppExport SEXP frailtyr_loglikelihood(SEXP X_SEXP, SEXP R_SEXP, SEXP I_SEXP, SEXP N_dotSEXP, SEXP H_dotSEXP, SEXP lambdaSEXP, SEXP betaSEXP, SEXP thetaSEXP, SEXP frailtySEXP) {
+double loglikelihood(List X_, List R_, List I_, List N_dot, List H_dot, NumericVector Lambda, NumericVector beta, NumericVector theta, String frailty);
+RcppExport SEXP frailtyr_loglikelihood(SEXP X_SEXP, SEXP R_SEXP, SEXP I_SEXP, SEXP N_dotSEXP, SEXP H_dotSEXP, SEXP LambdaSEXP, SEXP betaSEXP, SEXP thetaSEXP, SEXP frailtySEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -293,11 +304,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< List >::type I_(I_SEXP);
     Rcpp::traits::input_parameter< List >::type N_dot(N_dotSEXP);
     Rcpp::traits::input_parameter< List >::type H_dot(H_dotSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type Lambda(LambdaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type theta(thetaSEXP);
     Rcpp::traits::input_parameter< String >::type frailty(frailtySEXP);
-    __result = Rcpp::wrap(loglikelihood(X_, R_, I_, N_dot, H_dot, lambda, beta, theta, frailty));
+    __result = Rcpp::wrap(loglikelihood(X_, R_, I_, N_dot, H_dot, Lambda, beta, theta, frailty));
     return __result;
 END_RCPP
 }

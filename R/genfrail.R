@@ -19,7 +19,7 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
                      # If K is int, then fixed cluster sizes
                      # If K is numeric vector, then sizes provided
                      # Otherwise draw random
-                     K = c(2, "poisson", "pareto", "uniform"), 
+                     K = 2, #c(2, "poisson", "pareto", "uniform"), 
                      # cluster size distributian params:
                      # K-truncated Poisson: c(lambda, truncated value)
                      # Discrete Pareto: c(alpha, max value inclusive)
@@ -27,13 +27,17 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
                      K.params = c(2, 0), 
                      
                      # Only one of these can be non-null for the baseline hazard
-                     lambda_0 = NULL,
-                     Lambda_0 = function(t, tau=4.6, C=0.01) (C*t)^tau,
-                     Lambda_0_inv = NULL) {
+                     lambda_0 = NULL, #function(t) 2.9024e-9*t^3.6
+                     Lambda_0 = NULL, #function(t, tau=4.6, C=0.01) (C*t)^tau,
+                     Lambda_0_inv = function(t) (t^(1/4.6))/0.01,
+                     
+                     # Round time to nearest 
+                     round.base = 10
+                     ) {
   
   # Determine cluster sizes
   if (is.numeric(K) && length(K) == 1) {
-    cluster_sizes <- rep(K, N);
+    cluster_sizes <- c(rep(K, N));
   } else if (is.numeric(K) && length(K) > 1) {
     if (length(K) != N)
       stop("length(K) must equal N when providing cluster sizes")
@@ -126,9 +130,13 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
   obs.status <- sign(obs.time <= censor.time)
   obs.time <- pmin(obs.time, censor.time)
   
+  if (is.numeric(round.base)) {
+    obs.time <- round.base*round(obs.time/round.base)
+  }
+  
   colnames(Z) <- paste("Z", 1:p, sep="")
   dat <- data.frame(family=rep(1:N, cluster_sizes),
-                    rep=unlist(sapply(cluster_sizes, function(m) rep(1:m))), 
+                    rep=unlist(lapply(cluster_sizes, function(m) rep(1:m))), 
                     time=obs.time, 
                     status=obs.status,
                     Z)

@@ -152,9 +152,9 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_,
       H_dot_i(k) = 0;
     }
   }
-  // lambda_hat is the baseline cumulative hazard estimate
-  NumericVector lambda_hat(n_timesteps);
-  NumericVector delta_lambda_hat(n_timesteps);
+  // Lambda_hat is the baseline cumulative hazard estimate
+  NumericVector Lambda_hat(n_timesteps);
+  NumericVector delta_Lambda_hat(n_timesteps);
   
   double denom;
   // k starts from 1, not a typo
@@ -171,22 +171,16 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_,
         tmp += Y_i(j, k) * exp(sum(beta * X_i(j, _)));
       }
       
-//       Rcout << N_dot_i(k - 1) << std::endl;
-//       Rcout << H_dot_i(k - 1) << std::endl;
-//       Rcout << psi(N_dot_i(k - 1), 
-//                    H_dot_i(k - 1), 
-//                    theta.begin(), 
-//                    frailty) << std::endl;
+      // TODO: optimize by ignoring 0 terms, don't do the denom integrations
       denom += tmp * psi(N_dot_i(k - 1), 
                          H_dot_i(k - 1), 
                          theta.begin(), 
                          frailty);
-      
     }
     
-    delta_lambda_hat[k] = d_(k)/denom;
+    delta_Lambda_hat(k) = d_(k)/denom;
     
-    lambda_hat(k) = lambda_hat(k-1) + delta_lambda_hat(k);
+    Lambda_hat(k) = Lambda_hat(k - 1) + delta_Lambda_hat(k);
     
     for (int i = 0; i < n_clusters; ++i) {
       Rcpp::NumericMatrix X_i = X_(i);
@@ -197,7 +191,7 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_,
       for (int j = 0; j < X_i.nrow(); ++j) {
         // R_ is the rank of failure as an R index
         int k_min = min(NumericVector::create(R_i(j) - 1, k));
-        H_i(j, k) = lambda_hat(k_min) * exp(sum(beta * X_i(j, _)));
+        H_i(j, k) = Lambda_hat(k_min) * exp(sum(beta * X_i(j, _)));
       }
       
       H_dot_i(k) = sum(H_i( _ , k));
@@ -206,8 +200,8 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_,
   
   return Rcpp::List::create(Rcpp::Named("H_") = H_,
                             Rcpp::Named("H_dot") = H_dot,
-                            Rcpp::Named("Lambda_hat") = lambda_hat,
-                            Rcpp::Named("lambda_hat") = delta_lambda_hat);
+                            Rcpp::Named("Lambda_hat") = Lambda_hat,
+                            Rcpp::Named("lambda_hat") = delta_Lambda_hat);
 }
 
 // [[Rcpp::export]]

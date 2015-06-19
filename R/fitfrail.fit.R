@@ -50,14 +50,18 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   }
   
   # Unique time steps, including t=0. This is where the baseline hazard actually increases
-  time_steps <- c(0, sort(unique(time)))
+  # time_steps <- c(0, sort(unique(time)))
+  
+  time_steps <- c(0, sort(time))
+  time_steps_status <- c(0, unname(status[order(time)]))
   
   # The _ variables are all lists, indexed by the cluster name
   X_ <- split.data.frame(x, cluster) # Covariates
   T_ <- split(time, cluster) # Followup time
   I_ <- split(status, cluster) # Failure indicator
   # Failure rank + 1, where time_steps[R_[i][j]] is the failure time of member j in cluster i
-  R_ <- split(1 + increasing_rank(time), cluster) 
+  # R_ <- split(1 + increasing_rank(time), cluster) 
+  R_ <- split(1 + rank(time, ties.method="first"), cluster)
   
   # Cluster names and sizes are needed in several places, so get these now
   cluster_names <- levels(cluster)
@@ -67,7 +71,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   # N_[[i]][j, k] indicates whether individual j in cluster i failed at time <= tau_k
   N_ <- sapply(cluster_names, function(i) {
     t(sapply(1:cluster_sizes[[i]], function(j) {
-      as.numeric((I_[[i]][j] > 0) & (T_[[i]][j] <= time_steps))
+      as.numeric((I_[[i]][j] > 0) & (R_[[i]][j] <= 1:length(time_steps)))
     }))
   }, simplify = FALSE, USE.NAMES = TRUE)
   
@@ -77,14 +81,16 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   # Y_[[i]][j,k] indicates whether individual j in cluster i failed at time >= tau_k
   Y_ <- sapply(cluster_names, function(i) {
     t(sapply(1:cluster_sizes[[i]], function(j) {
-      as.numeric(T_[[i]][j] >= time_steps)
+      # as.numeric(T_[[i]][j] >= time_steps)
+      as.numeric(R_[[i]][j] >= 1:length(time_steps))
     }))
   }, simplify = FALSE, USE.NAMES = TRUE)
   
+  d_ <- time_steps_status
   # d_[k] is the number of failures at time tau_k
-  d_ <- vapply(seq_along(time_steps), function(k) {
-    sum(status[time == time_steps[k]])
-  }, 0)
+#   d_ <- vapply(seq_along(time_steps), function(k) {
+#     sum(status[time == time_steps[k]])
+#   }, 0)
   
   verbose <- control$verbose
   if (verbose)
@@ -156,23 +162,42 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   theta_hat <- gamma_hat[(n_beta+1):(n_beta+n_theta)]
   loglik <- loglikfn(beta_hat, theta_hat, frailty)
   
+  lambda_hat_nz <- lambda_hat[d_ > 0]
+  time_steps_nz <- time_steps[d_ > 0]
+  
   lambdafn <- Vectorize(function(t) {
-    lambda_hat[which.min(abs(time_steps - t))]
+    idx <- sum(t > time_steps_nz)
+    if (idx == 0) {
+      return(0)
+    } else if (idx == length(time_steps_nz)) {
+      idx <- length(time_steps_nz) - 1
+    }
+    lambda_hat_nz[idx]/(time_steps_nz[idx+1] - time_steps_nz[idx])
   })
   
   Lambdafn <- Vectorize(function(t) {
-    Lambda_hat[which.min(abs(time_steps - t))]
+    if (t <= 0) {
+      return(0);
+    }
+    Lambda_hat[sum(t > time_steps)]
   })
   
   list(beta = beta_hat,
        theta = theta_hat,
+       time_steps = time_steps,
+       lambda_hat_nz=lambda_hat_nz,
+       time_steps_nz=time_steps_nz,
+       d_ = d_,
        lambda = lambda_hat,
+       Lambda = Lambda_hat,
        loglik = loglik,
        frailty = frailty,
        loglikfn=loglikfn,
        lambdafn = lambdafn,
        Lambdafn = Lambdafn,
        fitter = fitter,
+       fitmethod = control$fitmethod,
        method = 'fitfrail'
+       # TODO: estimated frailty values
       )
 }
