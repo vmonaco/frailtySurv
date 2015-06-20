@@ -1,10 +1,13 @@
-# A wrapper for coxph, gathers the coeffs, theta, censoring, runtime
-simfrail <- function(reps, genfrail.args, fitfrail.args, lambda_points,
-                     mc.cores=detectCores(), seed=2015, use.parallel=TRUE) { 
+# Generate data and fit a model many times
+simfrail <- function(reps, 
+                     genfrail.args, 
+                     fitfrail.args,
+                     base.time, # where to evaluate the baseline hazard function
+                     mc.cores=0 # 0 to use all available cores, -1 to use all but 1, etc
+                     ) { 
   
   # To make the result reproducable when parallelized, seed each run from 
   # a list of random seeds sampled from a meta seed
-  set.seed(seed)
   seeds <- sample(1:1e7, reps, replace=TRUE)
   
   fn <- function(s) {
@@ -12,29 +15,29 @@ simfrail <- function(reps, genfrail.args, fitfrail.args, lambda_points,
     
     # Generate new random data, give this to coxph
     data <- do.call("genfrail", as.list(genfrail.args))
-    # data$time <- data$time + rnorm(length(data$time), 0, 0.01)
-    fitfrail.args[["data"]] = data
+    fitfrail.args[["data"]] <- data
     
-    # Only interested in total elapsed time
+    # Time the fitter
     runtime <- system.time(fit <- do.call("fitfrail", as.list(fitfrail.args)))["elapsed"]
     names(runtime) <- "runtime"
     
     cens <- 1 - sum(data$status)/length(data$status)
+    names(cens) <- "cens"
     
     beta <- fit$beta
     names(beta) <- paste("beta", 1:length(fit$beta))
+    
     theta=fit$theta
     names(theta) <- paste("theta", 1:length(fit$theta))
     
-    lambda <- fit$lambdafn(lambda_points)
-    names(lambda) <- paste("lambda.", lambda_points, sep="")
+    lambda <- fit$lambdafn(base.time)
+    names(lambda) <- paste("lambda.", base.time, sep="")
     
-    Lambda <- fit$Lambdafn(lambda_points)
-    names(Lambda) <- paste("Lambda.", lambda_points, sep="")
+    Lambda <- fit$Lambdafn(base.time)
+    names(Lambda) <- paste("Lambda.", base.time, sep="")
     
-    # Output is: beta1, beta2, ..., [theta], censoring, runtime
     c(runtime,
-      cens=cens,
+      cens,
       beta,
       theta,
       lambda,
@@ -42,9 +45,12 @@ simfrail <- function(reps, genfrail.args, fitfrail.args, lambda_points,
   }
   
   have.parallel <- requireNamespace("parallel", quietly = TRUE)
-  if (use.parallel && have.parallel) {
+  if (mc.cores != 1 && have.parallel) {
     # Run in parallel and make a row-observation matrix
-    results <- mclapply(seeds, fn, mc.preschedule=FALSE, 
+    if (mc.cores <= 0) {
+      mc.cores <- parallel::detectCores() + mc.cores
+    }
+    results <- parallel::mclapply(seeds, fn, mc.preschedule=FALSE, 
                         mc.set.seed=TRUE, mc.cores=mc.cores, mc.silent=FALSE)
   } else if (use.parallel && !have.parallel) {
     # Run in serial with a warning
@@ -56,56 +62,50 @@ simfrail <- function(reps, genfrail.args, fitfrail.args, lambda_points,
   }
   
   results <- t(simplify2array(results))
-  
-  # TODO: Summarize everything somewhere else:
-  # results <- apply(results, 2, function(x) c(mean=mean(x), sd=sd(x)))
-  
   data.frame(results)
 }
 
-fitfrail_residuals <- function(reps, beta, theta, formula, frailty, 
-                               lambda_points=0:150, Lambdafn=function(t, tau=4.6, C=0.01) (C*t)^tau,
-                               N=c(50,100)){#},500,1000)) {
+# Perform simfrail for multiple param values to passed genfrail
+simfrail.multigen <- function(reps, seed, genfrail.args, fitfrail.args, base.time,
+                              param.name, param.values) {
+  results <- lapply(param.values, function(pvalue) {
+    genfrail.args[[param.name]] <- pvalue
+    set.seed(seed) # seed before each run
+    partial.results <- simfrail(reps, genfrail.args, fitfrail.args, base.time)
+    # Name the first column as the parameter name
+    setNames(cbind(param.name=toString(pvalue), partial.results), 
+             c(param.name, names(partial.results)))
+  })
   
-  res <- lapply(N, function(Ni) {
-    r <- simfrail(reps, list(beta=beta, censor.params=c(130,15), frailty=frailty, N=Ni, K=2, 
-                         theta=theta, covariates="uniform"), 
-             list(formula=formula, frailty=frailty, verbose=FALSE), lambda_points=lambda_points)
-    
-    cbind(N=Ni, r, 
-               res.theta=r[,"theta.1"] - theta,
-               res.beta=unname(data.matrix(r[, grepl("beta.", names(r))])) - 
-                          matrix(rep(beta, each=reps), nrow=reps),
-          res.Lambda.20=r$Lambda.20 - Lambdafn(20),
-          res.Lambda.60=r$Lambda.60 - Lambdafn(60),
-          res.Lambda.80=r$Lambda.80 - Lambdafn(80),
-          res.Lambda.100=r$Lambda.100 - Lambdafn(100)
-          ) })
-  
-  do.call("rbind", res)
+  do.call("rbind", results)
 }
 
-plot_residuals <- function(res, title, lambda_points, lambdafn) {
+plot.residuals <- function(results, true.values, title="") {
+  if (!requireNamespace("parallel", quietly = TRUE)) {
+    stop("plot.residuals requires the reshape2 package")
+  }
+  
+  residuals <- cbind(N=results[,"N"], results[,names(true.values)] - true.values)
+  
   # Select N and residuals columns, start with res
-  var_names <- sapply(names(res)[grepl("res", names(res))], 
-                      function(w) gsub("res\\.", "", w),
-                      USE.NAMES=FALSE)
-  n_vars <- length(var_names)
-  res.stacked <- melt(res[,grepl("N|res", names(res))], id = c("N"))
-  cases <- c(t(unique(res.stacked["N"])))
-  mean_res <- mean(c(t(abs(res.stacked["value"]))))
-  bp_ylim <- 3 #0.25*mean_res
-  boxplot(value~N+variable, data=res.stacked, notch=TRUE, 
-          col=rep(1:n_vars, each=length(cases)), 
-          names=rep(cases, n_vars), 
+  var.names <- names(true.values)
+  n.vars <- length(true.values)
+  
+  residuals.melt <- reshape2::melt(residuals, id = c("N"))
+  cases <- c(t(unique(residuals.melt["N"])))
+  
+  # bp_ylim <- 3 #0.25*mean_res
+  boxplot(value ~ N + variable, data=residuals.melt, notch=TRUE, 
+          col=rep(1:n.vars, each=length(cases)), 
+          names=rep(cases, n.vars), 
           xlab="N", ylab="Residual", 
-          ylim=c(-bp_ylim, bp_ylim),
+          # ylim=c(-bp_ylim, bp_ylim),
           main=title)
   abline(h=0)
-  legend(x=0,y=bp_ylim, legend=var_names, fill=1:n_vars, ncol=n_vars)
+  legend("topright", legend=names(true.values), fill=1:n.vars, ncol=n.vars)
 }
 
-plot_baseline_hazard <- function(results, lambdafn=NULL, Lambdafn=NULL) {
+plot.baseline_hazard <- function(results, lambdafn=NULL, Lambdafn=NULL) {
   if (!is.null(lambdafn)) {
     bh <- results[,grepl("lambda.", names(results))]
     time_steps <- sapply(names(bh), 
@@ -113,7 +113,7 @@ plot_baseline_hazard <- function(results, lambdafn=NULL, Lambdafn=NULL) {
                         USE.NAMES=FALSE)
     time_steps <- as.numeric(time_steps)
     names(bh) <- time_steps
-    meltbh <- melt(t(bh))
+    meltbh <- reshape2::melt(t(bh))
     names(meltbh) <- c("Time","instance", "value")
     bhfn <- lambdafn
   } else if (!is.null(Lambdafn)) {
@@ -123,16 +123,24 @@ plot_baseline_hazard <- function(results, lambdafn=NULL, Lambdafn=NULL) {
                          USE.NAMES=FALSE)
     time_steps <- as.numeric(time_steps)
     names(bh) <- time_steps
-    meltbh <- melt(t(bh))
+    meltbh <- reshape2::melt(t(bh))
     names(meltbh) <- c("Time","instance", "value")
     bhfn <- Lambdafn
   } else {
     stop("Must provide BH function lambdafn or cumulative BH function Lambdafn.")
   }
   
-  ggplot(meltbh,aes(x=Time,y=value)) +
+  truebh <- data.frame(x=time_steps, y=bhfn(time_steps))
+  meltbh$type <- "Estimated"
+  truebh$type <- "True"
+  
+  ggplot(meltbh,aes(x=Time,y=value,color=type)) +
     stat_summary(fun.data = "mean_cl_boot", geom = "smooth") +
-    geom_line(aes(x=x, y=y), data.frame(x=time_steps, y=bhfn(time_steps)))
+    geom_line(aes(x=x, y=y, color=type), truebh) +
+    scale_colour_manual("Cumulative BH",
+                        values=c("True"="black","Estimated"="blue")) +
+    ylab("Cumulative baseline hazard") +
+    ggtitle("todo")
 }
 
 # A wrapper for coxph, gathers the coeffs, theta, censoring, runtime
@@ -166,7 +174,7 @@ simfrailcoxph <- function(reps, genfrail.args, coxph.args, seed=2015)
 
 # A wrapper for coxph, gathers the coeffs, theta, censoring, runtime
 simcoxph <- function(reps, genfrail.args, coxph.args, lambda_points,
-                     mc.cores=detectCores(), seed=2015) { 
+                     mc.cores=parallel::detectCores(), seed=2015) { 
   
   # To make the result reproducable when parallelized, seed each run from 
   # a list of random seeds sampled from a meta seed
@@ -194,17 +202,15 @@ simcoxph <- function(reps, genfrail.args, coxph.args, lambda_points,
     theta <- fit$history[[1]]$theta
     names(theta) <- paste("theta", 1:length(theta))
     
-    ss <- survfit(fit)
-    
-    Lambda_hat <- c(0, -log(ss$surv))
-    time_steps <- c(0, ss$time)
+    bh <- basehaz(fit, centered=FALSE)
+    Lambda_hat <- c(0, bh$hazard)
+    time_steps <- c(0, bh$time)
     
     Lambdafn <- Vectorize(function(t) {
       if (t <= 0) {
         return(0);
       }
       Lambda_hat[sum(t > time_steps)]
-      # Lambda_hat[which.min(abs(time_steps - t))]
     })
     
     Lambda <- Lambdafn(lambda_points)
@@ -214,12 +220,12 @@ simcoxph <- function(reps, genfrail.args, coxph.args, lambda_points,
     c(runtime,
       cens=cens,
       beta,
-      theta,
+      # theta,
       Lambda)
   }
   
   # Run in parallel and make a row-observation matrix
-  results <- mclapply(seeds, fn, mc.preschedule=FALSE, 
+  results <- parallel::mclapply(seeds, fn, mc.preschedule=FALSE, 
                       mc.set.seed=TRUE, mc.cores=mc.cores, mc.silent=FALSE)
   # results <- lapply(seeds, fn)
   results <- t(simplify2array(results))

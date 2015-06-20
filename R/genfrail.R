@@ -26,13 +26,13 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
                      # Uniform: c(lower, upper) inclusive
                      K.params = c(2, 0), 
                      
-                     # Only one of these can be non-null for the baseline hazard
-                     lambda_0 = NULL, #function(t) 2.9024e-9*t^3.6
-                     Lambda_0 = NULL, #function(t, tau=4.6, C=0.01) (C*t)^tau,
-                     Lambda_0_inv = function(t) (t^(1/4.6))/0.01,
-                     
+                     # Only one of these needs to be specified
+                     # Order of preference is: Lambda_0_inv, Lambda_0, lambda_0
+                     lambda_0 = function(t, tau=4.6, C=0.01) (tau*(C*t)^tau)/t,
+                     Lambda_0 = function(t, tau=4.6, C=0.01) (C*t)^tau,
+                     Lambda_0_inv = NULL, #function(t) (t^(1/4.6))/0.01,
                      # Round time to nearest 
-                     round.base = 10
+                     round.base = NULL
                      ) {
   
   # Determine cluster sizes
@@ -65,7 +65,7 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
     }
   }
   
-  cluster_frailty <- 1
+  cluster_frailty <- rep(1, N)
   # Generate the frailty for each family
   # In each case, only generate random values for non-degenerate distributions
   if (frailty=="gamma") {
@@ -103,11 +103,13 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
     obs.time <- Lambda_0_inv(-log(u)/rate)
   # Otherwise, use the method described by Crowther
   } else {
-    if (!is.null(lambda_0)) {
+    if (is.null(Lambda_0) && !is.null(lambda_0)) {
       # numeric integral nested in the root finding
       Lambda_0 <- Vectorize(function(t) {
-        integrate(lambda_0, 0, t)$value
+        integrate(lambda_0, 0, t, subdivisions = 1000L)$value
       })
+    } else if (is.null(Lambda_0)) {
+      stop("Need baseline hazard if cumulative baseline hazard is not specified.")
     }
     
     # TODO: first try to invert the function analytically
@@ -121,7 +123,8 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
       }
       # init at something big enough to avoid a seemingly 0 Jacobian
       # TODO: use uniroot instead?
-      nleqslv(100, fn, global="dbldog", control=list(allowSingular=TRUE))$x
+      # nleqslv(100, fn, global="dbldog", control=list(allowSingular=TRUE))$x
+      uniroot(fn, lower=.Machine$double.eps, upper=100, extendInt="downX")$root
     })
   }
   
