@@ -105,42 +105,38 @@ plot.residuals <- function(results, true.values, title="") {
   legend("topright", legend=names(true.values), fill=1:n.vars, ncol=n.vars)
 }
 
-plot.baseline_hazard <- function(results, lambdafn=NULL, Lambdafn=NULL) {
-  if (!is.null(lambdafn)) {
-    bh <- results[,grepl("lambda.", names(results))]
-    time_steps <- sapply(names(bh), 
-                        function(w) gsub("lambda\\.", "", w),
-                        USE.NAMES=FALSE)
-    time_steps <- as.numeric(time_steps)
-    names(bh) <- time_steps
-    meltbh <- reshape2::melt(t(bh))
-    names(meltbh) <- c("Time","instance", "value")
-    bhfn <- lambdafn
-  } else if (!is.null(Lambdafn)) {
-    bh <- results[,grepl("Lambda.", names(results))]
-    time_steps <- sapply(names(bh), 
-                         function(w) gsub("Lambda\\.", "", w),
-                         USE.NAMES=FALSE)
-    time_steps <- as.numeric(time_steps)
-    names(bh) <- time_steps
-    meltbh <- reshape2::melt(t(bh))
-    names(meltbh) <- c("Time","instance", "value")
-    bhfn <- Lambdafn
+plot.baseline_hazard <- function(results, true.values=NULL, cumhaz=TRUE, title="") {
+  
+  if (cumhaz) {
+    bh <- results[,grepl("Lambda", names(results))]
   } else {
-    stop("Must provide BH function lambdafn or cumulative BH function Lambdafn.")
+    bh <- results[,grepl("lambda", names(results))]
   }
   
-  truebh <- data.frame(x=time_steps, y=bhfn(time_steps))
+  base.time <- sapply(names(bh), function(w) gsub(".+\\.", "", w), USE.NAMES=FALSE)
+  base.time <- as.numeric(base.time)
+  names(bh) <- base.time
+  meltbh <- reshape2::melt(t(bh))
+  names(meltbh) <- c("Time","instance", "value")
   meltbh$type <- "Estimated"
-  truebh$type <- "True"
+
+  if (!is.null(true.values)) {
+    truebh <- data.frame(x=base.time, y=true.values)
+    truebh$type <- "True"
+  }
   
-  ggplot(meltbh,aes(x=Time,y=value,color=type)) +
+  p <- ggplot(meltbh, aes(x=Time,y=value,color=type)) +
     stat_summary(fun.data = "mean_cl_boot", geom = "smooth") +
-    geom_line(aes(x=x, y=y, color=type), truebh) +
-    scale_colour_manual("Cumulative BH",
-                        values=c("True"="black","Estimated"="blue")) +
     ylab("Cumulative baseline hazard") +
-    ggtitle("todo")
+    ggtitle(title)
+  
+  if (!is.null(true.values)) {
+    p <- p + 
+      scale_colour_manual("Cumulative BH", values=c("True"="black","Estimated"="blue")) +
+      geom_line(aes(x=x, y=y, color=type), truebh)
+  }
+  
+  p
 }
 
 # A wrapper for coxph, gathers the coeffs, theta, censoring, runtime
