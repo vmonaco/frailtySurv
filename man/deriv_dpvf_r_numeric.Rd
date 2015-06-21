@@ -2,11 +2,11 @@
 % Please edit documentation in R/distributions.R
 \name{deriv_dpvf_r_numeric}
 \alias{deriv_dpvf_r_numeric}
-\title{}
+\title{PVF numerical derivative wrt. alpha}
 \usage{
 deriv_dpvf_r_numeric(x, alpha)
 }
 \description{
-
+PVF numerical derivative wrt. alpha
 }
 

@@ -243,14 +243,14 @@ dpvf_r <- function(x, alpha, K=100) {
 }
 
 #'
-#' 
+#' PVF numerical derivative wrt. alpha
 #' 
 deriv_dpvf_r_numeric <- function(x, alpha) {
   Vectorize(function(x) grad(function(alpha) dpvf_r(x, alpha), alpha))(x)
 }
 
 #' 
-#' 
+#' Generate samples from a PVF using its LT
 #' 
 rpvf_r <- function(n, alpha) {
   rlaptrans(n, lt_dpvf_r, p=0, alpha=alpha)

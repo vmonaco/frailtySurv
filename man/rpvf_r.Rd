@@ -2,11 +2,11 @@
 % Please edit documentation in R/distributions.R
 \name{rpvf_r}
 \alias{rpvf_r}
-\title{}
+\title{Generate samples from a PVF using its LT}
 \usage{
 rpvf_r(n, alpha)
 }
 \description{
-
+Generate samples from a PVF using its LT
 }
 
