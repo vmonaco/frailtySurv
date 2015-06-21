@@ -80,12 +80,15 @@ simfrail.multigen <- function(reps, seed, genfrail.args, fitfrail.args, base.tim
   do.call("rbind", results)
 }
 
-plot.residuals <- function(results, true.values, title="") {
-  if (!requireNamespace("parallel", quietly = TRUE)) {
-    stop("plot.residuals requires the reshape2 package")
+plot.simfrail.residuals <- function(results, true.values, title="") {
+  if (!requireNamespace("ggplot2", quietly = TRUE) || 
+      !requireNamespace("gridExtra", quietly = TRUE)) {
+    stop("Plotting residuals requires the ggplot2, and reshape2 packages")
   }
   
-  residuals <- cbind(N=results[,"N"], results[,names(true.values)] - true.values)
+  residuals <- cbind(N=results["N"],
+                     t(apply(results[,names(true.values)], 1, 
+                             function(x) x - true.values)))
   
   # Select N and residuals columns, start with res
   var.names <- names(true.values)
@@ -105,38 +108,65 @@ plot.residuals <- function(results, true.values, title="") {
   legend("topright", legend=names(true.values), fill=1:n.vars, ncol=n.vars)
 }
 
-plot.baseline_hazard <- function(results, true.values=NULL, cumhaz=TRUE, title="") {
-  
-  if (cumhaz) {
-    bh <- results[,grepl("Lambda", names(results))]
-  } else {
-    bh <- results[,grepl("lambda", names(results))]
+plot.simfrail.hazard <- function(results, funs=c("cbh", "bh"), 
+                                 true.cbh=NULL, true.bh=NULL, title=NULL) {
+  if (!requireNamespace("ggplot2", quietly = TRUE) || 
+      !requireNamespace("gridExtra", quietly = TRUE) || 
+      !requireNamespace("gridExtra", quietly = TRUE)) {
+    stop("Plotting the hazard requires the ggplot2, gridExtra, and reshape2 packages")
+  }
+  plotter <- function(haz, ylabel, true.values=NULL) {
+    base.time <- sapply(names(haz), function(w) gsub(".+\\.", "", w), USE.NAMES=FALSE)
+    base.time <- as.numeric(base.time)
+    names(haz) <- base.time
+    melthaz <- reshape2::melt(t(haz))
+    names(melthaz) <- c("Time","instance", "value")
+    melthaz$type <- "Mean (95% CI)"
+    
+    if (!is.null(true.values)) {
+      if (is.function(true.values)) {
+        true.values <- true.values(base.time)
+      } else if (length(base.time) != length(true.values)) {
+        stop("Must provide a function or same number of BH points as evaluated in results.")
+      }
+      truebh <- data.frame(x=base.time, y=true.values)
+      truebh$type <- "Actual"
+    }
+    
+    p <- ggplot(melthaz, aes(x=Time,y=value,color=type)) +
+      stat_summary(fun.data="mean_cl_boot", geom="smooth") +
+      theme(legend.position=c(0,1),
+            legend.justification=c(0,1)) +
+      ylab(ylabel)
+    
+    if (!is.null(true.values)) {
+      p <- p + 
+        geom_line(aes(x=x, y=y, color=type), truebh) +
+        scale_colour_manual("", values=c("black","blue"))
+    } else {
+      p <- p + scale_colour_manual("", values=c("blue"))
+    }
+    
+    p
   }
   
-  base.time <- sapply(names(bh), function(w) gsub(".+\\.", "", w), USE.NAMES=FALSE)
-  base.time <- as.numeric(base.time)
-  names(bh) <- base.time
-  meltbh <- reshape2::melt(t(bh))
-  names(meltbh) <- c("Time","instance", "value")
-  meltbh$type <- "Estimated"
-
-  if (!is.null(true.values)) {
-    truebh <- data.frame(x=base.time, y=true.values)
-    truebh$type <- "True"
+  plots <- list()
+  
+  if ("cbh" %in% funs) {
+    p1 <- plotter(results[,grepl("Lambda", names(results))], 
+                       "Cumulative baseline hazard",
+                       true.cbh)
+    plots <- c(plots, list(p1))
   }
   
-  p <- ggplot(meltbh, aes(x=Time,y=value,color=type)) +
-    stat_summary(fun.data = "mean_cl_boot", geom = "smooth") +
-    ylab("Cumulative baseline hazard") +
-    ggtitle(title)
-  
-  if (!is.null(true.values)) {
-    p <- p + 
-      scale_colour_manual("Cumulative BH", values=c("True"="black","Estimated"="blue")) +
-      geom_line(aes(x=x, y=y, color=type), truebh)
+  if ("bh" %in% funs) {
+    p2 <- plotter(results[,grepl("lambda", names(results))], 
+                       "Baseline hazard",
+                       true.bh)
+    plots <- c(plots, list(p2))
   }
   
-  p
+  do.call(gridExtra::grid.arrange, c(plots, list(ncol=2, main=title)))
 }
 
 # A wrapper for coxph, gathers the coeffs, theta, censoring, runtime

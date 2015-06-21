@@ -71,6 +71,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   # N_[[i]][j, k] indicates whether individual j in cluster i failed at time <= tau_k
   N_ <- sapply(cluster_names, function(i) {
     t(sapply(1:cluster_sizes[[i]], function(j) {
+      # as.numeric((I_[[i]][j] > 0) & (T_[[i]][j] <= time_steps))
       as.numeric((I_[[i]][j] > 0) & (R_[[i]][j] <= 1:length(time_steps)))
     }))
   }, simplify = FALSE, USE.NAMES = TRUE)
