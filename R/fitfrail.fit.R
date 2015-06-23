@@ -11,6 +11,14 @@ sum_by_cluster <- function(A_) {
   A_dot
 }
 
+clapply <- function(clnames, clsizes, fn) {
+  sapply(clnames, function(i) {
+    t(sapply(1:clsizes[[i]], function(j) {
+      fn(i, j)
+    }))
+  }, simplify = FALSE, USE.NAMES = TRUE)
+}
+
 # Helper fn to get the rank, where duplicates have the same rank
 increasing_rank <- function(d) {
   j <- unique(sort(d));
@@ -59,9 +67,9 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   X_ <- split.data.frame(x, cluster) # Covariates
   T_ <- split(time, cluster) # Followup time
   I_ <- split(status, cluster) # Failure indicator
-  # Failure rank + 1, where time_steps[R_[i][j]] is the failure time of member j in cluster i
-  # R_ <- split(1 + increasing_rank(time), cluster) 
-  R_ <- split(1 + rank(time, ties.method="first"), cluster)
+  # Failure rank + 1, where time_steps[K_[i][j]] is the failure time of member j in cluster i
+  # K_ <- split(1 + increasing_rank(time), cluster) 
+  K_ <- split(1 + rank(time, ties.method="first"), cluster)
   
   # Cluster names and sizes are needed in several places, so get these now
   cluster_names <- levels(cluster)
@@ -72,7 +80,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   N_ <- sapply(cluster_names, function(i) {
     t(sapply(1:cluster_sizes[[i]], function(j) {
       # as.numeric((I_[[i]][j] > 0) & (T_[[i]][j] <= time_steps))
-      as.numeric((I_[[i]][j] > 0) & (R_[[i]][j] <= 1:length(time_steps)))
+      as.numeric((I_[[i]][j] > 0) & (K_[[i]][j] <= 1:length(time_steps)))
     }))
   }, simplify = FALSE, USE.NAMES = TRUE)
   
@@ -83,9 +91,15 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   Y_ <- sapply(cluster_names, function(i) {
     t(sapply(1:cluster_sizes[[i]], function(j) {
       # as.numeric(T_[[i]][j] >= time_steps)
-      as.numeric(R_[[i]][j] >= 1:length(time_steps))
+      as.numeric(K_[[i]][j] >= 1:length(time_steps))
     }))
   }, simplify = FALSE, USE.NAMES = TRUE)
+  
+  R_ <- clapply(cluster_names, cluster_sizes, function(i, j) {
+    exp(beta * X_[[i]][j]) * Y_[[i]][j]
+  })
+  R_dot_ <- sum_by_cluster(R_)
+  
   
   d_ <- time_steps_status
   # d_[k] is the number of failures at time tau_k
@@ -103,7 +117,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     beta <- gamma[1:n_beta]
     theta <- gamma[(n_beta+1):(n_beta+n_theta)]
     
-    estimator <- baseline_hazard_estimator(X_, R_, d_, Y_, N_dot, beta, theta, frailty)
+    estimator <- baseline_hazard_estimator(X_, K_, d_, Y_, N_dot, beta, theta, frailty)
     H_ <<- estimator$H_
     H_dot <<- estimator$H_dot
     lambda_hat <<- estimator$lambda_hat
@@ -117,11 +131,11 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     # TODO: This could be done in parallel, not much gain though.
     c(sapply(1:n_beta,
              function(beta_idx)
-               U_r(X_, R_, I_, N_dot, H_, H_dot, 
+               U_r(X_, K_, I_, N_dot, H_, H_dot, 
                    beta, theta, beta_idx, frailty)),
       sapply(1:n_theta, 
              function(theta_idx) 
-               U_p(X_, R_, I_, N_dot, H_, H_dot, 
+               U_p(X_, K_, I_, N_dot, H_, H_dot, 
                    beta, theta, theta_idx, frailty)))/n_clusters
   }
   
@@ -130,18 +144,50 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
       iter <<- iter + 1
       cat(c(signif(c(iter, beta, theta), 4), "\n"), sep="\t")
     }
-    estimator <- baseline_hazard_estimator(X_, R_, d_, Y_, N_dot, beta, theta, frailty)
-    loglikelihood(X_, R_, I_, N_dot, estimator$H_dot, estimator$Lambda_hat, beta, theta, frailty)
+    estimator <- baseline_hazard_estimator(X_, K_, d_, Y_, N_dot, beta, theta, frailty)
+    loglikelihood(X_, K_, I_, N_dot, estimator$H_dot, estimator$Lambda_hat, beta, theta, frailty)
   }
   
-  jacobian <- function(gamma) {
+  jacobian_ij <- function(gamma, i, j) {
+    stopifnot(length(gamma) == n_beta + n_theta)
     beta <- gamma[1:n_beta]
     theta <- gamma[(n_beta+1):(n_beta+n_theta)]
     
-    estimator <- baseline_hazard_estimator(X_, R_, d_, Y_, N_dot, beta, theta, frailty)
+    bh <- baseline_hazard_estimator(X_, K_, d_, Y_, N_dot, beta, theta, frailty)
+    Lambda <- bh$Lambda
+    lambda <- bh$lambda
+    H_ <- bh$H_
+    H_dot_ <- bh$H_dot_
+    if (i <= n_beta && j <= n_beta) {
+      dH <- dH_dbeta(d_, K_, X_, R_, R_dot_, N_dot, H_, H_dot_, 
+                            Lambda, lambda, beta, theta, j, frailty)
+      dH_dbeta_ <- dH$dH_dbeta_
+      dH_dot_dbeta_ <- dh$dH_dot_dbeta_
+      
+      jacobian_beta_beta(d_, K_, X_, N_dot, H_, H_dot, dH_dbeta_, dH_dot_dbeta_,
+                         beta, theta, i, j, frailty)
+    } else if (i <= n_beta && j > n_beta) {
+      # jacobian_beta_theta()
+      0
+    } else if (i > n_beta && j <= n_beta) {
+      # jacobian_theta_beta()
+      0
+    } else if (i > n_beta && j > n_beta) {
+      # jacobian_thtea_theta()
+      0
+    }
+  }
+  
+  jacobian <- function(gamma) {
+    n_gamma <- length(gamma)
+    
+    beta <- gamma[1:n_beta]
+    theta <- gamma[(n_beta+1):(n_beta+n_theta)]
+    
+    estimator <- baseline_hazard_estimator(X_, K_, d_, Y_, N_dot, beta, theta, frailty)
     
     # Build the jacobian matrix from the respective components
-    jacobian()
+    outer(1:n_gamma, 1:n_gamma, function(i, j) jacobian_ij(gamma, i, j))
   }
   
   if (control$fitmethod == 'score') {
@@ -209,7 +255,8 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
        Lambdafn = Lambdafn,
        fitter = fitter,
        fitmethod = control$fitmethod,
-       method = 'fitfrail'
+       method = 'fitfrail',
+       jacobian = jacobian
        # TODO: estimated frailty values
       )
 }

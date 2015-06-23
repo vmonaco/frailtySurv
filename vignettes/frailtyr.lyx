@@ -599,6 +599,25 @@ Generating survival data from a model with known parameters.
 \end_layout
 
 \begin_layout Standard
+\begin_inset Formula 
+\[
+S(t|{\bf Z},\omega)=\exp\left\{ -\omega\exp({\bf \beta'}{\bf Z})(0.01t)^{4.6}\right\} 
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\lambda_{0}\left(t\right)=\left\{ \tau\left(Ct\right)^{\tau}\right\} t^{-1}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 Oscillating BH:
 \begin_inset Formula 
 \[
