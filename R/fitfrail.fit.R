@@ -95,11 +95,6 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     }))
   }, simplify = FALSE, USE.NAMES = TRUE)
   
-  R_ <- clapply(cluster_names, cluster_sizes, function(i, j) {
-    exp(beta * X_[[i]][j]) * Y_[[i]][j]
-  })
-  R_dot_ <- sum_by_cluster(R_)
-  
   
   d_ <- time_steps_status
   # d_[k] is the number of failures at time tau_k
@@ -152,6 +147,11 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     stopifnot(length(gamma) == n_beta + n_theta)
     beta <- gamma[1:n_beta]
     theta <- gamma[(n_beta+1):(n_beta+n_theta)]
+    
+    R_ <- clapply(cluster_names, cluster_sizes, function(i, j) {
+      exp(beta * X_[[i]][j]) * Y_[[i]][j]
+    })
+    R_dot_ <- sum_by_cluster(R_)
     
     bh <- baseline_hazard_estimator(X_, K_, d_, Y_, N_dot, beta, theta, frailty)
     Lambda <- bh$Lambda

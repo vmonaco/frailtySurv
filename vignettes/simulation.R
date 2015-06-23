@@ -4,7 +4,7 @@ library(frailtyr)
 
 SEED <- 2015 # Meta-seed for each simulation run
 N <- c(50,100)#,200,400)#,500,1000) # Number of clusters
-REPS <- 100 # Number of repetitions for each simulation
+REPS <- 10 # Number of repetitions for each simulation
 BASE.TIME <- 0:150 # where to evaluate the baseline hazard
 BASE.TIME.RES <- c(25,50,75,100) # where to evaluate residulas of the baseline hazard
 
