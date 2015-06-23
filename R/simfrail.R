@@ -83,7 +83,7 @@ simfrail.multigen <- function(reps, seed, genfrail.args, fitfrail.args, base.tim
 
 plot.simfrail.residuals <- function(results, true.values, title="") {
   if (!requireNamespace("ggplot2", quietly = TRUE) || 
-      !requireNamespace("gridExtra", quietly = TRUE)) {
+      !requireNamespace("reshape2", quietly = TRUE)) {
     stop("Plotting residuals requires the ggplot2, and reshape2 packages")
   }
   require(reshape2)
@@ -112,12 +112,14 @@ plot.simfrail.residuals <- function(results, true.values, title="") {
 plot.simfrail.hazard <- function(results, funs=c("cbh", "bh"), 
                                  true.cbh=NULL, true.bh=NULL, title=NULL) {
   if (!requireNamespace("ggplot2", quietly = TRUE) || 
-      !requireNamespace("gridExtra", quietly = TRUE) || 
+      !requireNamespace("reshape2", quietly = TRUE) || 
       !requireNamespace("gridExtra", quietly = TRUE)) {
     stop("Plotting the hazard requires the ggplot2, gridExtra, and reshape2 packages")
   }
   require(ggplot2)
   require(reshape2)
+  require(gridExtra)
+  
   plotter <- function(haz, ylabel, true.values=NULL) {
     base.time <- sapply(names(haz), function(w) gsub(".+\\.", "", w), USE.NAMES=FALSE)
     base.time <- as.numeric(base.time)
