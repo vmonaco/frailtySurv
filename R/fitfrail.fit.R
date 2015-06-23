@@ -166,11 +166,22 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   lambda_hat_nz <- lambda_hat[d_ > 0]
   time_steps_nz <- time_steps[d_ > 0]
   
+  # Group lambda by time steps 
+  lambda_hat_nz <- vapply(split(lambda_hat_nz, factor(time_steps_nz)), sum, 0)
+  time_steps_nz <- unique(time_steps_nz)
+  
   lambdafn <- Vectorize(function(t) {
+    if (t <= 0) {
+      return(0);
+    }
+    
     idx <- sum(t > time_steps_nz)
+    
     if (idx == 0) {
       return(0)
-    } else if (idx == length(time_steps_nz)) {
+    }
+    
+    if (idx >= length(time_steps_nz)) {
       idx <- length(time_steps_nz) - 1
     }
     lambda_hat_nz[idx]/(time_steps_nz[idx+1] - time_steps_nz[idx])

@@ -44,8 +44,9 @@ simfrail <- function(reps,
       Lambda)
   }
   
+  use.parallel <- mc.cores != 1
   have.parallel <- requireNamespace("parallel", quietly = TRUE)
-  if (mc.cores != 1 && have.parallel) {
+  if (use.parallel && have.parallel) {
     # Run in parallel and make a row-observation matrix
     if (mc.cores <= 0) {
       mc.cores <- parallel::detectCores() + mc.cores

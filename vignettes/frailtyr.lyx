@@ -598,6 +598,18 @@ key "crowther2013simulating"
 Generating survival data from a model with known parameters.
 \end_layout
 
+\begin_layout Standard
+Oscillating BH:
+\begin_inset Formula 
+\[
+\lambda_{0}\left(t\right)=A^{sin\left(f\pi t\right)}\left\{ \tau\left(Ct\right)^{\tau}\right\} t^{-1}
+\]
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Model estimation
 \end_layout
