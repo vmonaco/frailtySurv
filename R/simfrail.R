@@ -86,7 +86,7 @@ plot.simfrail.residuals <- function(results, true.values, title="") {
       !requireNamespace("gridExtra", quietly = TRUE)) {
     stop("Plotting residuals requires the ggplot2, and reshape2 packages")
   }
-  
+  require(reshape2)
   residuals <- cbind(N=results["N"],
                      t(apply(results[,names(true.values)], 1, 
                              function(x) x - true.values)))
@@ -116,6 +116,8 @@ plot.simfrail.hazard <- function(results, funs=c("cbh", "bh"),
       !requireNamespace("gridExtra", quietly = TRUE)) {
     stop("Plotting the hazard requires the ggplot2, gridExtra, and reshape2 packages")
   }
+  require(ggplot2)
+  require(reshape2)
   plotter <- function(haz, ylabel, true.values=NULL) {
     base.time <- sapply(names(haz), function(w) gsub(".+\\.", "", w), USE.NAMES=FALSE)
     base.time <- as.numeric(base.time)
