@@ -1,0 +1,1572 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass jss
+\begin_preamble
+%the following commands are used only for articles and codesnippets
+
+\author{John V. Monaco\\Pace University \And 
+        Malka Gorfine\\Tel Aviv University  \And
+        Li Hsu\\Fred Hutchinson\\Cancer Research Center
+}
+\title{\pkg{frailtyr} Simulations}
+
+% the same as above, without any formatting
+\Plainauthor{John V. Monaco, Malka Gorfine, Li Hsu}
+\Plaintitle{frailtyr Simulations} 
+%if necessary, provide a short title
+\Shorttitle{Package foo in R} 
+
+\Abstract{This document contains simulation results using \pkg{frailtyr}. Each simulation contains 100 repetitions to obtain empirical confidence intervals.}
+%at least one keyword is needed
+\Keywords{survival analysis, \pkg{frailtyr}, \proglang{R}}
+%the same as above, without any formatting
+\Plainkeywords{survival analysis, frailtyr, R} 
+
+%the following commands are used only for book or software reviews
+
+%\Reviewer{Some Author\\University of Somewhere}
+%\Plainreviewer{Some Author}
+
+%the following commands are used only for book reviews
+%\Booktitle{LyX and \proglang{R}: Secrets of the LyX Master}
+%\Bookauthor{Book Author}
+%\Pubyear{2008}
+%\ISBN{0-12345-678-9}
+%\Pages{500}
+
+%the following command is used only for software reviews
+%\Softwaretitle{\proglang{gretl 1.7.4}}
+
+%the following commands are used only for book or software reviews
+%\Publisher{LyX Publishing Inc.}
+%\Pubaddress{LyX City}
+%\Price{USD 59.95 (P), USD 99.95 (H)}
+%\URL{http://www.lyx.org/}
+
+%without any formatting
+%\Plaintitle{LyX and R: Secrets of the LyX Master}
+%\Shorttitle{LyX and R}
+
+%the following commands are used for articles, codesnippets, book reviews and software reviews
+
+%publication information
+%do not use these commands before the article has been accepted
+%\Volume{00}
+%\Issue{0}
+%\Month{Month}
+%\Year{2000}
+%\Submitdate{2000-00-00}
+%\Acceptdate{2000-00-00}
+
+%The address of at least one author should be given in the following format
+\Address{
+  John V. Monaco\\
+  Seidenberg School of CSIS\\
+  Pace University\\
+  Pleasantville, NY, USA\\
+  E-mail: \email{jmonaco@pace.edu}\\
+  URL: \url{http://vmonaco.com}
+}
+%you can add a telephone and fax number before the e-mail in the format
+%Telephone: +12/3/4567-89
+%Fax: +12/3/4567-89
+
+%if you use Sweave,  include the following line (with % symbols):
+%% need no \usepackage{Sweave.sty}
+\end_preamble
+\options nojss
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format pdf2
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 0
+\use_package amssymb 0
+\use_package cancel 0
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 0
+\use_package mhchem 1
+\use_package stackrel 0
+\use_package stmaryrd 0
+\use_package undertilde 0
+\cite_engine natbib
+\cite_engine_type authoryear
+\biblio_style plainnat
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Note that title, author, address, abstract, keywords etc for this article
+ style are written in the LaTeX preamble (accessed from Document\SpecialChar \menuseparator
+Settings...\SpecialChar \menuseparator
+LaTeX
+ Preamble).
+ 
+\end_layout
+
+\begin_layout Plain Layout
+To use the JSS codesnippet, bookreview or softwarereview styles, replace
+ the option 
+\begin_inset Quotes eld
+\end_inset
+
+article
+\begin_inset Quotes erd
+\end_inset
+
+ in Document\SpecialChar \menuseparator
+Settings...\SpecialChar \menuseparator
+Document Class\SpecialChar \menuseparator
+Options with 
+\begin_inset Quotes eld
+\end_inset
+
+codesnippet
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+bookreview
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+softwarereview
+\begin_inset Quotes erd
+\end_inset
+
+ and remove/uncomment the relevant parts in the LaTeX Preamble.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+If you want to use this JSS article style for a non-JSS article, replace
+ the option 
+\begin_inset Quotes eld
+\end_inset
+
+article
+\begin_inset Quotes erd
+\end_inset
+
+ with 
+\begin_inset Quotes eld
+\end_inset
+
+nojss
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This will suppress the JSS-specic parts of the layout.
+\end_layout
+
+\begin_layout Plain Layout
+To include the JSS-specific parts of the layout, the article has to be processed
+ with PDF, i.e.
+ you cannot process it with DVI or PS.
+ However, if the option 
+\begin_inset Quotes eld
+\end_inset
+
+nojss
+\begin_inset Quotes erd
+\end_inset
+
+ is used, it can be processed with DVI or PS.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+List of symbols
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="7" columns="2">
+<features rotate="0" tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="left" valignment="top" width="75col%">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Symbol
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Description
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $N$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Number of clusters
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $K$
+\end_inset
+
+ or 
+\begin_inset Formula $m_{i}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+When 
+\begin_inset Formula $K$
+\end_inset
+
+ is used, there are exactly 
+\begin_inset Formula $K$
+\end_inset
+
+ members in each cluster.
+ Otherwise 
+\begin_inset Formula $m_{i}$
+\end_inset
+
+ is the size of the 
+\begin_inset Formula $i^{\mbox{th}}$
+\end_inset
+
+ cluster, and 
+\begin_inset Formula $\E\left[m_{i}\right]$
+\end_inset
+
+ is the expected size of each cluster
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\lambda_{0}$
+\end_inset
+
+ and 
+\begin_inset Formula $\Lambda_{0}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Baseline hazard and cumulative baseline hazard functions
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\beta$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Coefficient vector
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\theta$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Frailty distribution parameter vector
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $f\left(\omega;\theta\right)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Frailty distribution density, where 
+\begin_inset Formula $\omega_{i}$
+\end_inset
+
+ is a shared frailty value for the 
+\begin_inset Formula $i^{\mbox{th}}$
+\end_inset
+
+ cluster
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Symbol descriptions
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Gamma frailty benchmark
+\end_layout
+
+\begin_layout Standard
+Benchmark simulation with gamma frailty, two covariates, and typical baseline
+ hazard.
+ Censoring rates of 
+\begin_inset Formula $\sim40\%$
+\end_inset
+
+ are obtained with a 
+\begin_inset Formula $N\left(130,15\right)$
+\end_inset
+
+ censoring distribution.
+ Other simulations follow the benchmark simulation except where noted.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+\begin_inset Float table
+placement h
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="6">
+<features rotate="0" tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\beta_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\beta_{2}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\theta$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Censoring
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Runtime
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Emp.
+ mean
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Emp.
+ SD
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Benchmark simulation parameters with 
+\begin_inset Formula $N=400$
+\end_inset
+
+ and 
+\begin_inset Formula $K=2$
+\end_inset
+
+, where 
+\begin_inset Formula $\beta_{1}=\log(2)$
+\end_inset
+
+, 
+\begin_inset Formula $\beta_{2}=\log(3)$
+\end_inset
+
+, and 
+\begin_inset Formula $\theta=2$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/gamma-frailty_2-covars_residuals.pdf
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Gamma frailty benchmark residuals
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/gamma-frailty_2-covars_hazard.pdf
+	lyxscale 75
+	width 75col%
+	special page=1
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/gamma-frailty_2-covars_hazard.pdf
+	lyxscale 75
+	width 75col%
+	special page=2
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/gamma-frailty_2-covars_hazard.pdf
+	lyxscale 75
+	width 75col%
+	special page=3
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/gamma-frailty_2-covars_hazard.pdf
+	lyxscale 75
+	width 100col%
+	special page=4
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Gamma frailty benchmark simulation cumulative baseline hazard (left) and
+ baseline hazard (right) with hazard function 
+\begin_inset Formula $\lambda_{0}\left(t\right)=\left\{ \tau\left(Ct\right)^{\tau}\right\} t^{-1}$
+\end_inset
+
+, where 
+\begin_inset Formula $C=0.01$
+\end_inset
+
+ and 
+\begin_inset Formula $\tau=4.6$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Data generation
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{CodeChunk}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{Code}
+\end_layout
+
+\begin_layout Plain Layout
+
+genfrail(beta = c(log(2), log(3)), frailty = "gamma", theta = 2)
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{Code}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{CodeChunk}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Poisson cluster sizes
+\end_layout
+
+\begin_layout Standard
+Gamma frailty with cluster sizes drawn from a zero-truncated Poisson with
+ parameter 
+\begin_inset Formula $\lambda=2$
+\end_inset
+
+, where 
+\begin_inset Formula $\E\left[m_{i}\right]=\frac{\lambda}{1-e^{-\lambda}}=2.31$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/gamma-frailty_poisson-clusters_residuals.pdf
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Gamma frailty benchmark residuals
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/gamma-frailty_2-covars_hazard.pdf
+	lyxscale 75
+	width 75col%
+	special page=1
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/gamma-frailty_2-covars_hazard.pdf
+	lyxscale 75
+	width 75col%
+	special page=2
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/gamma-frailty_2-covars_hazard.pdf
+	lyxscale 75
+	width 75col%
+	special page=3
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/gamma-frailty_poisson-clusters_hazard.pdf
+	lyxscale 75
+	width 100col%
+	special page=4
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Gamma frailty benchmark simulation cumulative baseline hazard (left) and
+ baseline hazard (right) with hazard function 
+\begin_inset Formula $\lambda_{0}\left(t\right)=\left\{ \tau\left(Ct\right)^{\tau}\right\} t^{-1}$
+\end_inset
+
+, where 
+\begin_inset Formula $C=0.01$
+\end_inset
+
+ and 
+\begin_inset Formula $\tau=4.6$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Rounded observation times
+\end_layout
+
+\begin_layout Standard
+Gamma frailty with two covariates and observation times rounded to the nearest
+ integer.
+ There are 
+\begin_inset Formula $\sim4$
+\end_inset
+
+ failures at each time step for 
+\begin_inset Formula $t>10$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/gamma-frailty_rounded1-obs-time_residuals.pdf
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Residuals for gamma frailty with observation times rounded to the nearest
+ integer.
+ Cumulative baseline hazard estimates are biased as a result of rounding.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/gamma-frailty_rounded1-obs-time_hazard.pdf
+	lyxscale 75
+	width 100col%
+	special page=4
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Gamma frailty with observation times rounded to nearest integer, cumulative
+ baseline hazard (left) and baseline hazard (right) with hazard function
+ 
+\begin_inset Formula $\lambda_{0}\left(t\right)=\left\{ \tau\left(Ct\right)^{\tau}\right\} t^{-1}$
+\end_inset
+
+, where 
+\begin_inset Formula $C=0.01$
+\end_inset
+
+ and 
+\begin_inset Formula $\tau=4.6$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Gamma frailty with observation times rounded to the nearest multiple of
+ 10.
+ With 
+\begin_inset Formula $N=400$
+\end_inset
+
+ and 
+\begin_inset Formula $K=2$
+\end_inset
+
+, there are 
+\begin_inset Formula $\sim60$
+\end_inset
+
+ failures at each time step for 
+\begin_inset Formula $70\le t\le110$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/gamma-frailty_rounded10-obs-time_residuals.pdf
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Residuals for gamma frailty with observation times rounded to the nearest
+ multiple of 10.
+ Cumulative baseline hazard estimates are biased as a result of rounding.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/gamma-frailty_rounded10-obs-time_hazard.pdf
+	lyxscale 75
+	width 100col%
+	special page=4
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Gamma frailty with observation times rounded to the nearest multiple of
+ 10, cumulative baseline hazard (left) and baseline hazard (right) with
+ hazard function 
+\begin_inset Formula $\lambda_{0}\left(t\right)=\left\{ \tau\left(Ct\right)^{\tau}\right\} t^{-1}$
+\end_inset
+
+, where 
+\begin_inset Formula $C=0.01$
+\end_inset
+
+ and 
+\begin_inset Formula $\tau=4.6$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Oscillating baseline hazard
+\end_layout
+
+\begin_layout Standard
+Gamma frailty with baseline hazard function 
+\begin_inset Formula 
+\[
+\lambda_{0}\left(t\right)=A^{sin\left(f\pi t\right)}\left\{ \tau\left(Ct\right)^{\tau}\right\} t^{-1}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $C=0.01$
+\end_inset
+
+, 
+\begin_inset Formula $\tau=4.6$
+\end_inset
+
+, 
+\begin_inset Formula $A=2$
+\end_inset
+
+, and 
+\begin_inset Formula $f=0.1$
+\end_inset
+
+ to simulate oscillations in the increasing baseline hazard.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/gamma-frailty_oscillating-bh_residuals.pdf
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Residuals for gamma frailty with oscillating baseline hazard.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/gamma-frailty_oscillating-bh_hazard.pdf
+	lyxscale 75
+	width 100col%
+	special page=4
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Gamma frailty cumulative baseline hazard (left) and baseline hazard (right)
+ with hazard function 
+\begin_inset Formula $\lambda_{0}\left(t\right)=A^{sin\left(f\pi t\right)}\left\{ \tau\left(Ct\right)^{\tau}\right\} t^{-1}$
+\end_inset
+
+, where 
+\begin_inset Formula $C=0.01$
+\end_inset
+
+, 
+\begin_inset Formula $\tau=4.6$
+\end_inset
+
+, 
+\begin_inset Formula $A=2$
+\end_inset
+
+, and 
+\begin_inset Formula $f=0.1$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+PVF frailty
+\end_layout
+
+\begin_layout Standard
+Power variance function (PVF) frailty with 
+\begin_inset Formula $\alpha=0.7$
+\end_inset
+
+.
+ The censoring rate is
+\begin_inset Formula $\sim30\%$
+\end_inset
+
+ with a censoring distribution of 
+\begin_inset Formula $N(110,15)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/pvf-frailty_2-covars_residuals.pdf
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Residuals for gamma frailty with oscillating baseline hazard.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/pvf-frailty_2-covars_hazard.pdf
+	lyxscale 75
+	width 100col%
+	special page=4
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+PVF frailty cumulative baseline hazard (left) and baseline hazard (right)
+ with hazard function 
+\begin_inset Formula $\lambda_{0}\left(t\right)=\left\{ \tau\left(Ct\right)^{\tau}\right\} t^{-1}$
+\end_inset
+
+, where 
+\begin_inset Formula $C=0.01$
+\end_inset
+
+ and 
+\begin_inset Formula $\tau=4.6$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "frailtyr"
+options "plainnat"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

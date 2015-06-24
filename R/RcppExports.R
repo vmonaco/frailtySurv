@@ -89,3 +89,11 @@ loglikelihood <- function(X_, R_, I_, N_dot, H_dot, Lambda, beta, theta, frailty
     .Call('frailtyr_loglikelihood', PACKAGE = 'frailtyr', X_, R_, I_, N_dot, H_dot, Lambda, beta, theta, frailty)
 }
 
+dH_dbeta <- function(d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, Lambda, Delta_Lambda, beta, theta, beta_idx, frailty) {
+    .Call('frailtyr_dH_dbeta', PACKAGE = 'frailtyr', d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, Lambda, Delta_Lambda, beta, theta, beta_idx, frailty)
+}
+
+jacobian_beta_beta <- function(d_, K_, X_, N_dot, H_, H_dot, dH_dbeta_, dH_dot_dbeta_, beta, theta, beta_idx_1, beta_idx_2, frailty) {
+    .Call('frailtyr_jacobian_beta_beta', PACKAGE = 'frailtyr', d_, K_, X_, N_dot, H_, H_dot, dH_dbeta_, dH_dot_dbeta_, beta, theta, beta_idx_1, beta_idx_2, frailty)
+}
+

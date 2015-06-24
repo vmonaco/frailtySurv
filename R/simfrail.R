@@ -1,4 +1,5 @@
 # Generate data and fit a model many times
+# TODO: output progress
 simfrail <- function(reps, 
                      genfrail.args, 
                      fitfrail.args,
