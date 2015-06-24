@@ -3,8 +3,8 @@
 library(frailtyr)
 
 SEED <- 2015 # Meta-seed for each simulation run
-N <- c(50,100)#,200,400)#,500,1000) # Number of clusters
-REPS <- 10 # Number of repetitions for each simulation
+N <- c(50,100,200,400)#,500,1000) # Number of clusters
+REPS <- 100 # Number of repetitions for each simulation
 BASE.TIME <- 0:150 # where to evaluate the baseline hazard
 BASE.TIME.RES <- c(25,50,75,100) # where to evaluate residulas of the baseline hazard
 
@@ -71,9 +71,8 @@ simfrail.multigen.output <- function(name, title=NULL, outdir=OUTDIR, ...) {
   })
   dev.off()
   
-  return(results)
+  return(NULL)
 }
-
 
 ########## Simulations
 # Each simulation is run first without and then with frailty estimation
@@ -93,63 +92,94 @@ simfrail.multigen.output("gamma-frailty_2-covars", "Gamma frailty, 2 covariates"
                          base.time=BASE.TIME, 
                          param.name="N", param.values=N)
 
-# simfrail.multigen.output("gamma-frailty_poisson-clusters", "Gamma frailty, K~TP(2)",
-#                          reps=REPS, seed=SEED, 
-#                          genfrail.args=alist(
-#                            beta=c(log(2),log(3)),
-#                            frailty="gamma", 
-#                            censor.params=CENSOR.PARAMS,
-#                            K="poisson", theta=THETA, covariates="uniform",
-#                            lambda_0=lambda_0,
-#                            Lambda_0=Lambda_0), 
-#                          fitfrail.args=alist(
-#                            formula=Surv(time, status) ~ Z1 + Z2  + cluster(family), 
-#                            frailty="gamma", verbose=FALSE), 
-#                          base.time=BASE.TIME, 
-#                          param.name="N", param.values=N)
-# 
-# simfrail.multigen.output("pvf-frailty_2-covars", "PVF frailty, 2 covariates",
-#                          reps=REPS, seed=SEED, 
-#                          genfrail.args=alist(
-#                            beta=c(log(2),log(3)),
-#                            frailty="pvf", 
-#                            censor.params=CENSOR.PARAMS,
-#                            K=K, theta=0.7, covariates="uniform",
-#                            lambda_0=lambda_0,
-#                            Lambda_0=Lambda_0), 
-#                          fitfrail.args=alist(
-#                            formula=Surv(time, status) ~ Z1 + Z2  + cluster(family), 
-#                            frailty="pvf", verbose=FALSE), 
-#                          base.time=BASE.TIME, 
-#                          param.name="N", param.values=N)
-# 
-# simfrail.multigen.output("gamma-frailty_oscillating-bh", "Gamma frailty, oscillating BH",
-#                          reps=REPS, seed=SEED, 
-#                          genfrail.args=alist(
-#                            beta=c(log(2),log(3)),
-#                            frailty="gamma", 
-#                            censor.params=CENSOR.PARAMS,
-#                            K=K, theta=THETA, covariates="uniform",
-#                            lambda_0=lambda_0.osc,
-#                            Lambda_0=Lambda_0.osc), 
-#                          fitfrail.args=alist(
-#                            formula=Surv(time, status) ~ Z1 + Z2  + cluster(family), 
-#                            frailty="gamma", verbose=FALSE), 
-#                          base.time=BASE.TIME, 
-#                          param.name="N", param.values=N)
-# 
-# simfrail.multigen.output("gamma-frailty_rounded-obs-time", "Gamma frailty, obs time rounded to 10",
-#                          reps=REPS, seed=SEED, 
-#                          genfrail.args=alist(
-#                            beta=c(log(2),log(3)),
-#                            frailty="gamma", 
-#                            censor.params=CENSOR.PARAMS,
-#                            K=K, theta=THETA, covariates="uniform",
-#                            lambda_0=lambda_0,
-#                            Lambda_0=Lambda_0,
-#                            round=10), 
-#                          fitfrail.args=alist(
-#                            formula=Surv(time, status) ~ Z1 + Z2  + cluster(family), 
-#                            frailty="gamma", verbose=FALSE), 
-#                          base.time=BASE.TIME, 
-#                          param.name="N", param.values=N)
+simfrail.multigen.output("gamma-frailty_poisson-clusters", "Gamma frailty, K~TP(2)",
+                         reps=REPS, seed=SEED, 
+                         genfrail.args=alist(
+                           beta=c(log(2),log(3)),
+                           frailty="gamma", 
+                           censor.params=CENSOR.PARAMS,
+                           K="poisson", theta=THETA, covariates="uniform",
+                           lambda_0=lambda_0,
+                           Lambda_0=Lambda_0), 
+                         fitfrail.args=alist(
+                           formula=Surv(time, status) ~ Z1 + Z2  + cluster(family), 
+                           frailty="gamma", verbose=FALSE), 
+                         base.time=BASE.TIME, 
+                         param.name="N", param.values=N)
+
+simfrail.multigen.output("pvf-frailty_2-covars", "PVF frailty, 2 covariates",
+                         reps=REPS, seed=SEED, 
+                         genfrail.args=alist(
+                           beta=c(log(2),log(3)),
+                           frailty="pvf", 
+                           censor.params=CENSOR.PARAMS,
+                           K=K, theta=0.7, covariates="uniform",
+                           lambda_0=lambda_0,
+                           Lambda_0=Lambda_0), 
+                         fitfrail.args=alist(
+                           formula=Surv(time, status) ~ Z1 + Z2  + cluster(family), 
+                           frailty="pvf", verbose=FALSE), 
+                         base.time=BASE.TIME, 
+                         param.name="N", param.values=N)
+
+simfrail.multigen.output("gamma-frailty_oscillating-bh", "Gamma frailty, oscillating BH",
+                         reps=REPS, seed=SEED, 
+                         genfrail.args=alist(
+                           beta=c(log(2),log(3)),
+                           frailty="gamma", 
+                           censor.params=CENSOR.PARAMS,
+                           K=K, theta=THETA, covariates="uniform",
+                           lambda_0=lambda_0.osc,
+                           Lambda_0=Lambda_0.osc), 
+                         fitfrail.args=alist(
+                           formula=Surv(time, status) ~ Z1 + Z2  + cluster(family), 
+                           frailty="gamma", verbose=FALSE), 
+                         base.time=BASE.TIME, 
+                         param.name="N", param.values=N)
+
+simfrail.multigen.output("gamma-frailty_rounded10-obs-time", "Gamma frailty, obs time rounded to 10",
+                         reps=REPS, seed=SEED, 
+                         genfrail.args=alist(
+                           beta=c(log(2),log(3)),
+                           frailty="gamma", 
+                           censor.params=CENSOR.PARAMS,
+                           K=K, theta=THETA, covariates="uniform",
+                           lambda_0=lambda_0,
+                           Lambda_0=Lambda_0,
+                           round=10), 
+                         fitfrail.args=alist(
+                           formula=Surv(time, status) ~ Z1 + Z2  + cluster(family), 
+                           frailty="gamma", verbose=FALSE), 
+                         base.time=BASE.TIME, 
+                         param.name="N", param.values=N)
+
+simfrail.multigen.output("gamma-frailty_rounded1-obs-time", "Gamma frailty, obs time rounded to 10",
+                         reps=REPS, seed=SEED, 
+                         genfrail.args=alist(
+                           beta=c(log(2),log(3)),
+                           frailty="gamma", 
+                           censor.params=CENSOR.PARAMS,
+                           K=K, theta=THETA, covariates="uniform",
+                           lambda_0=lambda_0,
+                           Lambda_0=Lambda_0,
+                           round=1), 
+                         fitfrail.args=alist(
+                           formula=Surv(time, status) ~ Z1 + Z2  + cluster(family), 
+                           frailty="gamma", verbose=FALSE), 
+                         base.time=BASE.TIME, 
+                         param.name="N", param.values=N)
+
+simfrail.multigen.output("lognormal-frailty_2-covars", "Lognormal frailty, 2 covariates",
+                         reps=REPS, seed=SEED, 
+                         genfrail.args=alist(
+                           beta=c(log(2),log(3)),
+                           frailty="lognormal", 
+                           censor.params=CENSOR.PARAMS,
+                           K=K, theta=THETA, covariates="uniform",
+                           lambda_0=lambda_0,
+                           Lambda_0=Lambda_0), 
+                         fitfrail.args=alist(
+                           formula=Surv(time, status) ~ Z1 + Z2  + cluster(family), 
+                           frailty="lognormal", verbose=FALSE), 
+                         base.time=BASE.TIME, 
+                         param.name="N", param.values=N)

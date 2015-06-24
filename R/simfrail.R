@@ -113,7 +113,8 @@ plot.simfrail.hazard <- function(results, funs=c("cbh", "bh"),
                                  true.cbh=NULL, true.bh=NULL, title=NULL) {
   if (!requireNamespace("ggplot2", quietly = TRUE) || 
       !requireNamespace("reshape2", quietly = TRUE) || 
-      !requireNamespace("gridExtra", quietly = TRUE)) {
+      !requireNamespace("gridExtra", quietly = TRUE) ||
+      !requireNamespace("Hmisc", quietly = TRUE)) {
     stop("Plotting the hazard requires the ggplot2, gridExtra, and reshape2 packages")
   }
   require(ggplot2)
