@@ -260,29 +260,40 @@ rpvf_r <- function(n, alpha) {
 #' Coefficients for the PVF LT derivatives
 #' 
 lt_dpvf_coef_r <- function(p, j, alpha) {
-  if (p == 2 && j == 1) return(1 - alpha)
-  if (p == 2 && j == 2) return(1)
-  if (p == 3 && j == 1) return((1 - alpha)*(2 - alpha))
-  if (p == 3 && j == 2) return(3*(1 - alpha))
-  if (p == 3 && j == 3) return(1)
-  if (j == 1) return(gamma(p - alpha)/gamma(1 - alpha))
-  if (p == j) return(1)
+#   if (p == 2 && j == 1) return(1 - alpha)
+#   if (p == 2 && j == 2) return(1)
+#   if (p == 3 && j == 1) return((1 - alpha)*(2 - alpha))
+#   if (p == 3 && j == 2) return(3*(1 - alpha))
+#   if (p == 3 && j == 3) return(1)
+#   if (j == 1) return(gamma(p - alpha)/gamma(1 - alpha))
+#   if (p == j) return(1)
   
-  return(lt_dpvf_coef_r(p - 1, j - 1, alpha) + lt_dpvf_coef_r(p - 1, j, alpha)*((p - 1) - j*alpha))
+  if (p == j) return(1)
+  if (j == 1) return(gamma(p - alpha)/gamma(1 - alpha))
+  
+  return(lt_dpvf_coef_r(p - 1, j - 1, alpha) + 
+           lt_dpvf_coef_r(p - 1, j, alpha)*((p - 1) - j*alpha))
 }
 
 #' 
-#' Coefficients for the PVF LT derivates, wrt. alpha using Hougaard's definition
-#' Still need coefficients with alpha = delta
+#' Coefficients for the PVF LT, numerical deriv wrt. alpha
+#' 
+lt_deriv_dpvf_coef_r_numeric <- function(p, j, alpha) {
+  return(grad(function(alpha) lt_dpvf_coef(p, j, alpha), alpha))
+}
+
+#' 
+#' Coefficients for the PVF LT
 #' 
 lt_deriv_dpvf_coef_r <- function(p, j, alpha) {
-  if (j == 1) {
-    factor1 <- gamma(p - alpha)/gamma(1 - alpha)
-    factor2 <- sum(1/((1:(p-1)) - alpha))
-    return(factor1*factor2)
-  }
   
   if (p == j) return(0)
+  
+  if (j == 1) {
+    numer <- gamma(p - alpha)*(psigamma(1 - alpha) - psigamma(p - alpha))
+    denom <- gamma(1 - alpha)
+    return(numer/denom)
+  }
   
   return(lt_deriv_dpvf_coef_r(p - 1, j - 1, alpha) + 
            lt_deriv_dpvf_coef_r(p - 1, j, alpha) * ((p - 1) - j*alpha) -
@@ -291,6 +302,7 @@ lt_deriv_dpvf_coef_r <- function(p, j, alpha) {
 
 #' 
 #' Laplace transform of the one-parameter PVF distribution defined above
+#' 
 lt_dpvf_r <- function(p, s, alpha) {
   if (p == 0) {
     return(exp(-((1 + s)^alpha - 1)/alpha))
@@ -303,6 +315,7 @@ lt_dpvf_r <- function(p, s, alpha) {
 
 #' 
 #' pth moment of the one-parameter PVF distribution, as defined above
+#' 
 lt_dpvf_moment_r <- function(alpha, p) { 
   (-1)^p * lt_dpvf_r(p, 0, alpha)
 }
@@ -314,20 +327,26 @@ deriv_lt_dpvf_r_numeric <- function(p, s, alpha) {
   grad(function(alpha) lt_dpvf_r(p, s, alpha), alpha)
 }
 
-#' Similar issue as deriv_lt_dposstab_r, only closed-form expression for the
-#' 0th derivative wrt. s right now
-deriv_lt_dpvf_r <- function(p, s, alpha) {
-  if (p == 0) {
-    factor1 <- exp((1 - (s + 1)^alpha)/alpha)
-    factor2_term1 <- -(1 - (s + 1)^alpha)/alpha^2
-    factor2_term2 <- -((s + 1)^alpha * log(s + 1))/alpha
-    return(factor1*(factor2_term1 + factor2_term2))
+#' 
+#' PVF LT deriv wrt. alpha
+#' 
+deriv_lt_dpvf_r <- function(m, s, alpha) {
+  if (m == 0) {
+    term1 <- ((s + 1)^alpha - 1)/alpha^2
+    term2 <- ((s + 1)^alpha * log(1 + s))/alpha
+    return(lt_dpvf_r(0, s, alpha) * (term1 - term2))
   }
   
-  # deriv_lt_dpvf_r_numeric(p, s, alpha)
-   (-1)^p * deriv_lt_dpvf_r(0, s, alpha) * sum(vapply(1:p, function(j)
-     lt_deriv_dpvf_coef_r(p, j, alpha) * (1 + s)^(j*alpha - p), 0
-   ))
+  term1 <- (-1)^m * deriv_lt_dpvf_r(0, s, alpha) * 
+    sum(vapply(1:m, function(j)
+         lt_dpvf_coef_r(m, j, alpha) * (1 + s)^(j*alpha - m), 0))
+  
+  term2 <- (-1)^m * lt_dpvf_r(0, s, alpha) *
+    sum(vapply(1:m, function(j)
+        lt_deriv_dpvf_coef_r(m, j, alpha) * (1 + s)^(j*alpha - m) + 
+        lt_dpvf_coef_r(m, j, alpha) * j * (1 + s)^(j*alpha - m) * log(1 + s), 0))
+    
+  term1 + term2
 }
 
 

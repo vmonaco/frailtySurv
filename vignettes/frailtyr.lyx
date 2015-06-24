@@ -3,6 +3,80 @@
 \begin_document
 \begin_header
 \textclass jss
+\begin_preamble
+%the following commands are used only for articles and codesnippets
+
+\author{John V. Monaco\\Pace University \And 
+        Malka Gorfine\\Tel Aviv University  \And
+        Li Hsu\\Fred Hutchinson\\Cancer Research Center
+}
+\title{\pkg{frailtyr}: A General Semiparametric Shared Frailty Model}
+
+% the same as above, without any formatting
+\Plainauthor{John V. Monaco, Malka Gorfine, Li Hsu}
+\Plaintitle{frailtyr: A General Semiparametric Shared Frailty Model} 
+%if necessary, provide a short title
+\Shorttitle{Package foo in R} 
+
+\Abstract{TODO}
+%at least one keyword is needed
+\Keywords{survival analysis, \pkg{frailtyr}, \proglang{R}}
+%the same as above, without any formatting
+\Plainkeywords{survival analysis, frailtyr, R} 
+
+%the following commands are used only for book or software reviews
+
+%\Reviewer{Some Author\\University of Somewhere}
+%\Plainreviewer{Some Author}
+
+%the following commands are used only for book reviews
+%\Booktitle{LyX and \proglang{R}: Secrets of the LyX Master}
+%\Bookauthor{Book Author}
+%\Pubyear{2008}
+%\ISBN{0-12345-678-9}
+%\Pages{500}
+
+%the following command is used only for software reviews
+%\Softwaretitle{\proglang{gretl 1.7.4}}
+
+%the following commands are used only for book or software reviews
+%\Publisher{LyX Publishing Inc.}
+%\Pubaddress{LyX City}
+%\Price{USD 59.95 (P), USD 99.95 (H)}
+%\URL{http://www.lyx.org/}
+
+%without any formatting
+%\Plaintitle{LyX and R: Secrets of the LyX Master}
+%\Shorttitle{LyX and R}
+
+%the following commands are used for articles, codesnippets, book reviews and software reviews
+
+%publication information
+%do not use these commands before the article has been accepted
+%\Volume{00}
+%\Issue{0}
+%\Month{Month}
+%\Year{2000}
+%\Submitdate{2000-00-00}
+%\Acceptdate{2000-00-00}
+
+%The address of at least one author should be given in the following format
+\Address{
+  John V. Monaco\\
+  Seidenberg School of CSIS\\
+  Pace University\\
+  Pleasantville, NY, USA\\
+  E-mail: \email{jmonaco@pace.edu}\\
+  URL: \url{http://vmonaco.com}
+}
+%you can add a telephone and fax number before the e-mail in the format
+%Telephone: +12/3/4567-89
+%Fax: +12/3/4567-89
+
+%if you use Sweave,  include the following line (with % symbols):
+%% need no \usepackage{Sweave.sty}
+\end_preamble
+\options article
 \use_default_options true
 \maintain_unincluded_children false
 \language english
@@ -68,6 +142,74 @@
 \end_header
 
 \begin_body
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+newcommand{
+\backslash
+sunderline}[1]{
+\backslash
+smash{
+\backslash
+underline{#1
+\backslash
+mkern-4mu}
+\backslash
+mkern4mu } }
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+newcommand{
+\backslash
+bvec}{
+\backslash
+sunderline
+\backslash
+beta }
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+newcommand{
+\backslash
+Zvec}{
+\backslash
+sunderline Z}
+\end_layout
+
+\end_inset
+
+
+\end_layout
 
 \begin_layout Section
 Introduction
@@ -631,6 +773,40 @@ Oscillating BH:
 
 \begin_layout Section
 Model estimation
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\ell=\sum_{i=1}^{n}\sum_{j=1}^{m_{i}}\delta_{ij}\log e^{\sunderline\beta^{T}\sunderline Z_{ij}}+\sum_{i=1}^{n}\log\mathcal{L}^{\left(m_{i}\right)}\left(H_{i.}\left(\tau\right)\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+\sunderline U_{\bvec}=\frac{\partial}{\partial\bvec}\ell & = & \sum_{i=1}^{n}\left[\sum_{j=1}^{m_{i}}\delta_{ij}\Zvec_{ij}+\frac{\frac{\partial}{\partial\bvec}H_{i.}\left(\tau\right)\frac{\partial}{\partial H_{i.}\left(\tau\right)}\mathcal{L}^{\left(m_{i}\right)}\left(H_{i.}\left(\tau\right)\right)}{\mathcal{L}^{\left(m_{i}\right)}\left(H_{i.}\left(\tau\right)\right)}\right]\\
+ & = & \sum_{i=1}^{n}\left[\sum_{j=1}^{m_{i}}\delta_{ij}\Zvec_{ij}+\sum_{j=1}^{m_{i}}H_{ij}\left(T_{ij}\right)\Zvec_{ij}\frac{\mathcal{L}^{\left(m_{i}+1\right)}\left(H_{i.}\left(\tau\right)\right)}{\mathcal{L}^{\left(m_{i}\right)}\left(H_{i.}\left(\tau\right)\right)}\right]
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+U_{\theta}=\frac{\partial}{\partial\theta}\ell=\sum_{i=1}^{n}\frac{\frac{\partial}{\partial\theta}\mathcal{L}^{\left(m_{i}\right)}\left(H_{i.}\left(\tau\right)\right)}{\mathcal{L}^{\left(m_{i}\right)}\left(H_{i.}\left(\tau\right)\right)}
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1209,7 +1385,17 @@ LT deriv wrt alpha
 \end_layout
 
 \begin_layout Standard
-LT higher deriv wrt alpha?
+LT higher deriv wrt alpha
+\begin_inset Formula 
+\begin{eqnarray*}
+\frac{\partial}{\partial\alpha}c_{m,m}\left(\alpha\right) & = & 0\\
+\frac{\partial}{\partial\alpha}c_{m,1}\left(\alpha\right) & = & \frac{\Gamma\left(m-\alpha\right)\left\{ \psi^{\left(0\right)}\left(1-\alpha\right)-\psi^{\left(0\right)}\left(m-\alpha\right)\right\} }{\Gamma\left(1-\alpha\right)}\\
+\frac{\partial}{\partial\alpha}c_{m,j}\left(\alpha\right) & = & \frac{\partial}{\partial\alpha}c_{m-1,j-1}\left(\alpha\right)+\frac{\partial}{\partial\alpha}c_{m-1,j}\left(\alpha\right)\left\{ \left(m-1\right)-j\alpha\right\} -jc_{m-1,j}\left(\alpha\right)
+\end{eqnarray*}
+
+\end_inset
+
+
 \end_layout
 
 \end_body
