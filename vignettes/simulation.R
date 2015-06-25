@@ -184,3 +184,18 @@ simfrail.multigen.output <- function(name, title=NULL, outdir=OUTDIR, ...) {
 #                            frailty="pvf", verbose=FALSE), 
 #                          base.time=0:130, 
 #                          param.name="N", param.values=N)
+
+simfrail.multigen.output("invgauss-frailty_2-covars", "Inv gauss frailty, 2 covariates",
+                         reps=REPS, seed=SEED, 
+                         genfrail.args=alist(
+                           beta=c(log(2),log(3)),
+                           frailty="invgauss", 
+                           censor.params=CENSOR.PARAMS,
+                           K=K, theta=THETA, covariates="uniform",
+                           lambda_0=lambda_0,
+                           Lambda_0=Lambda_0), 
+                         fitfrail.args=alist(
+                           formula=Surv(time, status) ~ Z1 + Z2  + cluster(family), 
+                           frailty="invgauss", verbose=FALSE), 
+                         base.time=BASE.TIME, 
+                         param.name="N", param.values=N)

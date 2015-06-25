@@ -260,14 +260,6 @@ rpvf_r <- function(n, alpha) {
 #' Coefficients for the PVF LT derivatives
 #' 
 lt_dpvf_coef_r <- function(p, j, alpha) {
-#   if (p == 2 && j == 1) return(1 - alpha)
-#   if (p == 2 && j == 2) return(1)
-#   if (p == 3 && j == 1) return((1 - alpha)*(2 - alpha))
-#   if (p == 3 && j == 2) return(3*(1 - alpha))
-#   if (p == 3 && j == 3) return(1)
-#   if (j == 1) return(gamma(p - alpha)/gamma(1 - alpha))
-#   if (p == j) return(1)
-  
   if (p == j) return(1)
   if (j == 1) return(gamma(p - alpha)/gamma(1 - alpha))
   
@@ -382,6 +374,10 @@ deriv_dlognormal_r_numeric <- function(x, theta) {
 
 ################################################################################
 # TODO: Inverse Gaussian
+
+rinvgauss_r <- function(n, theta) {
+  statmod::rinvgauss(n, mean=1, shape=1/theta)
+}
 
 ################################################################################
 # K-truncated Poisson
