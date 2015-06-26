@@ -13,6 +13,7 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
                      # Censoring distribution and parameter vector
                      censoring = c("normal"),
                      censor.params = c(130,15), # Gaussian distribution for censoring
+                     censor.rate = 0.30,
                      
                      # Number of clusters and cluster sizes
                      N = 300, # N must be provided
@@ -62,6 +63,8 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
       Z[, j] <- rnorm(NK)
     } else if (covariates == "uniform") {
       Z[, j] <- runif(NK)
+    } else if (covariates == "zero") {
+      Z[, j] <- rep(0, NK)
     }
   }
   
@@ -100,12 +103,15 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
   
   # With the inverse cumulative hazard, apply Bender's method
   if (!is.null(Lambda_0_inv)) {
-    obs.time <- Lambda_0_inv(-log(u)/rate)
+    fail.time <- Lambda_0_inv(-log(u)/rate)
   # Otherwise, use the method described by Crowther
   } else {
     if (is.null(Lambda_0) && !is.null(lambda_0)) {
       # numeric integral nested in the root finding
       Lambda_0 <- Vectorize(function(t) {
+        if (t <= 0) {
+          return(0)
+        }
         integrate(lambda_0, 0, t, subdivisions = 1000L)$value
       })
     } else if (is.null(Lambda_0)) {
@@ -117,24 +123,29 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
     # if inversion fails, then need to find root for each t
     # Similar to the method described by Crowther, 
     # except solve: log(S(t)) - log(u) = 0
-    obs.time <- sapply(1:(NK), function(ij) {
+    fail.time <- sapply(1:(NK), function(ij) {
       fn <- function(t) {
         (-Lambda_0(t)*rate[ij]) - log(u[ij])
       }
-      # init at something big enough to avoid a seemingly 0 Jacobian
-      # TODO: use uniroot instead?
       # nleqslv(100, fn, global="dbldog", control=list(allowSingular=TRUE))$x
-      uniroot(fn, lower=.Machine$double.eps, upper=100, extendInt="downX")$root
+      uniroot(fn, lower=0, upper=100, extendInt="yes")$root
     })
   }
   
+#   Surv.fn <- ecdf(fail.time)
+#   Fail.fn <- function(t) 1 - Surv.fn(t)
+#   mu <- uniroot(function(mu) 
+#     censor.rate - integrate(function(t) 
+#       Fail.fn(t)*dnorm(t, mu, censor.params[2]), 0, Inf, subdivisions=1e3)$value,
+#     lower=0, upper=100, extendInt="up")$root
+  
   # Non-informative right censoring
   censor.time <- rnorm(NK, censor.params[1], censor.params[2])
-  obs.status <- sign(obs.time <= censor.time)
-  obs.time <- pmin(obs.time, censor.time)
+  obs.status <- sign(fail.time <= censor.time)
+  obs.time <- pmin(fail.time, censor.time)
   
   if (is.numeric(round.base)) {
-    obs.time <- round.base*round(obs.time/round.base)
+    obs.time <- round.base*floor(obs.time/round.base + 0.5)
   }
   
   colnames(Z) <- paste("Z", 1:p, sep="")

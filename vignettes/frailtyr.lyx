@@ -724,8 +724,171 @@ Data generation
 \end_layout
 
 \begin_layout Standard
-Generating data, genfrail arguments.
- From baseline hazard based on 
+Data can be generated under a wide variety of conditions to simulate survival
+ times.
+ The genfrail function in frailtyr is used to generate survival times from
+ a shared frailty model.
+ That is, we have survival function
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+S(t|{\bf Z}_{ij},\omega_{i})=\exp\left\{ -\Lambda_{0}\left(t\right)\omega_{i}\exp({\bf \beta'}{\bf Z}_{ij})\right\} \label{eq:share-frailty-survival}
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $t$
+\end_inset
+
+ is time, 
+\begin_inset Formula $\omega_{i}$
+\end_inset
+
+ is the frailty value for cluster 
+\begin_inset Formula $i$
+\end_inset
+
+, 
+\begin_inset Formula $\Lambda_{0}\left(t\right)$
+\end_inset
+
+ is the unspecified cumulative baseline hazard function, 
+\begin_inset Formula ${\bf \beta}$
+\end_inset
+
+ is the coefficient vector, and 
+\begin_inset Formula ${\bf Z}_{ij}$
+\end_inset
+
+ is the vector of covariates for member 
+\begin_inset Formula $j$
+\end_inset
+
+ in cluster 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ We let 
+\begin_inset Formula $\omega\sim f({\bf \theta})$
+\end_inset
+
+, where 
+\begin_inset Formula ${\bf \theta}$
+\end_inset
+
+ is a parameter vector for frailty distribution 
+\begin_inset Formula $f$
+\end_inset
+
+, and 
+\begin_inset Formula $Z\sim U\left(0,1\right)$
+\end_inset
+
+ or 
+\begin_inset Formula $Z\sim N\left(0,1\right)$
+\end_inset
+
+.
+ Covariates are draw from either a standard normal or uniform distribution,
+ as specified by the covariates parameter.
+\end_layout
+
+\begin_layout Subsection
+Baseline hazard
+\end_layout
+
+\begin_layout Standard
+There are three ways the baseline hazard can be specified to generate survival
+ data: as the inverse cumulative baseline hazard 
+\begin_inset Formula $\Lambda_{0}^{-1}$
+\end_inset
+
+, the cumulative baseline hazard 
+\begin_inset Formula $\Lambda_{0}$
+\end_inset
+
+, or the baseline hazard 
+\begin_inset Formula $\lambda_{0}$
+\end_inset
+
+.
+ Due to Bender 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "bender2005generating"
+
+\end_inset
+
+, if the cumulative baseline hazard function can be directly inverted, then
+ the failure times can solved directly by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+T_{ij}^{0}=\Lambda_{0}^{-1}\left[-\ln\left(u\right)\exp\left(-\beta^{'}{\bf X}_{ij}\right)\right]\label{eq:survival-time-direct}
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $u\sim U\left(0,1\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $T_{ij}^{0}$
+\end_inset
+
+ is the failure time for member 
+\begin_inset Formula $j$
+\end_inset
+
+ in cluster 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ Consequently, if 
+\begin_inset Formula $\Lambda_{0}^{-1}$
+\end_inset
+
+ is provided, then survival times are determined by Equation 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:survival-time-direct"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+When 
+\begin_inset Formula $\Lambda_{0}$
+\end_inset
+
+ cannot be inverted, we must solve the following equation for 
+\begin_inset Formula $t$
+\end_inset
+
+ to determine failure time 
+\begin_inset Formula $T_{ij}^{0}$
+\end_inset
+
+, 
+\begin_inset Formula 
+\[
+S\left(t|{\bf Z}_{ij},\omega_{i}\right)-u=0
+\]
+
+\end_inset
+
+using a univariate root-finding algorithm as described in 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "crowther2013simulating"
@@ -733,7 +896,311 @@ key "crowther2013simulating"
 \end_inset
 
 .
- Specifying baseline hazard.
+ Alternatively, we may take the logarithm and solve 
+\begin_inset Formula 
+\begin{equation}
+-\Lambda_{0}\left(t\right)\omega_{i}\exp({\bf \beta'}{\bf Z}_{ij})-\ln u=0\label{eq:survival-time-log-root}
+\end{equation}
+
+\end_inset
+
+for greater numerical stability in the root-finding algorithm.
+ genfrail takes this approach when 
+\begin_inset Formula $\Lambda_{0}$
+\end_inset
+
+ is provided and uses the R function uniroot to solve Equation 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:survival-time-log-root"
+
+\end_inset
+
+, which is based on Brent's algorithm 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "brent2013algorithms"
+
+\end_inset
+
+.
+ The resulting failure times take on values 
+\begin_inset Formula $[0,\infty)$
+\end_inset
+
+ for 
+\begin_inset Formula $u\in(0,1]$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+If neither 
+\begin_inset Formula $\Lambda_{0}^{-1}$
+\end_inset
+
+ or 
+\begin_inset Formula $\Lambda_{0}$
+\end_inset
+
+ are provided to genfrail, then the baseline hazard function 
+\begin_inset Formula $\lambda_{0}$
+\end_inset
+
+ must be passed.
+ In this case, we have 
+\begin_inset Formula 
+\[
+\Lambda_{0}\left(t\right)=\int_{0}^{t}\lambda_{0}\left(s\right)ds
+\]
+
+\end_inset
+
+which must be evaluated numerically.
+ Using the numerical integrations, Equation 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:survival-time-log-root"
+
+\end_inset
+
+ can be solved for 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ This approach is the most computationally expensive since it requires numerical
+ integration to be performed at each iteration in the root-finding algorithm,
+ but allows for generating data from arbitrary baseline hazard functions.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:datagen-examples"
+
+\end_inset
+
+ demonstrates generating data using each method.
+\end_layout
+
+\begin_layout Subsection
+Shared frailty
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:datagen-shared-frailty"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Shared frailty values are generated for each cluster by sampling a specified
+ frailty distribution.
+ See Appendix 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:frailty-distributions"
+
+\end_inset
+
+ for a full list of frailty distributions and parametrization.
+\end_layout
+
+\begin_layout Subsection
+Cluster sizes
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:datagen-cluster-size"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Depending on the data are clustered, the cluster sizes typically vary
+\end_layout
+
+\begin_layout Standard
+genfrail has the ability to generate cluster sizes from
+\end_layout
+
+\begin_layout Subsection
+Censoring
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:datagen-censoring"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The observed follow-up times and failure indicators are determined by right-cens
+oring the failure times.
+ Let the observed follow-up time for member 
+\begin_inset Formula $j$
+\end_inset
+
+ in cluster 
+\begin_inset Formula $i$
+\end_inset
+
+ be given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+T_{ij}=\min\left(T_{ij}^{0},C_{ij}\right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $C_{ij}$
+\end_inset
+
+ is the censoring time.
+ The failure indicator is given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\delta_{ij}=I\left(T_{ij}^{0}\le C_{ij}\right)
+\]
+
+\end_inset
+
+The censoring distribution is specified through the parameters censoring.distr
+ and censoring.param, for the distribution name and parameter vector, respectfull
+y.
+ A normal distribution is used by default.
+\end_layout
+
+\begin_layout Standard
+Sometimes, a particular censoring rate is desired.
+ Typically, the censoring distribution parameters are varied to obtain a
+ desired censoring rate.
+ genfrail can avoid this effort on behalf of the user by letting the desired
+ censoring rate be specified instead.
+ In this case, the appropriate parameters for the censoring distribution
+ are determined to achieve the desired censoring rate.
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $\dot{F}\left(t\right)$
+\end_inset
+
+ be the empirical cumulative distribution of failure times.
+ With a normal censoring distribution, the expected censoring rate is
+\begin_inset Formula 
+\[
+C\left(\mu\right)=\int_{0}^{\infty}\mathcal{N}\left(t;\mu,\sigma^{2}\right)F\left(t\right)dt
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $C\left(\mu\right)$
+\end_inset
+
+ is the empirical censoring rate as a function of 
+\begin_inset Formula $\mu$
+\end_inset
+
+.
+ To obtain a particular censoring rate 
+\begin_inset Formula $r$
+\end_inset
+
+, we must solve the equation
+\begin_inset Formula 
+\[
+r-C\left(\mu\right)=0
+\]
+
+\end_inset
+
+for 
+\begin_inset Formula $\mu$
+\end_inset
+
+.
+ The censoring variance 
+\begin_inset Formula $\sigma^{2}$
+\end_inset
+
+ must still be specified for the problem to be identifiable.
+ Particular censoring rates using other censoring distributions can be obtained
+ in a similar way.
+ genfrail is capable of censoring with normal, log-normal, and gamma distributio
+ns.
+\end_layout
+
+\begin_layout Subsection
+Rounding
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:datagen-rounding"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The observed times may optionally be rounded to the nearest multiple of
+ 
+\begin_inset Formula $B$
+\end_inset
+
+ by
+\begin_inset Formula 
+\[
+\dot{T}_{ij}=B\Biggl\lfloor\frac{T_{ij}}{B}+0.5\Biggr\rfloor
+\]
+
+\end_inset
+
+This has the effect of simulating multiple observations (and thus, multiple
+ failures depending on the failure indicator) at a given time step when
+ there are many subjects and a course-grained measurement of time.
+ If 
+\begin_inset Formula $B=1$
+\end_inset
+
+, the observed times are simply rounded to the nearest integer.
+\end_layout
+
+\begin_layout Subsection
+Examples
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:datagen-examples"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -999,6 +1466,16 @@ options "plain"
 \begin_layout Section
 \start_of_appendix
 Frailty distributions
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:frailty-distributions"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1361,7 +1838,7 @@ LT derivs
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-L^{\left(p\right)}\left(s\right)=\left(-1\right)^{p}L\left(s\right)\sum_{j=1}^{p}c_{p,j}\left(\alpha\right)\left(1+s\right)^{j\alpha-p}\label{eq:lt-pvf-deriv}
+L^{\left(m\right)}\left(s\right)=\left(-1\right)^{m}L\left(s\right)\sum_{j=1}^{m}c_{m,j}\left(\alpha\right)\left(1+s\right)^{j\alpha-m}\label{eq:lt-pvf-deriv}
 \end{equation}
 
 \end_inset
@@ -1386,12 +1863,42 @@ LT deriv wrt alpha
 
 \begin_layout Standard
 LT higher deriv wrt alpha
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
-\begin{eqnarray*}
-\frac{\partial}{\partial\alpha}c_{m,m}\left(\alpha\right) & = & 0\\
-\frac{\partial}{\partial\alpha}c_{m,1}\left(\alpha\right) & = & \frac{\Gamma\left(m-\alpha\right)\left\{ \psi^{\left(0\right)}\left(1-\alpha\right)-\psi^{\left(0\right)}\left(m-\alpha\right)\right\} }{\Gamma\left(1-\alpha\right)}\\
-\frac{\partial}{\partial\alpha}c_{m,j}\left(\alpha\right) & = & \frac{\partial}{\partial\alpha}c_{m-1,j-1}\left(\alpha\right)+\frac{\partial}{\partial\alpha}c_{m-1,j}\left(\alpha\right)\left\{ \left(m-1\right)-j\alpha\right\} -jc_{m-1,j}\left(\alpha\right)
-\end{eqnarray*}
+\begin{eqnarray}
+c_{m,m}\left(\alpha\right) & = & 0\nonumber \\
+c_{m,1}\left(\alpha\right) & = & \frac{\Gamma\left(m-\alpha\right)}{\Gamma\left(1-\alpha\right)}\nonumber \\
+c_{m,j}\left(\alpha\right) & = & c_{m-1,j-1}\left(\alpha\right)+c_{m-1,j}\left(\alpha\right)\left\{ \left(m-1\right)-j\alpha\right\} \label{eq:pvf-lt-coef}
+\end{eqnarray}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray}
+\frac{\partial}{\partial\alpha}\mathcal{L}^{\left(m\right)}\left(s\right) & = & \frac{\partial}{\partial\alpha}\left[\left(-1\right)^{m}\mathcal{L}\left(s\right)\sum_{j=1}^{m}c_{m,j}\left(\alpha\right)\left(1+s\right)^{j\alpha-m}\right]\nonumber \\
+ & = & \left(-1\right)^{m}\left\{ \frac{\partial}{\partial\alpha}\mathcal{L}\left(s\right)\right\} \sum_{j=1}^{m}c_{m,j}\left(\alpha\right)\left(1+s\right)^{j\alpha-m}\nonumber \\
+ &  & +\left(-1\right)^{m}\mathcal{L}\left(s\right)\sum_{j=1}^{m}\Bigg\{\frac{\partial}{\partial\alpha}c_{m,j}\left(\alpha\right)\left(1+s\right)^{j\alpha-m}\nonumber \\
+ &  & \qquad\qquad\qquad\qquad+c_{m,j}\left(\alpha\right)j\left(1+s\right)^{j\alpha-m}\ln\left(1+s\right)\Bigg\}\label{eq:pvf-lt-deriv}
+\end{eqnarray}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray}
+\frac{\partial}{\partial\alpha}c_{m,m}\left(\alpha\right) & = & 0\nonumber \\
+\frac{\partial}{\partial\alpha}c_{m,1}\left(\alpha\right) & = & \frac{\Gamma\left(m-\alpha\right)\left\{ \psi^{\left(0\right)}\left(1-\alpha\right)-\psi^{\left(0\right)}\left(m-\alpha\right)\right\} }{\Gamma\left(1-\alpha\right)}\nonumber \\
+\frac{\partial}{\partial\alpha}c_{m,j}\left(\alpha\right) & = & \frac{\partial}{\partial\alpha}c_{m-1,j-1}\left(\alpha\right)+\frac{\partial}{\partial\alpha}c_{m-1,j}\left(\alpha\right)\left\{ \left(m-1\right)-j\alpha\right\} -jc_{m-1,j}\left(\alpha\right)\label{eq:pvf-lt-deriv-coef}
+\end{eqnarray}
 
 \end_inset
 
