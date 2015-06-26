@@ -51,10 +51,10 @@ dgamma_r <- function(x, theta) {
 #' 
 deriv_dgamma_r <- function(x, theta) {
   # deriv_idx ignored here since there is only one parameter
-  term1 <- (x/theta)^(1/theta - 1)
-  term2 <- exp(-x/theta)
-  term3 <- log(theta/x) + digamma(1/theta) + x - 1
-  (term1 * term2 * term3)/(gamma(1/theta)*theta^3)
+  ( (x/theta)^(1/theta - 1) * 
+     exp(-x/theta) * 
+     (log(theta/x) + digamma(1/theta) + x - 1) )/
+  (gamma(1/theta)*theta^3)
 }
 
 #' 
@@ -62,6 +62,21 @@ deriv_dgamma_r <- function(x, theta) {
 #' 
 deriv_dgamma_r_numeric <- function(x, theta) {
   grad(function(theta) dgamma_r(x, theta), theta)
+}
+
+#' 
+#' Deriv of gamma density wrt. theta, evaluated numerically
+#' 
+deriv_deriv_dgamma_r <- function(x, theta) {
+  (((x/theta)^(1/theta - 1) * (exp(-x/theta) * (x/theta^2)) - ((x/theta)^(1/theta - 
+  1) * (log((x/theta)) * (1/theta^2)) + (x/theta)^((1/theta - 
+  1) - 1) * ((1/theta - 1) * (x/theta^2))) * exp(-x/theta)) * 
+  (log(theta/x) + digamma(1/theta) + x - 1) + (x/theta)^(1/theta - 
+  1) * exp(-x/theta) * (1/x/(theta/x) - 1/theta^2 * trigamma(1/theta)))/(gamma(1/theta) * 
+  theta^3) - ((x/theta)^(1/theta - 1) * exp(-x/theta) * (log(theta/x) + 
+  digamma(1/theta) + x - 1)) * (gamma(1/theta) * (3 * theta^2) - 
+  1/theta^2 * (gamma(1/theta) * digamma(1/theta)) * theta^3)/(gamma(1/theta) * 
+  theta^3)^2
 }
 
 #'
@@ -79,22 +94,115 @@ lt_dgamma_r <- function(p, s, theta) {
 #' pth derivative wrt. s
 #' 
 deriv_lt_dgamma_r <- function(p, s, theta) {
-  tmp1 <- (1/theta)^(1/theta)
-  tmp2 <- (-1)^p
-  tmp3 <- gamma(p + 1/theta)
-  tmp4 <- (1/theta + s)
-  tmp5 <- (-1/theta - p)
+#   tmp1 <- (1/theta)^(1/theta)
+#   tmp2 <- (-1)^p
+#   tmp3 <- gamma(p + 1/theta)
+#   tmp4 <- (1/theta + s)
+#   tmp5 <- (-1/theta - p)
+#   
+#   term1 <- tmp1 * tmp2 * tmp3 * tmp4^tmp5 * 
+#     ( log(tmp4)/theta^2 - tmp5/(theta^2 * tmp4) )
+#   
+#   term2 <- tmp1 * tmp2 * (-1/theta^2 - log(1/theta)/theta^2) * tmp3 * tmp4^tmp5
+#   
+#   term3 <- (1/theta)^(1/theta + 2) * tmp2 * tmp3 * digamma(p + 1/theta) * tmp4^tmp5
+#   
+#   term4 <- (1/theta)^(1/theta + 2) * tmp2 * digamma(1/theta) * tmp3 * tmp4^tmp5
+#   
+#   (term1 + term2 - term3 + term4)/gamma(1/theta)
   
-  term1 <- tmp1 * tmp2 * tmp3 * tmp4^tmp5 * 
-    ( log(tmp4)/theta^2 - tmp5/(theta^2 * tmp4) )
-  
-  term2 <- tmp1 * tmp2 * (-1/theta^2 - log(1/theta)/theta^2) * tmp3 * tmp4^tmp5
-  
-  term3 <- (1/theta)^(1/theta + 2) * tmp2 * tmp3 * digamma(p + 1/theta) * tmp4^tmp5
-  
-  term4 <- (1/theta)^(1/theta + 2) * tmp2 * digamma(1/theta) * tmp3 * tmp4^tmp5
-  
-  (term1 + term2 - term3 + term4)/gamma(1/theta)
+  # Without the tmp vars
+  (((-1)^p * (1/theta)^(1/theta) * (((1/theta) + s)^(-((1/theta) + 
+    p)) * (log(((1/theta) + s)) * (1/theta^2)) - ((1/theta) + 
+    s)^((-((1/theta) + p)) - 1) * ((-((1/theta) + p)) * (1/theta^2))) - 
+    (-1)^p * ((1/theta)^(1/theta) * (log((1/theta)) * (1/theta^2)) + 
+        (1/theta)^((1/theta) - 1) * ((1/theta) * (1/theta^2))) * 
+        ((1/theta) + s)^(-((1/theta) + p))) * gamma((1/theta) + 
+    p) - (-1)^p * (1/theta)^(1/theta) * ((1/theta) + s)^(-((1/theta) + 
+    p)) * (1/theta^2 * (gamma((1/theta) + p) * digamma((1/theta) + 
+    p))))/gamma((1/theta)) + (-1)^p * (1/theta)^(1/theta) * ((1/theta) + 
+    s)^(-((1/theta) + p)) * gamma((1/theta) + p) * (1/theta^2 * 
+    (gamma((1/theta)) * digamma((1/theta))))/gamma((1/theta))^2
+}
+
+#' 
+#' Gamma LT 2nd derivative wrt. theta. This obviously was not solved by hand.
+#' 
+deriv_deriv_lt_dgamma_r <- function(p, s, theta) {
+  (((-1)^p * (1/theta)^(1/theta) * ((((1/theta) + s)^(-((1/theta) + 
+    p)) * (log(((1/theta) + s)) * (1/theta^2)) - ((1/theta) + 
+    s)^((-((1/theta) + p)) - 1) * ((-((1/theta) + p)) * (1/theta^2))) * 
+    (log(((1/theta) + s)) * (1/theta^2)) - ((1/theta) + s)^(-((1/theta) + 
+    p)) * (log(((1/theta) + s)) * (2 * theta/(theta^2)^2) + 1/theta^2/((1/theta) + 
+    s) * (1/theta^2)) - ((((1/theta) + s)^((-((1/theta) + p)) - 
+    1) * (log(((1/theta) + s)) * (1/theta^2)) - ((1/theta) + 
+    s)^(((-((1/theta) + p)) - 1) - 1) * (((-((1/theta) + p)) - 
+    1) * (1/theta^2))) * ((-((1/theta) + p)) * (1/theta^2)) + 
+    ((1/theta) + s)^((-((1/theta) + p)) - 1) * (1/theta^2 * (1/theta^2) - 
+        (-((1/theta) + p)) * (2 * theta/(theta^2)^2)))) - (-1)^p * 
+    ((1/theta)^(1/theta) * (log((1/theta)) * (1/theta^2)) + (1/theta)^((1/theta) - 
+        1) * ((1/theta) * (1/theta^2))) * (((1/theta) + s)^(-((1/theta) + 
+    p)) * (log(((1/theta) + s)) * (1/theta^2)) - ((1/theta) + 
+    s)^((-((1/theta) + p)) - 1) * ((-((1/theta) + p)) * (1/theta^2))) - 
+    ((-1)^p * ((1/theta)^(1/theta) * (log((1/theta)) * (1/theta^2)) + 
+        (1/theta)^((1/theta) - 1) * ((1/theta) * (1/theta^2))) * 
+        (((1/theta) + s)^(-((1/theta) + p)) * (log(((1/theta) + 
+            s)) * (1/theta^2)) - ((1/theta) + s)^((-((1/theta) + 
+            p)) - 1) * ((-((1/theta) + p)) * (1/theta^2))) - 
+        (-1)^p * ((1/theta)^((1/theta) - 1) * ((1/theta) * (2 * 
+            theta/(theta^2)^2) + 1/theta^2 * (1/theta^2)) + ((1/theta)^((1/theta) - 
+            1) * (log((1/theta)) * (1/theta^2)) + (1/theta)^(((1/theta) - 
+            1) - 1) * (((1/theta) - 1) * (1/theta^2))) * ((1/theta) * 
+            (1/theta^2)) + ((1/theta)^(1/theta) * (log((1/theta)) * 
+            (2 * theta/(theta^2)^2) + 1/theta^2/(1/theta) * (1/theta^2)) + 
+            ((1/theta)^(1/theta) * (log((1/theta)) * (1/theta^2)) + 
+                (1/theta)^((1/theta) - 1) * ((1/theta) * (1/theta^2))) * 
+                (log((1/theta)) * (1/theta^2)))) * ((1/theta) + 
+            s)^(-((1/theta) + p)))) * gamma((1/theta) + p) - 
+    ((-1)^p * (1/theta)^(1/theta) * (((1/theta) + s)^(-((1/theta) + 
+        p)) * (log(((1/theta) + s)) * (1/theta^2)) - ((1/theta) + 
+        s)^((-((1/theta) + p)) - 1) * ((-((1/theta) + p)) * (1/theta^2))) - 
+        (-1)^p * ((1/theta)^(1/theta) * (log((1/theta)) * (1/theta^2)) + 
+            (1/theta)^((1/theta) - 1) * ((1/theta) * (1/theta^2))) * 
+            ((1/theta) + s)^(-((1/theta) + p))) * (1/theta^2 * 
+        (gamma((1/theta) + p) * digamma((1/theta) + p))) - (((-1)^p * 
+    (1/theta)^(1/theta) * (((1/theta) + s)^(-((1/theta) + p)) * 
+    (log(((1/theta) + s)) * (1/theta^2)) - ((1/theta) + s)^((-((1/theta) + 
+    p)) - 1) * ((-((1/theta) + p)) * (1/theta^2))) - (-1)^p * 
+    ((1/theta)^(1/theta) * (log((1/theta)) * (1/theta^2)) + (1/theta)^((1/theta) - 
+        1) * ((1/theta) * (1/theta^2))) * ((1/theta) + s)^(-((1/theta) + 
+    p))) * (1/theta^2 * (gamma((1/theta) + p) * digamma((1/theta) + 
+    p))) - (-1)^p * (1/theta)^(1/theta) * ((1/theta) + s)^(-((1/theta) + 
+    p)) * (1/theta^2 * (gamma((1/theta) + p) * (1/theta^2 * trigamma((1/theta) + 
+    p)) + 1/theta^2 * (gamma((1/theta) + p) * digamma((1/theta) + 
+    p)) * digamma((1/theta) + p)) + 2 * theta/(theta^2)^2 * (gamma((1/theta) + 
+    p) * digamma((1/theta) + p)))))/gamma((1/theta)) + (((-1)^p * 
+    (1/theta)^(1/theta) * (((1/theta) + s)^(-((1/theta) + p)) * 
+    (log(((1/theta) + s)) * (1/theta^2)) - ((1/theta) + s)^((-((1/theta) + 
+    p)) - 1) * ((-((1/theta) + p)) * (1/theta^2))) - (-1)^p * 
+    ((1/theta)^(1/theta) * (log((1/theta)) * (1/theta^2)) + (1/theta)^((1/theta) - 
+        1) * ((1/theta) * (1/theta^2))) * ((1/theta) + s)^(-((1/theta) + 
+    p))) * gamma((1/theta) + p) - (-1)^p * (1/theta)^(1/theta) * 
+    ((1/theta) + s)^(-((1/theta) + p)) * (1/theta^2 * (gamma((1/theta) + 
+    p) * digamma((1/theta) + p)))) * (1/theta^2 * (gamma((1/theta)) * 
+    digamma((1/theta))))/gamma((1/theta))^2 + (((((-1)^p * (1/theta)^(1/theta) * 
+    (((1/theta) + s)^(-((1/theta) + p)) * (log(((1/theta) + s)) * 
+        (1/theta^2)) - ((1/theta) + s)^((-((1/theta) + p)) - 
+        1) * ((-((1/theta) + p)) * (1/theta^2))) - (-1)^p * ((1/theta)^(1/theta) * 
+    (log((1/theta)) * (1/theta^2)) + (1/theta)^((1/theta) - 1) * 
+    ((1/theta) * (1/theta^2))) * ((1/theta) + s)^(-((1/theta) + 
+    p))) * gamma((1/theta) + p) - (-1)^p * (1/theta)^(1/theta) * 
+    ((1/theta) + s)^(-((1/theta) + p)) * (1/theta^2 * (gamma((1/theta) + 
+    p) * digamma((1/theta) + p)))) * (1/theta^2 * (gamma((1/theta)) * 
+    digamma((1/theta)))) - (-1)^p * (1/theta)^(1/theta) * ((1/theta) + 
+    s)^(-((1/theta) + p)) * gamma((1/theta) + p) * (1/theta^2 * 
+    (gamma((1/theta)) * (1/theta^2 * trigamma((1/theta))) + 1/theta^2 * 
+        (gamma((1/theta)) * digamma((1/theta))) * digamma((1/theta))) + 
+    2 * theta/(theta^2)^2 * (gamma((1/theta)) * digamma((1/theta)))))/gamma((1/theta))^2 + 
+    (-1)^p * (1/theta)^(1/theta) * ((1/theta) + s)^(-((1/theta) + 
+        p)) * gamma((1/theta) + p) * (1/theta^2 * (gamma((1/theta)) * 
+        digamma((1/theta)))) * (2 * (1/theta^2 * (gamma((1/theta)) * 
+        digamma((1/theta))) * gamma((1/theta))))/(gamma((1/theta))^2)^2)
 }
 
 #' 
@@ -102,6 +210,13 @@ deriv_lt_dgamma_r <- function(p, s, theta) {
 #' 
 deriv_lt_dgamma_r_numeric <- function(p, s, theta) {
   grad(function(theta) lt_dgamma_r(p, s, theta), theta)
+}
+
+#' 
+#' 
+#' 
+deriv_deriv_lt_dgamma_r_numeric <- function(p, s, theta) {
+  grad(function(theta) deriv_lt_dgamma_r_numeric(p, s, theta), theta)
 }
 
 #' 

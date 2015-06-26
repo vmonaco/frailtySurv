@@ -17,6 +17,10 @@ deriv_lt_dgamma_c <- function(p, s, theta) {
     .Call('frailtyr_deriv_lt_dgamma_c', PACKAGE = 'frailtyr', p, s, theta)
 }
 
+deriv_deriv_lt_dgamma_c <- function(p, s, theta) {
+    .Call('frailtyr_deriv_deriv_lt_dgamma_c', PACKAGE = 'frailtyr', p, s, theta)
+}
+
 dlognormal_c <- function(x, theta) {
     .Call('frailtyr_dlognormal_c', PACKAGE = 'frailtyr', x, theta)
 }
@@ -93,7 +97,23 @@ dH_dbeta <- function(d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, Lambda, Delta_L
     .Call('frailtyr_dH_dbeta', PACKAGE = 'frailtyr', d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, Lambda, Delta_Lambda, beta, theta, beta_idx, frailty)
 }
 
-jacobian_beta_beta <- function(d_, K_, X_, N_dot, H_, H_dot, dH_dbeta_, dH_dot_dbeta_, beta, theta, beta_idx_1, beta_idx_2, frailty) {
-    .Call('frailtyr_jacobian_beta_beta', PACKAGE = 'frailtyr', d_, K_, X_, N_dot, H_, H_dot, dH_dbeta_, dH_dot_dbeta_, beta, theta, beta_idx_1, beta_idx_2, frailty)
+dH_dtheta <- function(d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, Lambda, Delta_Lambda, beta, theta, theta_idx, frailty) {
+    .Call('frailtyr_dH_dtheta', PACKAGE = 'frailtyr', d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, Lambda, Delta_Lambda, beta, theta, theta_idx, frailty)
+}
+
+jacobian_beta_beta <- function(K_, X_, N_dot, H_, H_dot, dH_dbeta_, dH_dot_dbeta_, beta, theta, beta_idx_1, beta_idx_2, frailty) {
+    .Call('frailtyr_jacobian_beta_beta', PACKAGE = 'frailtyr', K_, X_, N_dot, H_, H_dot, dH_dbeta_, dH_dot_dbeta_, beta, theta, beta_idx_1, beta_idx_2, frailty)
+}
+
+jacobian_beta_theta <- function(K_, X_, N_dot, H_, H_dot, dH_dtheta_, dH_dot_dtheta_, beta, theta, beta_idx, theta_idx, frailty) {
+    .Call('frailtyr_jacobian_beta_theta', PACKAGE = 'frailtyr', K_, X_, N_dot, H_, H_dot, dH_dtheta_, dH_dot_dtheta_, beta, theta, beta_idx, theta_idx, frailty)
+}
+
+jacobian_theta_beta <- function(K_, X_, N_dot, H_, H_dot, dH_dbeta_, dH_dot_dbeta_, beta, theta, theta_idx, beta_idx, frailty) {
+    .Call('frailtyr_jacobian_theta_beta', PACKAGE = 'frailtyr', K_, X_, N_dot, H_, H_dot, dH_dbeta_, dH_dot_dbeta_, beta, theta, theta_idx, beta_idx, frailty)
+}
+
+jacobian_theta_theta <- function(K_, X_, N_dot, H_, H_dot, dH_dtheta_, dH_dot_dtheta_, beta, theta, theta_idx_1, theta_idx_2, frailty) {
+    .Call('frailtyr_jacobian_theta_theta', PACKAGE = 'frailtyr', K_, X_, N_dot, H_, H_dot, dH_dtheta_, dH_dot_dtheta_, beta, theta, theta_idx_1, theta_idx_2, frailty)
 }
 

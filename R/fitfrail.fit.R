@@ -77,24 +77,27 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   n_clusters <- length(cluster_names)
   
   # N_[[i]][j, k] indicates whether individual j in cluster i failed at time <= tau_k
-  N_ <- sapply(cluster_names, function(i) {
-    t(sapply(1:cluster_sizes[[i]], function(j) {
-      # as.numeric((I_[[i]][j] > 0) & (T_[[i]][j] <= time_steps))
-      as.numeric((I_[[i]][j] > 0) & (K_[[i]][j] <= 1:length(time_steps)))
-    }))
-  }, simplify = FALSE, USE.NAMES = TRUE)
+#   N_ <- sapply(cluster_names, function(i) {
+#     t(sapply(1:cluster_sizes[[i]], function(j) {
+#       # as.numeric((I_[[i]][j] > 0) & (T_[[i]][j] <= time_steps))
+#       as.numeric((I_[[i]][j] > 0) & (K_[[i]][j] <= 1:length(time_steps)))
+#     }))
+#   }, simplify = FALSE, USE.NAMES = TRUE)
+  N_ <- clapply(cluster_names, cluster_sizes, function(i, j) {
+    as.numeric((I_[[i]][j] > 0) & (K_[[i]][j] <= 1:length(time_steps)))})
   
   # N_dot[[i]][k] is the number of individuals in cluster i that failed up to time tau_k
   N_dot <- sum_by_cluster(N_)
   
   # Y_[[i]][j,k] indicates whether individual j in cluster i failed at time >= tau_k
-  Y_ <- sapply(cluster_names, function(i) {
-    t(sapply(1:cluster_sizes[[i]], function(j) {
-      # as.numeric(T_[[i]][j] >= time_steps)
-      as.numeric(K_[[i]][j] >= 1:length(time_steps))
-    }))
-  }, simplify = FALSE, USE.NAMES = TRUE)
-  
+#   Y_ <- sapply(cluster_names, function(i) {
+#     t(sapply(1:cluster_sizes[[i]], function(j) {
+#       # as.numeric(T_[[i]][j] >= time_steps)
+#       as.numeric(K_[[i]][j] >= 1:length(time_steps))
+#     }))
+#   }, simplify = FALSE, USE.NAMES = TRUE)
+  Y_ <- clapply(cluster_names, cluster_sizes, function(i, j) {
+      as.numeric(K_[[i]][j] >= 1:length(time_steps))})
   
   d_ <- time_steps_status
   # d_[k] is the number of failures at time tau_k
@@ -143,56 +146,70 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     loglikelihood(X_, K_, I_, N_dot, estimator$H_dot, estimator$Lambda_hat, beta, theta, frailty)
   }
   
-  jacobian_ij <- function(gamma, i, j) {
-    stopifnot(length(gamma) == n_beta + n_theta)
-    beta <- gamma[1:n_beta]
-    theta <- gamma[(n_beta+1):(n_beta+n_theta)]
-    
-    R_ <- clapply(cluster_names, cluster_sizes, function(i, j) {
-      exp(beta * X_[[i]][j]) * Y_[[i]][j]
-    })
-    R_dot_ <- sum_by_cluster(R_)
-    
-    bh <- baseline_hazard_estimator(X_, K_, d_, Y_, N_dot, beta, theta, frailty)
-    Lambda <- bh$Lambda
-    lambda <- bh$lambda
-    H_ <- bh$H_
-    H_dot_ <- bh$H_dot_
+  jacobian_ij <- function(i, j, beta, theta, R_, R_dot_, H_, H_dot_, Lambda, lambda) {
     if (i <= n_beta && j <= n_beta) {
       dH <- dH_dbeta(d_, K_, X_, R_, R_dot_, N_dot, H_, H_dot_, 
                             Lambda, lambda, beta, theta, j, frailty)
-      dH_dbeta_ <- dH$dH_dbeta_
-      dH_dot_dbeta_ <- dh$dH_dot_dbeta_
       
-      jacobian_beta_beta(d_, K_, X_, N_dot, H_, H_dot, dH_dbeta_, dH_dot_dbeta_,
+      jacobian_beta_beta(K_, X_, N_dot, H_, H_dot, dH$dH_dbeta_, dH$dH_dot_dbeta_,
                          beta, theta, i, j, frailty)
     } else if (i <= n_beta && j > n_beta) {
-      # jacobian_beta_theta()
-      0
+      dH <- dH_dtheta(d_, K_, X_, R_, R_dot_, N_dot, H_, H_dot_, 
+                     Lambda, lambda, beta, theta, n_beta - j, frailty)
+      
+      jacobian_beta_theta(K_, X_, N_dot, H_, H_dot, dH$dH_dtheta_, dH$dH_dot_dtheta_,
+                         beta, theta, i, n_beta - j, frailty)
     } else if (i > n_beta && j <= n_beta) {
-      # jacobian_theta_beta()
-      0
+      dH <- dH_dbeta(d_, K_, X_, R_, R_dot_, N_dot, H_, H_dot_, 
+                     Lambda, lambda, beta, theta, j, frailty)
+      
+      jacobian_theta_beta(K_, X_, N_dot, H_, H_dot, dH$dH_dbeta_, dH$dH_dot_dbeta_,
+                         beta, theta, n_beta - i, j, frailty)
     } else if (i > n_beta && j > n_beta) {
-      # jacobian_thtea_theta()
-      0
+      dH <- dH_dtheta(d_, K_, X_, R_, R_dot_, N_dot, H_, H_dot_, 
+                      Lambda, lambda, beta, theta, n_beta - j, frailty)
+      
+      jacobian_theta_theta(K_, X_, N_dot, H_, H_dot, dH$dH_dtheta_, dH$dH_dot_dtheta_,
+                          beta, theta, n_beta - i, n_beta - j, frailty)
     }
   }
   
   jacobian <- function(gamma) {
     n_gamma <- length(gamma)
+    stopifnot(length(gamma) == n_beta + n_theta)
     
     beta <- gamma[1:n_beta]
     theta <- gamma[(n_beta+1):(n_beta+n_theta)]
     
-    estimator <- baseline_hazard_estimator(X_, K_, d_, Y_, N_dot, beta, theta, frailty)
+    R_ <- clapply(cluster_names, cluster_sizes, function(i, j) {
+      exp(sum(beta * X_[[i]][j])) * Y_[[i]][j,]
+    })
+    R_dot_ <- sum_by_cluster(R_)
     
+    bh <- baseline_hazard_estimator(X_, K_, d_, Y_, N_dot, beta, theta, frailty)
+    Lambda <- bh$Lambda_hat
+    lambda <- bh$lambda_hat
+    H_ <- bh$H_
+    H_dot_ <- bh$H_dot
+    
+#     dH <- dH_dtheta(d_, K_, X_, R_, R_dot_, N_dot, H_, H_dot_, 
+#                     Lambda, lambda, beta, theta, 1, frailty)
+#     return(dH)
     # Build the jacobian matrix from the respective components
-    outer(1:n_gamma, 1:n_gamma, function(i, j) jacobian_ij(gamma, i, j))
+    outer(1:n_gamma, 1:n_gamma, Vectorize(function(i, j) 
+      jacobian_ij(i, j, beta, theta, R_, R_dot_, H_, H_dot_, Lambda, lambda)))
+  }
+  
+  est <- function(beta, theta, frailty="gamma") {
+    baseline_hazard_estimator(X_, K_, d_, Y_, N_dot, beta, theta, frailty)
   }
   
   if (control$fitmethod == 'score') {
     fitter <- nleqslv(c(beta_init, theta_init), U, 
-                      control=list(maxit=control$iter.max,xtol=1e-8,ftol=1e-8,btol=1e-3))
+                      control=list(maxit=control$iter.max,xtol=1e-8,ftol=1e-8,btol=1e-3),
+                      jac=jacobian,
+                      jacobian=TRUE
+                      )
     gamma_hat <- fitter$x
   } else if (control$fitmethod == 'like') {
     stop("TODO")
@@ -256,7 +273,10 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
        fitter = fitter,
        fitmethod = control$fitmethod,
        method = 'fitfrail',
-       jacobian = jacobian
+       jacobian = jacobian,
+       U = U,
+       est = est
        # TODO: estimated frailty values
+       # TODO: use numerical jac for variance?
       )
 }
