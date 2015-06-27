@@ -117,6 +117,29 @@ Generating data, genfrail arguments. From baseline hazard based on
 
 Generating survival data from a model with known parameters.
 
+\begin{figure}
+\begin{center}
+<<label=frailty-distributions,fig=TRUE,echo=FALSE,height=4,width=6>>=
+library(frailtyr)
+labels <- c("Gamma", "Log-normal", "Inv-Gaussian", "PVF")
+x <- seq(0, 10, length.out=100)
+variance <- 0.7
+theta.gamma <- variance
+# Determine theta for lognormal by solving the variance
+theta.lognormal <- uniroot(function(p) variance - exp(p)*(exp(p) - 1), c(0, 10))$root
+theta.invgauss <- variance
+theta.pvf <- 1 - variance
+plot(x, dgamma_c(x, theta.gamma), type="l", lty=1, 
+     xlab=expression(omega), ylab="Density", ylim=c(0,1))
+lines(x, dlognormal_c(x, theta.lognormal), lty=2, col=2)
+lines(x, dinvgauss_c(x, theta.invgauss), lty=3, col=3)
+lines(x, dpvf_c(x, theta.pvf), lty=4, col=4)
+legend("topright", inset=.05, title="Distribution", labels, lwd=2, lty=1:4, col=1:4)
+@
+\end{center}
+\caption{Frailty distribution densities with $ \VAR[\omega] = \Sexpr{variance}$ . Gamma, Inv-Gaussian, and PVF have $ \E[\omega] = 1 $ and log-normal has $ \E[\omega] \approx 1.168. $}
+\label{fig:frailty-distributions}
+\end{figure}
 
 \section{Model estimation}
 

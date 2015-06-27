@@ -998,8 +998,37 @@ name "sub:datagen-shared-frailty"
 \end_layout
 
 \begin_layout Standard
-Shared frailty values are generated for each cluster by sampling a specified
- frailty distribution.
+Shared frailty values are generated for each cluster according to the frailty
+ distribution specified.
+ Gamma variates are generating using the R stats function rgamma, which
+ relies on two different techniques depending on whether 
+\begin_inset Formula $\theta>1$
+\end_inset
+
+.
+ For other distributions with Laplace transforms, frailty values are generated
+ using a modified Newton-Raphson algorithm for numerical transform inversion
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ridout2009generating"
+
+\end_inset
+
+.
+ This technique is used for the PVF and positive stable distributions.
+ Note that while frailtyr can generate survival data with a positive stable
+ frailty distribution, it cannot estimate parameters for this model due
+ to the positive stable having an infinite mean.
+ Frailty values from a log-normal distribution are generated in the usual
+ way, and inverse Gaussian variates are generated using a transformation
+ method in the statmod package 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "statmod2015"
+
+\end_inset
+
+.
  See Appendix 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -1008,6 +1037,203 @@ reference "sec:frailty-distributions"
 \end_inset
 
  for a full list of frailty distributions and parametrization.
+\end_layout
+
+\begin_layout Standard
+For the gamma, log-normal, and inverse Gaussian, there is a positive relationshi
+p between the distribution parameter 
+\begin_inset Formula $\theta$
+\end_inset
+
+ and the strength of dependence between cluster members.
+ As 
+\begin_inset Formula $\theta$
+\end_inset
+
+ increases, inter-cluster differences decrease and intra-cluster differences
+ increase.
+ The opposite is true for the PVF, and as 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ increases, the dependence between cluster members decreases.
+ All the supported frailty distributions have degenerate cases, which are
+ defined in Appendix 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:frailty-distributions"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:frailty-distributions"
+
+\end_inset
+
+ shows the densities for the supported distributions, all with 
+\begin_inset Formula $0.7$
+\end_inset
+
+ variance.
+ The gamma and inverse Gaussian have variance 
+\begin_inset Formula $\VAR\left[\omega\right]=\theta=0.7$
+\end_inset
+
+, while the PVF has 
+\begin_inset Formula $\VAR\left[\omega\right]=1-\alpha=0.7$
+\end_inset
+
+ for 
+\begin_inset Formula $\alpha=0.3$
+\end_inset
+
+.
+ For the log-normal 
+\begin_inset Formula $\VAR\left[\omega\right]=e^{\theta}\left(e^{\theta}-1\right)=0.7$
+\end_inset
+
+ must be solved for 
+\begin_inset Formula $\theta$
+\end_inset
+
+ to get 
+\begin_inset Formula $\theta\approx0.3884$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\backslash
+begin{figure} 
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+begin{center} 
+\end_layout
+
+\begin_layout Plain Layout
+<<label=frailty-distributions,fig=TRUE,echo=FALSE,height=4,width=6>>= 
+\end_layout
+
+\begin_layout Plain Layout
+library(frailtyr) 
+\end_layout
+
+\begin_layout Plain Layout
+labels <- c("Gamma", "Log-normal", "Inv-Gaussian", "PVF") 
+\end_layout
+
+\begin_layout Plain Layout
+x <- seq(0, 10, length.out=100) 
+\end_layout
+
+\begin_layout Plain Layout
+variance <- 0.7 
+\end_layout
+
+\begin_layout Plain Layout
+theta.gamma <- variance 
+\end_layout
+
+\begin_layout Plain Layout
+# Determine theta for lognormal by solving the variance 
+\end_layout
+
+\begin_layout Plain Layout
+theta.lognormal <- uniroot(function(p) variance - exp(p)*(exp(p) - 1), c(0,
+ 10))$root 
+\end_layout
+
+\begin_layout Plain Layout
+theta.invgauss <- variance 
+\end_layout
+
+\begin_layout Plain Layout
+theta.pvf <- 1 - variance 
+\end_layout
+
+\begin_layout Plain Layout
+plot(x, dgamma_c(x, theta.gamma), type="l", lty=1, xlab=expression(omega),
+ ylab="Density", ylim=c(0,1)) 
+\end_layout
+
+\begin_layout Plain Layout
+lines(x, dlognormal_c(x, theta.lognormal), lty=2, col=2) 
+\end_layout
+
+\begin_layout Plain Layout
+lines(x, dinvgauss_c(x, theta.invgauss), lty=3, col=3) 
+\end_layout
+
+\begin_layout Plain Layout
+lines(x, dpvf_c(x, theta.pvf), lty=4, col=4) 
+\end_layout
+
+\begin_layout Plain Layout
+legend("topright", inset=.05, title="Distribution", labels, lwd=2, lty=1:4,
+ col=1:4) @ 
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+end{center} 
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+caption{Frailty distribution densities with $ 
+\backslash
+VAR[
+\backslash
+omega] = 
+\backslash
+Sexpr{variance}$ .
+ Gamma, Inv-Gaussian, and PVF have $ 
+\backslash
+E[
+\backslash
+omega] = 1 $ and log-normal has $ 
+\backslash
+E[
+\backslash
+omega] 
+\backslash
+approx 1.168.
+ $}
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+label{fig:frailty-distributions} 
+\end_layout
+
+\begin_layout Plain Layout
+
+\backslash
+end{figure}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -1025,11 +1251,164 @@ name "sub:datagen-cluster-size"
 \end_layout
 
 \begin_layout Standard
-Depending on the data are clustered, the cluster sizes typically vary
+Depending on how a cluster is defined, the cluster sizes in a shared frailty
+ dataset will vary.
+ For example, in the Diabetic Retinopathy Study (DRS), two failure times
+ are observed for each subject corresponding to the left and right eye 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "diabetic1976preliminary,huster1989modelling"
+
+\end_inset
+
+.
+ Observations are clustered by subject, so every cluster has exactly two
+ members.
+ If instead the observations were clustered by geographical location, the
+ cluster sizes would vary and perhaps follow a discrete power law.
+ genfrail is able to generate data with fixed or varying cluster sizes.
 \end_layout
 
 \begin_layout Standard
-genfrail has the ability to generate cluster sizes from
+Cluster sizes can be generated from a k-truncated Poisson 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "aster2014"
+
+\end_inset
+
+, where the expected cluster size is given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\E\left[K\right]=\frac{\lambda-e^{-\lambda}\sum_{j=1}^{l}\frac{\lambda^{j}}{\left(j-1\right)!}}{1-e^{-\lambda}\sum_{j=0}^{l}\frac{\lambda^{j}}{j!}}
+\]
+
+\end_inset
+
+The typical case is with 
+\begin_inset Formula $l=0$
+\end_inset
+
+ for a zero-truncated Poisson.
+ If we also have 
+\begin_inset Formula $\lambda=2$
+\end_inset
+
+, then 
+\begin_inset Formula $\E[K]\approx2.313$
+\end_inset
+
+.
+ The parameters for the k-truncated Poisson are c(l, lambda).
+\end_layout
+
+\begin_layout Standard
+A discrete zeta distribution can also be used to generate cluster sizes.
+ Accurately fitting and generating from a discrete power-law distribution
+ is generally difficult 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "clauset2009power"
+
+\end_inset
+
+, and genfrail uses a truncated Zeta distribution to avoid some of the pitfalls.
+ The density is given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+f\left(K;s,u,l\right)=\frac{\left(K-l\right)^{-s}/\zeta\left(s\right)}{\sum_{j=1}^{u-l}j^{-s}/\zeta\left(s\right)}\quad s>1
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\zeta\left(s\right)$
+\end_inset
+
+ is the Riemann zeta function, 
+\begin_inset Formula $s$
+\end_inset
+
+ is the scaling exponent, 
+\begin_inset Formula $l$
+\end_inset
+
+ is the noninclusive lower bound, and 
+\begin_inset Formula $u$
+\end_inset
+
+ is the inclusive upper bound.
+ The resulting distribution has support 
+\begin_inset Formula $K\in\left\{ l+1,\dots,u\right\} $
+\end_inset
+
+.
+ With 
+\begin_inset Formula $s\gg1$
+\end_inset
+
+, large enough 
+\begin_inset Formula $u$
+\end_inset
+
+, the distribution behaves similar to the zeta distribution, where 
+\begin_inset Formula $\E\left[K\right]=\frac{1}{\zeta\left(s\right)}\sum_{j=1}^{\infty}\frac{1}{j^{s-1}}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Finally, a discrete uniform distribution can be specified by passing K =
+ 
+\begin_inset Quotes eld
+\end_inset
+
+duniform
+\begin_inset Quotes erd
+\end_inset
+
+ to genfrail.
+ The respective parameters are c(l, u), where 
+\begin_inset Formula $l$
+\end_inset
+
+ is the noninclusive lower bound and 
+\begin_inset Formula $u$
+\end_inset
+
+ is the inclusive upper bound.
+ Similar to the truncated zeta, 
+\begin_inset Formula $K\in\left\{ l+1,\dots,u\right\} $
+\end_inset
+
+ and cluster sizes will be selected from this set.
+ Since the lower bound is noninclusive, 
+\begin_inset Formula $\E\left[K\right]=\frac{1+l+u}{2}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The cluster sizes may also be specified by the user.
+ In this case, a vector of the desired cluster sizes should be passed as
+ parameter 
+\begin_inset Formula $K$
+\end_inset
+
+.
+ In this case, 
+\begin_inset Formula $N$
+\end_inset
+
+ is ignored with a warning.
 \end_layout
 
 \begin_layout Subsection
@@ -1085,8 +1464,7 @@ where
 \end_inset
 
 The censoring distribution is specified through the parameters censoring.distr
- and censoring.param, for the distribution name and parameter vector, respectfull
-y.
+ and censoring.param for the distribution name and parameter vector, respectfully.
  A normal distribution is used by default.
 \end_layout
 
@@ -1097,7 +1475,8 @@ Sometimes, a particular censoring rate is desired.
  genfrail can avoid this effort on behalf of the user by letting the desired
  censoring rate be specified instead.
  In this case, the appropriate parameters for the censoring distribution
- are determined to achieve the desired censoring rate.
+ are determined to achieve the desired censoring rate, given the generated
+ failure times.
 \end_layout
 
 \begin_layout Standard
@@ -1144,11 +1523,19 @@ for
 \begin_inset Formula $\sigma^{2}$
 \end_inset
 
- must still be specified for the problem to be identifiable.
- Particular censoring rates using other censoring distributions can be obtained
- in a similar way.
- genfrail is capable of censoring with normal, log-normal, and gamma distributio
-ns.
+ must be specified for the problem to be identifiable.
+ Solving for 
+\begin_inset Formula $\mu$
+\end_inset
+
+ will give the censoring distribution with expected censoring rate 
+\begin_inset Formula $r$
+\end_inset
+
+ for the data generated.
+ Thus, this method works with any empirical distribution of failure times.
+ genfrail uses this method to achieve a desired censoring rate with either
+ normal or log-normal censoring distributions.
 \end_layout
 
 \begin_layout Subsection
@@ -1217,9 +1604,9 @@ S(t|{\bf Z},\omega)=\exp\left\{ -\omega\exp({\bf \beta'}{\bf Z})(0.01t)^{4.6}\ri
 
 
 \begin_inset Formula 
-\[
-\lambda_{0}\left(t\right)=\left\{ \tau\left(Ct\right)^{\tau}\right\} t^{-1}
-\]
+\begin{equation}
+\lambda_{0}\left(t\right)=\left\{ \tau\left(Ct\right)^{\tau}\right\} t^{-1}\label{eq:hazard-typical}
+\end{equation}
 
 \end_inset
 
@@ -1229,13 +1616,19 @@ S(t|{\bf Z},\omega)=\exp\left\{ -\omega\exp({\bf \beta'}{\bf Z})(0.01t)^{4.6}\ri
 \begin_layout Standard
 Oscillating BH:
 \begin_inset Formula 
-\[
-\lambda_{0}\left(t\right)=A^{sin\left(f\pi t\right)}\left\{ \tau\left(Ct\right)^{\tau}\right\} t^{-1}
-\]
+\begin{equation}
+\lambda_{0}\left(t\right)=A^{sin\left(f\pi t\right)}\left\{ \tau\left(Ct\right)^{\tau}\right\} t^{-1}\label{eq:hazard-oscillate}
+\end{equation}
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+The baseline hazard can be verified by passing a zero covariate coefficient
+ and no censoring.
+ In this case, the empirical failure rate should reflect the baseline hazard.
 \end_layout
 
 \begin_layout Section

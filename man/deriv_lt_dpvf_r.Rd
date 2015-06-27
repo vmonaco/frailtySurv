@@ -2,13 +2,11 @@
 % Please edit documentation in R/distributions.R
 \name{deriv_lt_dpvf_r}
 \alias{deriv_lt_dpvf_r}
-\title{Similar issue as deriv_lt_dposstab_r, only closed-form expression for the
-0th derivative wrt. s right now}
+\title{PVF LT deriv wrt. alpha}
 \usage{
-deriv_lt_dpvf_r(p, s, alpha)
+deriv_lt_dpvf_r(m, s, alpha)
 }
 \description{
-Similar issue as deriv_lt_dposstab_r, only closed-form expression for the
-0th derivative wrt. s right now
+PVF LT deriv wrt. alpha
 }
 

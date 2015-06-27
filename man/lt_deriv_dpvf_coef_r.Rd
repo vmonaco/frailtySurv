@@ -2,13 +2,11 @@
 % Please edit documentation in R/distributions.R
 \name{lt_deriv_dpvf_coef_r}
 \alias{lt_deriv_dpvf_coef_r}
-\title{Coefficients for the PVF LT derivates, wrt. alpha using Hougaard's definition
-Still need coefficients with alpha = delta}
+\title{Coefficients for the PVF LT}
 \usage{
 lt_deriv_dpvf_coef_r(p, j, alpha)
 }
 \description{
-Coefficients for the PVF LT derivates, wrt. alpha using Hougaard's definition
-Still need coefficients with alpha = delta
+Coefficients for the PVF LT
 }
 

@@ -213,7 +213,7 @@ deriv_lt_dgamma_r_numeric <- function(p, s, theta) {
 }
 
 #' 
-#' 
+#' 2nd deriv evaluated numerically
 #' 
 deriv_deriv_lt_dgamma_r_numeric <- function(p, s, theta) {
   grad(function(theta) deriv_lt_dgamma_r_numeric(p, s, theta), theta)
@@ -519,17 +519,26 @@ etpois <- function(lambda, k=0) {
 }
 
 ################################################################################
-# Discrete truncated Pareto
+# Truncated Zeta distribution
 
 # Density
-ddpareto <- function(x, alpha){
-  exp(-alpha*log(x) - log(zeta(alpha)))
+dtzeta <- function(x, alpha, xmin=0, xmax=1e4){
+  out <- rep(0, length(x))
+  denom <- sum((1:(xmax-xmin))^-alpha / zeta(alpha))
+  idx <- (x > xmin)&(x <= xmax)
+  out[idx] <- ((x[idx]-xmin)^-alpha / zeta(alpha))/denom
+  out
 }
 
-# The "easy" way of simulating a discrete Pareto, but not exact
-rdpareto <- function(n, alpha, cuttoff=10000){
-  sample(x=1:x.max, size=n, replace=TRUE,
-         prob=ddpareto(alpha, x=1:cuttoff))
+# The "easy" way of sampling the truncated Zeta
+rtzeta <- function(n, alpha, xmin=0, xmax=1e4){
+  sample(x=xmin:xmax, size=n, replace=TRUE,
+         prob=dtzeta(x=xmin:xmax, alpha, xmin, xmax))
+}
+
+etzeta <- function(alpha, xmin=0, xmax=1e4) {
+  k <- 1:(xmax - xmin)
+  1/zeta(alpha) * sum(1/(k^(alpha - 1)))
 }
 
 ################################################################################

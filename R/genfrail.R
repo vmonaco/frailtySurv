@@ -1,4 +1,6 @@
-genfrail <- function(beta = c(log(2)), # Covariate coefficients
+genfrail <- function(
+                     
+                     beta = c(log(2)), # Covariate coefficients
                      covar.distr = c("normal", "uniform", "zero"),
                      covar.param = c(0,1),
                      
@@ -22,7 +24,7 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
                      # If K is int, then fixed cluster sizes
                      # If K is numeric vector, then sizes provided
                      # Otherwise draw random
-                     K = 2, #c(2, "poisson", "pareto", "uniform"), 
+                     K = 2, #c(2, "poisson", "tzeta", "duniform"), 
                      # cluster size distributian params:
                      # K-truncated Poisson: c(lambda, truncated value)
                      # Discrete Pareto: c(alpha, max value inclusive)
@@ -47,9 +49,9 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
     cluster.sizes <- K
   } else if (K == "poisson") {
     cluster.sizes <- rtpois(N, K.params[1], K.params[2])
-  } else if (K == "dpareto") {
-    cluster.sizes <- rdpareto(N, K.params[1], K.params[2])
-  } else if (K == "uniform") {
+  } else if (K == "tzeta") {
+    cluster.sizes <- rtzeta(N, K.params[1], K.params[2], K.params[3])
+  } else if (K == "duniform") {
     cluster.sizes <- round(runif(N, K.params[1], K.params[2]))
   } else {
     stop("Wrong value for K. Must be int, string, or numeric vector")
