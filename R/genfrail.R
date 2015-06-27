@@ -1,19 +1,21 @@
 genfrail <- function(beta = c(log(2)), # Covariate coefficients
-                     covariates = c("normal", "uniform"),
+                     covar.distr = c("normal", "uniform", "zero"),
+                     covar.param = c(0,1),
                      
                      # TODO: parameters names like this:
                      # coefficients = c(log(2)),
                      # covariate.distr = c("normal", "uniform"),
-                     # covariate.param = c(0,1),
                      
                      # Frailty distribution and parameter vector
-                     frailty = c("gamma", "lognormal", "invgauss", "posstab", "pvf"), 
+                     frailty = c("gamma", "lognormal", "invgauss", 
+                                 "posstab", "pvf", "none"), 
                      theta = c(2), # Frailty distribution parameter vector
                      
-                     # Censoring distribution and parameter vector
-                     censoring = c("normal"),
-                     censor.params = c(130,15), # Gaussian distribution for censoring
-                     censor.rate = 0.30,
+                     # Censoring distribution and parameters vector
+                     censor.distr = c("normal", "lognormal", "none"),
+                     censor.rate = NULL, # If specified, overrides mu
+                     censor.mu = 130, # 5
+                     censor.sigma = 15, # 0.5
                      
                      # Number of clusters and cluster sizes
                      N = 300, # N must be provided
@@ -38,61 +40,61 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
   
   # Determine cluster sizes
   if (is.numeric(K) && length(K) == 1) {
-    cluster_sizes <- c(rep(K, N));
+    cluster.sizes <- c(rep(K, N));
   } else if (is.numeric(K) && length(K) > 1) {
     if (length(K) != N)
       stop("length(K) must equal N when providing cluster sizes")
-    cluster_sizes <- K
+    cluster.sizes <- K
   } else if (K == "poisson") {
-    cluster_sizes <- rtpois(N, K.params[1], K.params[2])
+    cluster.sizes <- rtpois(N, K.params[1], K.params[2])
   } else if (K == "dpareto") {
-    cluster_sizes <- rdpareto(N, K.params[1], K.params[2])
+    cluster.sizes <- rdpareto(N, K.params[1], K.params[2])
   } else if (K == "uniform") {
-    cluster_sizes <- round(runif(N, K.params[1], K.params[2]))
+    cluster.sizes <- round(runif(N, K.params[1], K.params[2]))
   } else {
     stop("Wrong value for K. Must be int, string, or numeric vector")
   }
   
-  NK <- sum(cluster_sizes)
+  NK <- sum(cluster.sizes)
   
   # Generate the covariates
   p <- length(beta)
   Z <- matrix(0, nrow=NK, ncol=p)
   for (j in 1:p) {
-    if (covariates == "normal") {
+    if (covar.distr == "normal") {
       Z[, j] <- rnorm(NK)
-    } else if (covariates == "uniform") {
+    } else if (covar.distr == "uniform") {
       Z[, j] <- runif(NK)
-    } else if (covariates == "zero") {
+    } else if (covar.distr == "zero") {
       Z[, j] <- rep(0, NK)
     }
   }
   
-  cluster_frailty <- rep(1, N)
+  cluster.frailty <- rep(1, N)
   # Generate the frailty for each family
   # In each case, only generate random values for non-degenerate distributions
   if (frailty=="gamma") {
     if ( theta != 0 )
-      cluster_frailty <- rgamma_r(N, theta)
+      cluster.frailty <- rgamma_r(N, theta)
   } else if (frailty=="lognormal") {
     if ( theta != 0 )
-      cluster_frailty <- rlognormal_r(N, theta)
+      cluster.frailty <- rlognormal_r(N, theta)
   } else if (frailty=="invgauss") {
     if ( theta != 0 )
-      cluster_frailty <- rinvgauss_r(N, theta)
+      cluster.frailty <- rinvgauss_r(N, theta)
   } else if (frailty=="posstab") {
     if ( theta != 1 )
-      cluster_frailty <- rposstab_r(N, theta)
+      cluster.frailty <- rposstab_r(N, theta)
   } else if (frailty=="pvf") {
     if ( theta != 1 )
-      cluster_frailty <- rpvf_r(N, theta)
+      cluster.frailty <- rpvf_r(N, theta)
   } else if (frailty == "none") {
     # do nothing, w is already 1
   } else {
     stop("Wrong value for frailty: ", frailty)
   }
   
-  w = rep(cluster_frailty, cluster_sizes)
+  w = rep(cluster.frailty, cluster.sizes)
   rate <- w*exp(Z%*%beta)
   
   if (sum(c(!is.null(lambda_0), !is.null(Lambda_0), !is.null(Lambda_0_inv)) > 1))
@@ -118,7 +120,7 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
       stop("Need baseline hazard if cumulative baseline hazard is not specified.")
     }
     
-    # TODO: first try to invert the function analytically
+    # TODO: first try to invert the function analytically, maybe using Ryacas?
     
     # if inversion fails, then need to find root for each t
     # Similar to the method described by Crowther, 
@@ -132,25 +134,58 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
     })
   }
   
-#   Surv.fn <- ecdf(fail.time)
-#   Fail.fn <- function(t) 1 - Surv.fn(t)
-#   mu <- uniroot(function(mu) 
-#     censor.rate - integrate(function(t) 
-#       Fail.fn(t)*dnorm(t, mu, censor.params[2]), 0, Inf, subdivisions=1e3)$value,
-#     lower=0, upper=100, extendInt="up")$root
+  if (censor.distr == "normal") {
+    censor.density <- dnorm
+    censor.random <- rnorm
+    censor.quantile <- qnorm
+  } else if (censor.distr == "lognormal") {
+    censor.density <- dlnorm
+    censor.random <- rlnorm
+    censor.quantile <- qlnorm
+  } else if (censor.distr == "none") {
+    warning("Censoring distribution is set to none")
+  } else {
+    stop("Censoring distribution must be normal or lognormal")
+  }
   
-  # Non-informative right censoring
-  censor.time <- rnorm(NK, censor.params[1], censor.params[2])
-  obs.status <- sign(fail.time <= censor.time)
-  obs.time <- pmin(fail.time, censor.time)
+  if (censor.distr == "none") {
+    obs.status <- rep(1, NK)
+    obs.time <- fail.time
+  } else {
+    if (!is.null(censor.rate)) {
+      if (!is.null(censor.mu))
+        warning("Censoring rate will override mean")
+      
+      stopifnot(0 <= censor.rate && censor.rate <= 1)
+      
+      # Empirical survivor and hazard functions
+      esurv <- ecdf(fail.time)
+      efail <- function(t) 1 - esurv(t)
+      
+      # Split the integral up into 2 parts since it may actually be ~0 for 
+      # most of the interval. Make this split at the 50th percentile
+      censor.mu <- uniroot(function(mu) 
+        censor.rate - 
+          (integrate(function(t) efail(t)*censor.density(t, mu, censor.sigma), 
+            -Inf, censor.quantile(0.5, mu, censor.sigma), subdivisions=1e3)$value +
+           integrate(function(t) efail(t)*censor.density(t, mu, censor.sigma), 
+            censor.quantile(0.5, mu, censor.sigma), Inf, subdivisions=1e3)$value),
+        lower=0, upper=100, extendInt="up")$root
+    }
+    
+    # Non-informative right censoring
+    censor.time <- censor.random(NK, censor.mu, censor.sigma)
+    obs.status <- sign(fail.time <= censor.time)
+    obs.time <- pmin(fail.time, censor.time)
+  }
   
   if (is.numeric(round.base)) {
     obs.time <- round.base*floor(obs.time/round.base + 0.5)
   }
   
   colnames(Z) <- paste("Z", 1:p, sep="")
-  dat <- data.frame(family=rep(1:N, cluster_sizes),
-                    rep=unlist(lapply(cluster_sizes, function(m) rep(1:m))), 
+  dat <- data.frame(family=rep(1:N, cluster.sizes),
+                    rep=unlist(lapply(cluster.sizes, function(m) rep(1:m))), 
                     time=obs.time, 
                     status=obs.status,
                     Z)
