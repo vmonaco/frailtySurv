@@ -363,6 +363,8 @@ integer.
 
 Generating survival data from a model with known parameters.
 
+simdata <- genfrail(N=300, K=2, beta=log(2), frailty="gamma", theta=2)
+
 \[
 S(t|{\bf Z},\omega)=\exp\left\{ -\omega\exp({\bf \beta'}{\bf Z})(0.01t)^{4.6}\right\} 
 \]
