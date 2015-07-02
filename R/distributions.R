@@ -25,6 +25,15 @@ num_vs_lt <- function(k, N_dot, H_dot, density_params, density_fn, density_LT) {
       phi_laplace(k, N_dot, H_dot, density_params, density_LT))
 }
 
+kendalls_tau <- function(fn1, fn2) {
+#   cdf1 <- Vectorize(function(x) integrate(fn1, 0, x)$value)
+#   cdf2 <- Vectorize(function(x) integrate(fn2, 0, x)$value)
+  # 4*integrate(function(x, y) abs(fn1(x)-fn2(x)), 0, Inf)$value - 1
+#   f <- function(x) {
+#     fn1(x[1])*fn2(x[2])
+#   }
+  # 4*adaptIntegrate(f, c(0,0), c(100,100))$integral - 1
+}
 
 ################################################################################
 # Gamma distribution

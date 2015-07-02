@@ -107,7 +107,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   
   verbose <- control$verbose
   if (verbose)
-    cat(c("Iter", paste("beta_", 1:n_beta, sep=""), paste("theta_", 1:n_beta, sep=""), "\n"), sep="\t")
+    cat(c("Iter", paste("beta_", 1:n_beta, sep=""), paste("theta_", 1:n_theta, sep=""), "\n"), sep="\t")
   
   iter <- 0
   # Build the system of equations where gamma is c(beta, theta)
@@ -197,26 +197,48 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
 #     return(dH)
     # Build the jacobian matrix from the respective components
     outer(1:n_gamma, 1:n_gamma, Vectorize(function(i, j) 
-      jacobian_ij(i, j, beta, theta, R_, R_dot_, H_, H_dot_, Lambda, lambda)))
+      jacobian_ij(i, j, beta, theta, R_, R_dot_, H_, H_dot_, Lambda, lambda)))/n_clusters
   }
   
   est <- function(beta, theta, frailty="gamma") {
     baseline_hazard_estimator(X_, K_, d_, Y_, N_dot, beta, theta, frailty)
   }
   
+  covariance_V <- function(gamma) {
+    eta <- U(gamma)
+    
+  }
+  
+  covariance_G <- function(gamma) {
+    
+  }
+  
+  covariance_C <- function(gamma) {
+    
+  }
+  
+  covariance <- function(gamma) {
+    D <- jacobian(gamma)
+    V <- covariance_V(gamma)
+    G <- covariance_G(gamma)
+    C <- covariance_C(gamma)
+    
+    solve(D)*(V + G + C)*solve(t(D))
+  }
+  
   if (control$fitmethod == 'score') {
     fitter <- nleqslv(c(beta_init, theta_init), U, 
                       control=list(maxit=control$iter.max,xtol=1e-8,ftol=1e-8,btol=1e-3),
-                      jac=jacobian,
+                      # jac=jacobian,
                       jacobian=TRUE
                       )
     gamma_hat <- fitter$x
   } else if (control$fitmethod == 'like') {
     stop("TODO")
-#   fitter <- optim(c(0, 0.01), function(x) loglikfn(x[1], x[2], frailty), 
-#                lower=c(-4,0.05), upper=c(4,10), method="L-BFGS-B",
-#                control=list(fnscale=-1, factr=1e8, pgtol=1e-8))
-#   gamma_hat <- fitter$par
+    fitter <- optim(c(0, 0.01), function(x) loglikfn(x[1], x[2], frailty), 
+                 lower=c(-4,0.05), upper=c(4,10), method="L-BFGS-B",
+                 control=list(fnscale=-1, factr=1e8, pgtol=1e-8))
+    gamma_hat <- fitter$par
   }
   
   if (verbose)
