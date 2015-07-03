@@ -117,3 +117,31 @@ jacobian_theta_theta <- function(K_, X_, N_dot, H_, H_dot, dH_dtheta_, dH_dot_dt
     .Call('frailtyr_jacobian_theta_theta', PACKAGE = 'frailtyr', K_, X_, N_dot, H_, H_dot, dH_dtheta_, dH_dot_dtheta_, beta, theta, theta_idx_1, theta_idx_2, frailty)
 }
 
+Q_beta <- function(X_, R_star, N_dot_, H_, H_dot_, theta, r, frailty) {
+    .Call('frailtyr_Q_beta', PACKAGE = 'frailtyr', X_, R_star, N_dot_, H_, H_dot_, theta, r, frailty)
+}
+
+Q_theta <- function(X_, R_star, N_dot_, H_, H_dot_, theta, r, frailty) {
+    .Call('frailtyr_Q_theta', PACKAGE = 'frailtyr', X_, R_star, N_dot_, H_, H_dot_, theta, r, frailty)
+}
+
+Ycal <- function(X_, Y_, N_dot_, H_dot_, beta, theta, frailty) {
+    .Call('frailtyr_Ycal', PACKAGE = 'frailtyr', X_, Y_, N_dot_, H_dot_, beta, theta, frailty)
+}
+
+eta <- function(N_dot_, H_dot_, theta, frailty) {
+    .Call('frailtyr_eta', PACKAGE = 'frailtyr', N_dot_, H_dot_, theta, frailty)
+}
+
+Upsilon <- function(X_, K_, R_dot_, nu_, Ycal_, beta, theta, frailty) {
+    .Call('frailtyr_Upsilon', PACKAGE = 'frailtyr', X_, K_, R_dot_, nu_, Ycal_, beta, theta, frailty)
+}
+
+xi_beta <- function(X_, I_, N_dot, H_, H_dot_, beta, theta, r, frailty) {
+    .Call('frailtyr_xi_beta', PACKAGE = 'frailtyr', X_, I_, N_dot, H_, H_dot_, beta, theta, r, frailty)
+}
+
+xi_theta <- function(X_, I_, N_dot, H_, H_dot_, beta, theta, r, frailty) {
+    .Call('frailtyr_xi_theta', PACKAGE = 'frailtyr', X_, I_, N_dot, H_, H_dot_, beta, theta, r, frailty)
+}
+

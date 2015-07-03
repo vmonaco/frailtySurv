@@ -893,7 +893,6 @@ NumericVector Ycal(List X_,
                    NumericVector beta,
                    NumericVector theta,
                    String frailty) {
-  
   NumericVector tmp = H_dot_(0);
   int n_timesteps = tmp.size();
   int n_clusters = X_.size();
@@ -903,7 +902,7 @@ NumericVector Ycal(List X_,
   NumericVector Upsilon_(n_timesteps);
   
   for (int k = 0; k < n_timesteps; ++k) {
-    double Ycal_outer_sum = 0;
+    double outer_sum = 0;
     
     for (int i = 0; i < n_clusters; ++i) {
       // Output
@@ -916,13 +915,13 @@ NumericVector Ycal(List X_,
       // Vectors
       Rcpp::NumericVector N_dot_i = N_dot_(i);
       Rcpp::NumericVector H_dot_i = H_dot_(i);
+      double inner_sum = 0;
       
-      double Ycal_inner_sum = 0;
       for (int j = 0; j < X_i.nrow(); ++j) {
-        Ycal_inner_sum += Y_i(j, k) * exp(sum(beta * X_i(j, _)));
+        inner_sum += Y_i(j, k) * exp(sum(beta * X_i(j, _)));
       }
       
-      Ycal_outer_sum += Ycal_inner_sum * 
+      outer_sum += inner_sum * 
         psi(N_dot_i(k), H_dot_i(k), theta.begin(), frailty);
       
       nu_i(k) = 
@@ -932,17 +931,17 @@ NumericVector Ycal(List X_,
              phi(1,N_dot_i(k),H_dot_i(k), theta.begin(), frailty), 2));
     }
     
-    Ycal_(k) = Ycal_outer_sum/n_clusters;
+    Ycal_(k) = outer_sum/n_clusters;
   }
   
   return Ycal_;
 }
 
 // [[Rcpp::export]]
-List nu(List N_dot_,
-        List H_dot_,
-        NumericVector theta,
-        String frailty) {
+List eta(List N_dot_,
+         List H_dot_,
+         NumericVector theta,
+         String frailty) {
   
   NumericVector tmp = H_dot_(0);
   int n_timesteps = tmp.size();
@@ -1009,4 +1008,72 @@ NumericVector Upsilon(List X_,
   }
   
   return Upsilon_;
+}
+
+// [[Rcpp::export]]
+NumericVector xi_beta(List X_,
+                      List I_, 
+                      List N_dot,
+                      List H_, 
+                      List H_dot_,
+                      NumericVector beta, 
+                      NumericVector theta,
+                      int r, String frailty) {
+  r -= 1;  // Convert R idx to C++ idx to avoid confusion
+  NumericVector tmp = H_dot_(0);
+  int tau = tmp.size() - 1;
+  int n_clusters = X_.size();
+  NumericVector xi_r(n_clusters);
+  
+  double term1 = 0;
+  double term2 = 0;
+  for (int i = 0; i < n_clusters; ++i) {
+    NumericMatrix X_i = X_(i);
+    NumericMatrix H_i = H_(i);
+    
+    NumericVector I_i = I_(i);
+    NumericVector N_dot_i = N_dot(i);
+    NumericVector H_dot_i = H_dot_(i);
+    
+    double term2_factor1 = 0;
+    for (int j = 0; j < X_i.nrow(); j++) {
+      term1 += I_i[j] * X_i(j, r);
+      term2_factor1 += H_i(j, tau) * X_i(j, r);
+    }
+    
+    term2 = term2_factor1 * psi(N_dot_i(tau), H_dot_i(tau), theta.begin(), frailty);
+    
+    xi_r(i) = term1 - term2;
+  }
+  
+  return xi_r;
+}
+
+// [[Rcpp::export]]
+NumericVector xi_theta(List X_,
+                       List I_, 
+                       List N_dot,
+                       List H_, 
+                       List H_dot_,
+                       NumericVector beta, 
+                       NumericVector theta,
+                       int r, String frailty) {
+  r -= 1;  // Convert R idx to C++ idx to avoid confusion
+  NumericVector tmp = H_dot_(0);
+  int tau = tmp.size() - 1;
+  int n_clusters = X_.size();
+  NumericVector xi_r(n_clusters);
+  
+  for (int i = 0; i < n_clusters; ++i) {
+    Rcpp::NumericMatrix X_i = X_(i);
+    Rcpp::NumericVector I_i = I_(i);
+    Rcpp::NumericVector N_dot_i = N_dot(i);
+    Rcpp::NumericMatrix H_i = H_(i);
+    Rcpp::NumericVector H_dot_i = H_dot_(i);
+    
+    xi_r(i) = phi_prime(1, N_dot_i(tau), H_dot_i(tau),theta.begin(), frailty, r)/
+                    phi(1, N_dot_i(tau), H_dot_i(tau),theta.begin(), frailty);
+  }
+  
+  return xi_r;
 }
