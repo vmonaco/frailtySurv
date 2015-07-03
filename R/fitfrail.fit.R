@@ -89,6 +89,9 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   # N_dot[[i]][k] is the number of individuals in cluster i that failed up to time tau_k
   N_dot <- sum_by_cluster(N_)
   
+  N_tilde <- clapply(cluster_names, cluster_sizes, function(i, j) {
+    as.numeric((K_[[i]][j] <= 1:length(time_steps)))})
+  
   # Y_[[i]][j,k] indicates whether individual j in cluster i failed at time >= tau_k
 #   Y_ <- sapply(cluster_names, function(i) {
 #     t(sapply(1:cluster_sizes[[i]], function(j) {
@@ -192,9 +195,6 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     H_ <- bh$H_
     H_dot_ <- bh$H_dot
     
-#     dH <- dH_dtheta(d_, K_, X_, R_, R_dot_, N_dot, H_, H_dot_, 
-#                     Lambda, lambda, beta, theta, 1, frailty)
-#     return(dH)
     # Build the jacobian matrix from the respective components
     outer(1:n_gamma, 1:n_gamma, Vectorize(function(i, j) 
       jacobian_ij(i, j, beta, theta, R_, R_dot_, H_, H_dot_, Lambda, lambda)))/n_clusters
@@ -211,6 +211,72 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   
   covariance_G <- function(gamma) {
     
+    sum_clappy <- function(fn) {
+      sum(unlist(clapply(cluster_names, cluster_sizes, fn)))
+    }
+    
+    tau <- length(time_steps)
+    
+    R_star <- clapply(cluster_names, cluster_sizes, function(i, j) {
+      exp(sum(beta * X_[[i]][j]))
+    })
+    
+    # Split Q up into beta and theta components, then create a Q_ function
+    # that accesses component by index r
+    Q_beta_ <- lapply(1:n_beta, function(r) {
+      Q_beta(X_, R_star, N_dot_, H_, H_dot_, theta, r, frailty)
+    })
+    
+    Q_theta_ <- lapply(1:n_theta, function(r) {
+      Q_theta(X_, R_star, N_dot_, H_, H_dot_, theta, r, frailty)
+    })
+    
+    Q_ <- function(i, j, r, t) {
+      if (1 <= r && r <= n_beta) {
+        Q_beta[[r]][[i]][j, t]
+      } else if (n_beta < r && r <= (n_beta + n_theta)) {
+        Q_theta[[n_beta - r]][[i]][j, t]
+      }
+    }
+    
+    # Ycal, nu, and Upsilon
+    Yal_ <- Ycal(X_, Y_, N_dot_, H_dot_, beta, theta, frailty)
+    nu_ <- nu(N_dot_, H_dot_, theta, frailty)
+    Upsilon_ <- Upsilon(X_, K_, R_dot_, nu_, Ycal_, beta, theta, frailty)
+    
+    Omega <- function(i, j, s, t) {
+      integrate(function(u) {
+        Ycal_[u]^(-2) * R_dot[[i]][u] * nu_[[i]][u] * exp(sum(beta*X_[[i]][j])) * 
+          sum_clapply(function(k, l) {
+            N_[[k]][l, u]
+          })
+      }, s, t)$value/n_clusters^2
+    }
+    
+    p_hat <- function(t) {
+      prod(vapply(1:t, function(s) {
+        1 + sum_clappy(function(i, j) {
+          (I_[[i]][j] * Upsilon[s] + Omega(i, j, s, t)) * N_tilde[[i]][j, s]
+        })
+      }, 0))
+    }
+    
+    pi_ <- function(r, s) {
+      integrate(function(t) {
+        sum_ij(function(i, j) {
+          Q_(i, j, r, t) * N_tilde[[i]][j,t]
+        })/p_hat(t)
+      }, s, tau)$value/n_clusters
+    }
+    
+    G_ <- function(i, j) {
+      integrate(function(s) {
+        factor4 <- sum_clappy(function(i,j) N_dot[[i]][j,s])/Y_cal(s)^2
+        pi_(i, s) * pi_(j, s) * p_hat(s-1)^2 * factor4
+        })$value/n_clusters
+    }
+    
+    outer(1:n_gamma, 1:n_gamma, Vectorize(function(i, j) G_(i, j)))
   }
   
   covariance_C <- function(gamma) {
