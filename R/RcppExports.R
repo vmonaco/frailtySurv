@@ -81,14 +81,6 @@ baseline_hazard_estimator <- function(X_, R_, d_, Y_, N_dot, beta, theta, frailt
     .Call('frailtyr_baseline_hazard_estimator', PACKAGE = 'frailtyr', X_, R_, d_, Y_, N_dot, beta, theta, frailty)
 }
 
-U_r <- function(X_, R_, I_, N_dot, H_, H_dot, beta, theta, beta_idx, frailty) {
-    .Call('frailtyr_U_r', PACKAGE = 'frailtyr', X_, R_, I_, N_dot, H_, H_dot, beta, theta, beta_idx, frailty)
-}
-
-U_p <- function(X_, R_, I_, N_dot, H_, H_dot, beta, theta, theta_idx, frailty) {
-    .Call('frailtyr_U_p', PACKAGE = 'frailtyr', X_, R_, I_, N_dot, H_, H_dot, beta, theta, theta_idx, frailty)
-}
-
 loglikelihood <- function(X_, R_, I_, N_dot, H_dot, Lambda, beta, theta, frailty) {
     .Call('frailtyr_loglikelihood', PACKAGE = 'frailtyr', X_, R_, I_, N_dot, H_dot, Lambda, beta, theta, frailty)
 }

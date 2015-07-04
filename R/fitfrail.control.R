@@ -8,7 +8,7 @@ fitfrail.control <- function(fitmethod='score',
                              iter.max=20,
                              toler.inf=sqrt(eps),
                              verbose=TRUE) {
-  if (!fitmethod %in% c("score", "like")) stop("fitmethod must be one of: score, like")
+  if (!fitmethod %in% c("score", "loglik")) stop("fitmethod must be one of: score, loglik")
   if (iter.max < 0) stop("Invalid value for iterations")
   if (eps <= 0) stop ("Invalid convergence criteria")
   list(fitmethod=fitmethod,
