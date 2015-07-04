@@ -136,6 +136,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   iter <- 0
   # Build the system of equations where gamma is c(beta, theta)
   U <- function(gamma) {
+    cat('U  ', gamma, '\n')
     beta <<- gamma[1:n_beta]
     theta <<- gamma[(n_beta+1):(n_beta+n_theta)]
     
@@ -144,10 +145,11 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     H_dot_ <<- estimator$H_dot
     lambda_hat <<- estimator$lambda_hat
     Lambda_hat <<- estimator$Lambda_hat
+    psi_ <<- estimator$psi_
     
     if (verbose) {
       iter <<- iter + 1
-      cat(c(signif(c(iter, beta, theta), 4), "\n"), sep="\t")
+      # cat(c(signif(c(iter, beta, theta), 4), "\n"), sep="\t")
     }
     
     # TODO: This could be done in parallel, not much gain though.
@@ -170,61 +172,52 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     loglikelihood(X_, K_, I_, N_dot, estimator$H_dot, estimator$Lambda_hat, beta, theta, frailty)
   }
   
-  jacobian_ij <- function(i, j, beta, theta, R_, R_dot_, H_, H_dot_, Lambda, lambda) {
+  jacobian_ij <- function(i, j) {
     if (i <= n_beta && j <= n_beta) {
       dH <- dH_dbeta(d_, K_, X_, R_, R_dot_, N_dot, H_, H_dot_, 
-                            Lambda, lambda, beta, theta, j, frailty)
+                            Lambda_hat, lambda_hat, beta, theta, j, frailty)
       
-      jacobian_beta_beta(K_, X_, N_dot, H_, H_dot, dH$dH_dbeta_, dH$dH_dot_dbeta_,
+      jacobian_beta_beta(K_, X_, N_dot, H_, H_dot_, dH$dH_dbeta_, dH$dH_dot_dbeta_,
                          beta, theta, i, j, frailty)
     } else if (i <= n_beta && j > n_beta) {
       dH <- dH_dtheta(d_, K_, X_, R_, R_dot_, N_dot, H_, H_dot_, 
-                     Lambda, lambda, beta, theta, n_beta - j, frailty)
+                      Lambda_hat, lambda_hat, beta, theta, n_beta - j, frailty)
       
-      jacobian_beta_theta(K_, X_, N_dot, H_, H_dot, dH$dH_dtheta_, dH$dH_dot_dtheta_,
+      jacobian_beta_theta(K_, X_, N_dot, H_, H_dot_, dH$dH_dtheta_, dH$dH_dot_dtheta_,
                          beta, theta, i, n_beta - j, frailty)
     } else if (i > n_beta && j <= n_beta) {
       dH <- dH_dbeta(d_, K_, X_, R_, R_dot_, N_dot, H_, H_dot_, 
-                     Lambda, lambda, beta, theta, j, frailty)
+                     Lambda_hat, lambda_hat, beta, theta, j, frailty)
       
-      jacobian_theta_beta(K_, X_, N_dot, H_, H_dot, dH$dH_dbeta_, dH$dH_dot_dbeta_,
+      jacobian_theta_beta(K_, X_, N_dot, H_, H_dot_, dH$dH_dbeta_, dH$dH_dot_dbeta_,
                          beta, theta, n_beta - i, j, frailty)
     } else if (i > n_beta && j > n_beta) {
       dH <- dH_dtheta(d_, K_, X_, R_, R_dot_, N_dot, H_, H_dot_, 
-                      Lambda, lambda, beta, theta, n_beta - j, frailty)
+                      Lambda_hat, lambda_hat, beta, theta, n_beta - j, frailty)
       
-      jacobian_theta_theta(K_, X_, N_dot, H_, H_dot, dH$dH_dtheta_, dH$dH_dot_dtheta_,
+      jacobian_theta_theta(K_, X_, N_dot, H_, H_dot_, dH$dH_dtheta_, dH$dH_dot_dtheta_,
                           beta, theta, n_beta - i, n_beta - j, frailty)
     }
   }
   
   jacobian <- function(gamma) {
-    n_gamma <- length(gamma)
-    stopifnot(length(gamma) == n_beta + n_theta)
-    
-    beta <- gamma[1:n_beta]
-    theta <- gamma[(n_beta+1):(n_beta+n_theta)]
-    
-    R_ <- clapply(cluster_names, cluster_sizes, function(i, j) {
+    cat('jac', gamma, '\n')
+    R_ <<- clapply(cluster_names, cluster_sizes, function(i, j) {
       exp(sum(beta * X_[[i]][j])) * Y_[[i]][j,]
     })
-    R_dot_ <- sum_by_cluster(R_)
-    
-    bh <- baseline_hazard_estimator(X_, K_, d_, Y_, N_dot, beta, theta, frailty)
-    Lambda <- bh$Lambda_hat
-    lambda <- bh$lambda_hat
-    H_ <- bh$H_
-    H_dot_ <- bh$H_dot
+    R_dot_ <<- sum_by_cluster(R_)
     
     # Build the jacobian matrix from the respective components
     outer(1:n_gamma, 1:n_gamma, Vectorize(function(i, j) 
-      jacobian_ij(i, j, beta, theta, R_, R_dot_, H_, H_dot_, Lambda, lambda)))/n_clusters
+      jacobian_ij(i, j)))/n_clusters
   }
   
   est <- function(beta, theta, frailty="gamma") {
     baseline_hazard_estimator(X_, K_, d_, Y_, N_dot, beta, theta, frailty)
   }
   
+  # The covariance matrix is encapsulated in a function since it takes some effort
+  # to compute. By default, it is only computed when accessed by the user
   covariance <- function() {
     # First, gather some variables that were defined before the covar steps
     
@@ -317,14 +310,32 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     G <- outer(1:n_gamma, 1:n_gamma, Vectorize(function(r, l) {
       integrate(Vectorize(function(s) {
         pi_[r, s] * pi_[l, s] * p_hat[s - 1]^2 * N_dot_dot[s]/Ycal_[s]^2
-      }), 1, tau)$value/n_clusters
+      }), 2, tau)$value/n_clusters
     }))
     
     ################################################################## Step III
     
-    u_
+    # M_[i,s]
+    M_ <- lapply(1:n_clusters, function(i) {
+      outer(1:cluster_sizes[[i]], 1:tau, Vectorize(function(j, t) {
+        if (t <= 2) {
+          N_[[i]][j, t]
+        } else {
+          N_[[i]][j, t] - integrate(Vectorize(function(u) {
+            exp(sum(beta * X_[[i]][j,])) * Y_[[i]][j, u] * psi_[[i]][u - 1] * Lambda_hat[u]
+          }), 2, t)$value
+        }
+      }))
+    })
     
-    M_
+    Msum_ <- do.call(rbind, lapply(M_, colSums))
+    
+    # u_[i,r]
+    u_ <- outer(1:n_clusters, 1:n_gamma, Vectorize(function(i, r) {
+      integrate(Vectorize(function (s) {
+        Msum_[i, s] * pi_[r, s] * p_hat[s - 1]/Ycal_[s]
+      }), 2, tau)$value
+    }))
     
     C <- outer(1:n_gamma, 1:n_gamma, Vectorize(function(r, l) {
         Reduce('+', vapply(1:n_clusters, function(i) {
@@ -333,16 +344,18 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     }))
     
     ################################################################## Step IV
-    D <- jacobian(gamma)
+    D <- jacobian()
     
     ################################################################## Step V
-    solve(D)*(V + G + C)*solve(t(D))
+    D_inv <- solve(D)
+    D_inv %*% (V + G + C) %*% t(D_inv)
   }
   
   if (control$fitmethod == 'score') {
     fitter <- nleqslv(c(beta_init, theta_init), U, 
                       control=list(maxit=control$iter.max,xtol=1e-8,ftol=1e-8,btol=1e-3),
-                      # jac=jacobian,
+                      method='Newton',
+                      jac=jacobian,
                       jacobian=TRUE
                       )
     gamma_hat <- fitter$x

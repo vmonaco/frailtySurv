@@ -176,18 +176,26 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_,
   
   // H_dot is a list of numeric vectors
   Rcpp::List H_dot = clone(N_dot);
+  Rcpp::List psi_ = clone(N_dot);
   
-  for (int i = 0; i < n_clusters; ++i) {
-    // H_[i](NumericMatrix(n_members, n_timesteps));
-    Rcpp::NumericMatrix H_i = H_(i);
-    Rcpp::NumericVector H_dot_i = H_dot(i);
-    for (int k = 0; k < n_timesteps; ++k) {
+  for (int k = 0; k < n_timesteps; ++k) {
+    for (int i = 0; i < n_clusters; ++i) {
+      Rcpp::NumericMatrix H_i = H_(i);
+      Rcpp::NumericVector H_dot_i = H_dot(i);
+      Rcpp::NumericVector psi_i = psi_(i);
       for (int j = 0; j < H_i.nrow(); ++j) {
         H_i(j, k) = 0;
       }
       H_dot_i(k) = 0;
+      
+      if (k == 0) {
+        psi_i(k) = psi(0, 0, theta.begin(), frailty);
+      } else {
+        psi_i(k) = 0;
+      }
     }
   }
+  
   // Lambda_hat is the baseline cumulative hazard estimate
   NumericVector Lambda_hat(n_timesteps);
   NumericVector delta_Lambda_hat(n_timesteps);
@@ -201,6 +209,7 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_,
       Rcpp::NumericMatrix Y_i = Y_(i);
       Rcpp::NumericVector N_dot_i = N_dot(i);
       Rcpp::NumericVector H_dot_i = H_dot(i);
+      Rcpp::NumericVector psi_i = psi_(i);
       
       double tmp = 0;
       for (int j = 0; j < X_i.nrow(); ++j) {
@@ -208,10 +217,7 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_,
       }
       
       // TODO: optimize by ignoring 0 terms, don't do the denom integrations
-      denom += tmp * psi(N_dot_i(k - 1), 
-                         H_dot_i(k - 1), 
-                         theta.begin(), 
-                         frailty);
+      denom += tmp * psi_i(k - 1);
     }
     
     delta_Lambda_hat(k) = d_(k)/denom;
@@ -223,6 +229,8 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_,
       Rcpp::NumericVector R_i = R_(i);
       Rcpp::NumericMatrix H_i = H_(i);
       Rcpp::NumericVector H_dot_i = H_dot(i);
+      Rcpp::NumericVector N_dot_i = N_dot(i);
+      Rcpp::NumericVector psi_i = psi_(i);
       
       for (int j = 0; j < X_i.nrow(); ++j) {
         // R_ is the rank of failure as an R index
@@ -231,13 +239,17 @@ Rcpp::List baseline_hazard_estimator(Rcpp::List X_,
       }
       
       H_dot_i(k) = sum(H_i( _ , k));
+      
+      psi_i(k) = psi(N_dot_i(k), H_dot_i(k), theta.begin(), frailty);
     }
   }
   
   return Rcpp::List::create(Rcpp::Named("H_") = H_,
                             Rcpp::Named("H_dot") = H_dot,
                             Rcpp::Named("Lambda_hat") = Lambda_hat,
-                            Rcpp::Named("lambda_hat") = delta_Lambda_hat);
+                            Rcpp::Named("lambda_hat") = delta_Lambda_hat,
+                            Rcpp::Named("psi_") = psi_
+                            );
 }
 
 // [[Rcpp::export]]
