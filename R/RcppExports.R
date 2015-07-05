@@ -77,20 +77,20 @@ phi_prime_c <- function(k, N_dot, H_dot, theta, frailty, deriv_idx) {
     .Call('frailtyr_phi_prime_c', PACKAGE = 'frailtyr', k, N_dot, H_dot, theta, frailty, deriv_idx)
 }
 
-baseline_hazard_estimator <- function(X_, R_, d_, Y_, N_dot, beta, theta, frailty) {
-    .Call('frailtyr_baseline_hazard_estimator', PACKAGE = 'frailtyr', X_, R_, d_, Y_, N_dot, beta, theta, frailty)
+bh <- function(d_, X_, K_, Y_, N_dot, beta, theta, frailty) {
+    .Call('frailtyr_bh', PACKAGE = 'frailtyr', d_, X_, K_, Y_, N_dot, beta, theta, frailty)
 }
 
-loglikelihood <- function(X_, R_, I_, N_dot, H_dot, Lambda, beta, theta, frailty) {
-    .Call('frailtyr_loglikelihood', PACKAGE = 'frailtyr', X_, R_, I_, N_dot, H_dot, Lambda, beta, theta, frailty)
+loglikelihood <- function(X_, K_, I_, phi_1_, Lambda, beta) {
+    .Call('frailtyr_loglikelihood', PACKAGE = 'frailtyr', X_, K_, I_, phi_1_, Lambda, beta)
 }
 
-dH_dbeta <- function(d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, Lambda, Delta_Lambda, beta, theta, beta_idx, frailty) {
-    .Call('frailtyr_dH_dbeta', PACKAGE = 'frailtyr', d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, Lambda, Delta_Lambda, beta, theta, beta_idx, frailty)
+dH_dbeta <- function(d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, Lambda, lambda, beta, theta, beta_idx, frailty) {
+    .Call('frailtyr_dH_dbeta', PACKAGE = 'frailtyr', d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, Lambda, lambda, beta, theta, beta_idx, frailty)
 }
 
-dH_dtheta <- function(d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, Lambda, Delta_Lambda, beta, theta, theta_idx, frailty) {
-    .Call('frailtyr_dH_dtheta', PACKAGE = 'frailtyr', d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, Lambda, Delta_Lambda, beta, theta, theta_idx, frailty)
+dH_dtheta <- function(d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, Lambda, lambda, beta, theta, theta_idx, frailty) {
+    .Call('frailtyr_dH_dtheta', PACKAGE = 'frailtyr', d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, Lambda, lambda, beta, theta, theta_idx, frailty)
 }
 
 jacobian_beta_beta <- function(K_, X_, N_dot, H_, H_dot, dH_dbeta_, dH_dot_dbeta_, beta, theta, beta_idx_1, beta_idx_2, frailty) {

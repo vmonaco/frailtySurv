@@ -248,46 +248,43 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
-// baseline_hazard_estimator
-Rcpp::List baseline_hazard_estimator(Rcpp::List X_, Rcpp::List R_, NumericVector d_, Rcpp::List Y_, Rcpp::List N_dot, NumericVector beta, NumericVector theta, String frailty);
-RcppExport SEXP frailtyr_baseline_hazard_estimator(SEXP X_SEXP, SEXP R_SEXP, SEXP d_SEXP, SEXP Y_SEXP, SEXP N_dotSEXP, SEXP betaSEXP, SEXP thetaSEXP, SEXP frailtySEXP) {
+// bh
+List bh(NumericVector d_, List X_, List K_, List Y_, List N_dot, NumericVector beta, NumericVector theta, String frailty);
+RcppExport SEXP frailtyr_bh(SEXP d_SEXP, SEXP X_SEXP, SEXP K_SEXP, SEXP Y_SEXP, SEXP N_dotSEXP, SEXP betaSEXP, SEXP thetaSEXP, SEXP frailtySEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< Rcpp::List >::type X_(X_SEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type R_(R_SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type d_(d_SEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type Y_(Y_SEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type N_dot(N_dotSEXP);
+    Rcpp::traits::input_parameter< List >::type X_(X_SEXP);
+    Rcpp::traits::input_parameter< List >::type K_(K_SEXP);
+    Rcpp::traits::input_parameter< List >::type Y_(Y_SEXP);
+    Rcpp::traits::input_parameter< List >::type N_dot(N_dotSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type theta(thetaSEXP);
     Rcpp::traits::input_parameter< String >::type frailty(frailtySEXP);
-    __result = Rcpp::wrap(baseline_hazard_estimator(X_, R_, d_, Y_, N_dot, beta, theta, frailty));
+    __result = Rcpp::wrap(bh(d_, X_, K_, Y_, N_dot, beta, theta, frailty));
     return __result;
 END_RCPP
 }
 // loglikelihood
-double loglikelihood(List X_, List R_, List I_, List N_dot, List H_dot, NumericVector Lambda, NumericVector beta, NumericVector theta, String frailty);
-RcppExport SEXP frailtyr_loglikelihood(SEXP X_SEXP, SEXP R_SEXP, SEXP I_SEXP, SEXP N_dotSEXP, SEXP H_dotSEXP, SEXP LambdaSEXP, SEXP betaSEXP, SEXP thetaSEXP, SEXP frailtySEXP) {
+double loglikelihood(List X_, List K_, List I_, List phi_1_, NumericVector Lambda, NumericVector beta);
+RcppExport SEXP frailtyr_loglikelihood(SEXP X_SEXP, SEXP K_SEXP, SEXP I_SEXP, SEXP phi_1_SEXP, SEXP LambdaSEXP, SEXP betaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< List >::type X_(X_SEXP);
-    Rcpp::traits::input_parameter< List >::type R_(R_SEXP);
+    Rcpp::traits::input_parameter< List >::type K_(K_SEXP);
     Rcpp::traits::input_parameter< List >::type I_(I_SEXP);
-    Rcpp::traits::input_parameter< List >::type N_dot(N_dotSEXP);
-    Rcpp::traits::input_parameter< List >::type H_dot(H_dotSEXP);
+    Rcpp::traits::input_parameter< List >::type phi_1_(phi_1_SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type Lambda(LambdaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< String >::type frailty(frailtySEXP);
-    __result = Rcpp::wrap(loglikelihood(X_, R_, I_, N_dot, H_dot, Lambda, beta, theta, frailty));
+    __result = Rcpp::wrap(loglikelihood(X_, K_, I_, phi_1_, Lambda, beta));
     return __result;
 END_RCPP
 }
 // dH_dbeta
-List dH_dbeta(NumericVector d_, List K_, List X_, List R_, List R_dot_, List N_dot_, List H_, List H_dot_, NumericVector Lambda, NumericVector Delta_Lambda, NumericVector beta, NumericVector theta, int beta_idx, String frailty);
-RcppExport SEXP frailtyr_dH_dbeta(SEXP d_SEXP, SEXP K_SEXP, SEXP X_SEXP, SEXP R_SEXP, SEXP R_dot_SEXP, SEXP N_dot_SEXP, SEXP H_SEXP, SEXP H_dot_SEXP, SEXP LambdaSEXP, SEXP Delta_LambdaSEXP, SEXP betaSEXP, SEXP thetaSEXP, SEXP beta_idxSEXP, SEXP frailtySEXP) {
+List dH_dbeta(NumericVector d_, List K_, List X_, List R_, List R_dot_, List N_dot_, List H_, List H_dot_, NumericVector Lambda, NumericVector lambda, NumericVector beta, NumericVector theta, int beta_idx, String frailty);
+RcppExport SEXP frailtyr_dH_dbeta(SEXP d_SEXP, SEXP K_SEXP, SEXP X_SEXP, SEXP R_SEXP, SEXP R_dot_SEXP, SEXP N_dot_SEXP, SEXP H_SEXP, SEXP H_dot_SEXP, SEXP LambdaSEXP, SEXP lambdaSEXP, SEXP betaSEXP, SEXP thetaSEXP, SEXP beta_idxSEXP, SEXP frailtySEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -300,18 +297,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< List >::type H_(H_SEXP);
     Rcpp::traits::input_parameter< List >::type H_dot_(H_dot_SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type Lambda(LambdaSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type Delta_Lambda(Delta_LambdaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type theta(thetaSEXP);
     Rcpp::traits::input_parameter< int >::type beta_idx(beta_idxSEXP);
     Rcpp::traits::input_parameter< String >::type frailty(frailtySEXP);
-    __result = Rcpp::wrap(dH_dbeta(d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, Lambda, Delta_Lambda, beta, theta, beta_idx, frailty));
+    __result = Rcpp::wrap(dH_dbeta(d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, Lambda, lambda, beta, theta, beta_idx, frailty));
     return __result;
 END_RCPP
 }
 // dH_dtheta
-List dH_dtheta(NumericVector d_, List K_, List X_, List R_, List R_dot_, List N_dot_, List H_, List H_dot_, NumericVector Lambda, NumericVector Delta_Lambda, NumericVector beta, NumericVector theta, int theta_idx, String frailty);
-RcppExport SEXP frailtyr_dH_dtheta(SEXP d_SEXP, SEXP K_SEXP, SEXP X_SEXP, SEXP R_SEXP, SEXP R_dot_SEXP, SEXP N_dot_SEXP, SEXP H_SEXP, SEXP H_dot_SEXP, SEXP LambdaSEXP, SEXP Delta_LambdaSEXP, SEXP betaSEXP, SEXP thetaSEXP, SEXP theta_idxSEXP, SEXP frailtySEXP) {
+List dH_dtheta(NumericVector d_, List K_, List X_, List R_, List R_dot_, List N_dot_, List H_, List H_dot_, NumericVector Lambda, NumericVector lambda, NumericVector beta, NumericVector theta, int theta_idx, String frailty);
+RcppExport SEXP frailtyr_dH_dtheta(SEXP d_SEXP, SEXP K_SEXP, SEXP X_SEXP, SEXP R_SEXP, SEXP R_dot_SEXP, SEXP N_dot_SEXP, SEXP H_SEXP, SEXP H_dot_SEXP, SEXP LambdaSEXP, SEXP lambdaSEXP, SEXP betaSEXP, SEXP thetaSEXP, SEXP theta_idxSEXP, SEXP frailtySEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -324,12 +321,12 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< List >::type H_(H_SEXP);
     Rcpp::traits::input_parameter< List >::type H_dot_(H_dot_SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type Lambda(LambdaSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type Delta_Lambda(Delta_LambdaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type theta(thetaSEXP);
     Rcpp::traits::input_parameter< int >::type theta_idx(theta_idxSEXP);
     Rcpp::traits::input_parameter< String >::type frailty(frailtySEXP);
-    __result = Rcpp::wrap(dH_dtheta(d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, Lambda, Delta_Lambda, beta, theta, theta_idx, frailty));
+    __result = Rcpp::wrap(dH_dtheta(d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, Lambda, lambda, beta, theta, theta_idx, frailty));
     return __result;
 END_RCPP
 }

@@ -91,8 +91,9 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   iter <- 1
   verbose <- control$verbose
   fitmethod <- control$fitmethod
-  # The objective function, either score equations or loglikelihood
-  # where gamma is c(beta, theta)
+  # The objective function for either score equations or loglikelihood optimization
+  # gamma is c(beta, theta), several global variables are updated since these are
+  # reused in other places (jacobian, covar matrix)
   fit_fn <- function(gamma) {
     beta <<- gamma[1:n_beta]
     theta <<- gamma[(n_beta+1):(n_beta+n_theta)]
@@ -126,56 +127,87 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
       iter <<- iter + 1
     }
     
+    # TODO: This could be done in parallel, not much gain though.
+    xi_beta_ <- vapply(1:n_beta, function(r) {
+      xi_beta(X_, I_, N_dot_, H_, H_dot_, beta, theta, r, frailty)
+    }, rep(0, n_clusters))
+    
+    xi_theta_ <- vapply(1:n_theta, function(r) {
+      xi_theta(X_, I_, N_dot_, H_, H_dot_, beta, theta, r, frailty)
+    }, rep(0, n_clusters))
+    
+    # xi_[i,r], where i is cluster, r is param idx
+    # Update globally, this is used in the jacobian and covariance matrix
+    xi_ <<- cbind(xi_beta_, xi_theta_)
+    U_ <<- colMeans(xi_)
+    
     if (fitmethod == "loglik") {
       loglik
     } else if (fitmethod == "score") {
-      # TODO: This could be done in parallel, not much gain though.
-      xi_beta_ <- vapply(1:n_beta, function(r) {
-        xi_beta(X_, I_, N_dot_, H_, H_dot_, beta, theta, r, frailty)
-      }, rep(0, n_clusters))
-      
-      xi_theta_ <- vapply(1:n_theta, function(r) {
-        xi_theta(X_, I_, N_dot_, H_, H_dot_, beta, theta, r, frailty)
-      }, rep(0, n_clusters))
-      
-      # xi_[i,r], where i is cluster, r is param idx
-      xi_ <- cbind(xi_beta_, xi_theta_)
-      
-      colMeans(xi_)
+      U_
     }
   }
   
-  jacobian_ij <- function(i, j) {
-    if (i <= n_beta && j <= n_beta) {
-      dH <- dH_dbeta(d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, 
-                            Lambda_hat, lambda_hat, beta, theta, j, frailty)
-      
-      jacobian_beta_beta(K_, X_, N_dot_, H_, H_dot_, dH$dH_dbeta_, dH$dH_dot_dbeta_,
-                         beta, theta, i, j, frailty)
-    } else if (i <= n_beta && j > n_beta) {
-      dH <- dH_dtheta(d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, 
-                      Lambda_hat, lambda_hat, beta, theta, n_beta - j, frailty)
-      
-      jacobian_beta_theta(K_, X_, N_dot_, H_, H_dot_, dH$dH_dtheta_, dH$dH_dot_dtheta_,
-                         beta, theta, i, n_beta - j, frailty)
-    } else if (i > n_beta && j <= n_beta) {
-      dH <- dH_dbeta(d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, 
-                     Lambda_hat, lambda_hat, beta, theta, j, frailty)
-      
-      jacobian_theta_beta(K_, X_, N_dot_, H_, H_dot_, dH$dH_dbeta_, dH$dH_dot_dbeta_,
-                         beta, theta, n_beta - i, j, frailty)
-    } else if (i > n_beta && j > n_beta) {
-      dH <- dH_dtheta(d_, K_, X_, R_, R_dot_, N_dot_, H_, H_dot_, 
-                      Lambda_hat, lambda_hat, beta, theta, n_beta - j, frailty)
-      
-      jacobian_theta_theta(K_, X_, N_dot_, H_, H_dot_, dH$dH_dtheta_, dH$dH_dot_dtheta_,
-                          beta, theta, n_beta - i, n_beta - j, frailty)
-    }
+  # Already computed
+  loglik_jacobian <- function(gamma=NULL) {
+    U_
   }
   
-  jacobian <- function(gamma=NULL) {
-    cat('jac', gamma, '\n')
+  score_jacobian <- function(gamma=NULL) {
+    phi_3_ <<- phi_k(3, N_dot_, H_dot_, theta, frailty)
     
+    # phi_prime_i_[[theta_idx]][[i]][k]
+    phi_prime_1_ <<- lapply(1:n_theta, function(theta_idx) 
+      phi_prime_k(1, theta_idx, N_dot_, H_dot_, theta, frailty))
+    # phi_prime_1_ <<- phi_prime_k(1, 1, N_dot_, H_dot_, theta, frailty)
+    phi_prime_2_ <<- lapply(1:n_theta, function(theta_idx) 
+      phi_prime_k(2, theta_idx, N_dot_, H_dot_, theta, frailty))
+    
+    phi_prime_prime_1_ <<- lapply(1:n_theta, function(theta_idx_1) {
+      lapply(1:n_theta, function(theta_idx_2) {
+        phi_prime_prime_k(1, theta_idx_1, theta_idx_2, 
+                          N_dot_, H_dot_, theta, frailty, k_tau)})})
+    
+    jacobian_ij <- function(l, s) {
+      if (l <= n_beta && s <= n_beta) {
+        dH <- dH_dbeta(s, d_, X_, K_, R_, R_dot_, 
+                       phi_1_, phi_2_, phi_3_, 
+                       Lambda, lambda,
+                       beta, theta, frailty)
+        
+        jacobian_beta_beta(X_, K_, H_, 
+                           phi_1_, phi_2_, phi_3_,
+                           dH$dH_dbeta_, dH$dH_dot_dbeta_, l)
+      } else if (l <= n_beta && s > n_beta) {
+        dH <- dH_dtheta(d_, X_, K_, R_, R_dot_,
+                        phi_1_, phi_2_, phi_3_,
+                        phi_prime_1_[[s - n_beta]], phi_prime_2_[[s - n_beta]],
+                        Lambda, lambda, beta)
+        
+        jacobian_beta_theta(X_, K_,  H_, 
+                            phi_1_, phi_2_, phi_3_,
+                            phi_prime_1_[[s - n_beta]], phi_prime_2_[[s - n_beta]],
+                            dH$dH_dtheta_, dH$dH_dot_dtheta_, l)
+      } else if (l > n_beta && s <= n_beta) {
+        dH <- dH_dbeta(s, d_, X_, K_, R_, R_dot_, 
+                       phi_1_, phi_2_, phi_3_, 
+                       Lambda, lambda,
+                       beta, theta, frailty)
+        
+        jacobian_theta_beta(phi_1_,phi_2_,
+                            phi_prime_1_[[l - n_beta]], phi_prime_2_[[l - n_beta]],
+                            dH$dH_dot_dbeta_)
+      } else if (l > n_beta && s > n_beta) {
+        dH <- dH_dtheta(d_, X_, K_, R_, R_dot_,
+                        phi_1_, phi_2_, phi_3_,
+                        phi_prime_1_[[s - n_beta]], phi_prime_2_[[s - n_beta]],
+                        Lambda, lambda, beta)
+        
+        jacobian_theta_theta(phi_1_, phi_2_,
+                             phi_prime_1_[[l - n_beta]], phi_prime_2_[[l - n_beta]], 
+                             phi_prime_prime_1_[[l - n_beta]][[s - n_beta]], dH$dH_dot_dtheta_)
+      }
+    }
     # Build the jacobian matrix from the respective components
     outer(1:n_gamma, 1:n_gamma, Vectorize(function(i, j) 
       jacobian_ij(i, j)))
@@ -185,29 +217,10 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   # to compute. By default, it is only computed when accessed by the user
   covariance <- function() {
     # First, gather some variables that were defined before the covar steps
-    
-    R_ <- clapply(cluster_names, cluster_sizes, function(i, j) {
-      exp(sum(beta * X_[[i]][j])) * Y_[[i]][j,]
-    })
-    
-    R_dot_ <- lapply(R_, function(R_i) colSums(R_i))
-    
     # Sum over custers and members
     N_dot_dot <- colSums(Reduce('+', N_))
 
     ################################################################## Step I
-    xi_beta_ <- vapply(1:n_beta, function(r) {
-      xi_beta(X_, I_, N_dot, H_, H_dot_, beta, theta, r, frailty)
-    }, rep(0, n_clusters))
-    
-    xi_theta_ <- vapply(1:n_theta, function(r) {
-      xi_theta(X_, I_, N_dot, H_, H_dot_, beta, theta, r, frailty)
-    }, rep(0, n_clusters))
-    
-    # xi_[i, r], where i is cluster, r is param idx
-    xi_ <- cbind(xi_beta_, xi_theta_)
-    
-    ################################## V
     V <- Reduce('+', lapply(1:n_clusters, function(i) {
       outer(xi_[i,], xi_[i,])}
       ))/n_clusters
@@ -319,50 +332,26 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   # The actual optimization takes place here
   if (fitmethod == "loglik") {
     fitter <- optim(gamma_init, fit_fn, 
-                    lower=c(-4,0.05), upper=c(4,10), method="L-BFGS-B",
+                    gr=loglik_jacobian,
+                    lower=c(-Inf,0), upper=c(Inf,Inf), method="L-BFGS-B",
                     control=list(fnscale=-1, factr=1e8, pgtol=1e-8)
-                    # TODO: gradiant function
                     )
     gamma_hat <- fitter$par
   } else if (control$fitmethod == "score") {
     fitter <- nleqslv(gamma_init, fit_fn, 
                       control=list(maxit=control$iter.max,xtol=1e-8,ftol=1e-8,btol=1e-3),
                       method='Newton',
-                      # jac=jacobian, # TODO
+                      jac=score_jacobian,
                       jacobian=TRUE
                       )
     gamma_hat <- fitter$x
   }
   
   if (verbose)
-    cat("Converged after", iter, "iterations\n")
+    cat("Converged after", iter-1, "iterations\n")
   
   beta_hat <- gamma_hat[1:n_beta]
   theta_hat <- gamma_hat[(n_beta+1):(n_beta+n_theta)]
-  
-  lambda_hat_nz <- lambda_hat[d_ > 0]
-  time_steps_nz <- time_steps[d_ > 0]
-  
-  # Group lambda by time steps 
-  lambda_hat_nz <- vapply(split(lambda_hat_nz, factor(time_steps_nz)), sum, 0)
-  time_steps_nz <- unique(time_steps_nz)
-  
-  lambdafn <- Vectorize(function(t) {
-    if (t <= 0) {
-      return(0);
-    }
-    
-    idx <- sum(t > time_steps_nz)
-    
-    if (idx == 0) {
-      return(0)
-    }
-    
-    if (idx >= length(time_steps_nz)) {
-      idx <- length(time_steps_nz) - 1
-    }
-    lambda_hat_nz[idx]/(time_steps_nz[idx+1] - time_steps_nz[idx])
-  })
   
   Lambdafn <- Vectorize(function(t) {
     if (t <= 0) {
@@ -374,20 +363,18 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   list(beta = beta_hat,
        theta = theta_hat,
        time_steps = time_steps,
-       lambda_hat_nz=lambda_hat_nz,
-       time_steps_nz=time_steps_nz,
        d_ = d_,
-       lambda = lambda_hat,
-       Lambda = Lambda_hat,
+       Lambda = Lambda,
        loglik = loglik,
        frailty = frailty,
-       lambdafn = lambdafn,
        Lambdafn = Lambdafn,
        fitter = fitter,
        fitmethod = control$fitmethod,
        method = 'fitfrail',
-       jacobian = jacobian,
-       covariance = covariance
+       jacobian = score_jacobian,
+       covariance = covariance,
+       phi_1_=phi_1_,
+       phi_3_=phi_3_
        # TODO: estimated frailty values
        # TODO: use numerical jac for variance?
       )
