@@ -65,6 +65,13 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
       }, FUN.VALUE=FUN.VALUE))})
   }
   
+  clustlapply <- function(fn) {
+    lapply(cluster_names, function(i) {
+      lapply(1:cluster_sizes[[i]], function(j) {
+        fn(i, j)
+      })})
+  }
+  
   # N_[[i]][j,k] == 1 if ij failed on/before time t_k
   N_ <- clustapply(function(i, j) {
     as.numeric((I_[[i]][j] > 0) & (K_[[i]][j] <= 1:k_tau))
@@ -112,6 +119,9 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     phi_1_ <<- bh_$phi_1_
     phi_2_ <<- bh_$phi_2_
     
+    phi_prime_1_ <<- lapply(1:n_theta, function(theta_idx) 
+      phi_prime_k(1, theta_idx, N_dot_, H_dot_, theta, frailty))
+    
     # Update the loglik globally
     loglik <<- loglikelihood(X_, K_, I_, phi_1_, Lambda, beta)
     
@@ -129,11 +139,11 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     
     # TODO: This could be done in parallel, not much gain though.
     xi_beta_ <- vapply(1:n_beta, function(r) {
-      xi_beta(X_, I_, N_dot_, H_, H_dot_, beta, theta, r, frailty)
+      xi_beta(X_, I_, H_, psi_, r)
     }, rep(0, n_clusters))
     
     xi_theta_ <- vapply(1:n_theta, function(r) {
-      xi_theta(X_, I_, N_dot_, H_, H_dot_, beta, theta, r, frailty)
+      xi_theta(phi_1_, phi_prime_1_[[r]], r)
     }, rep(0, n_clusters))
     
     # xi_[i,r], where i is cluster, r is param idx
@@ -156,10 +166,6 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   score_jacobian <- function(gamma=NULL) {
     phi_3_ <<- phi_k(3, N_dot_, H_dot_, theta, frailty)
     
-    # phi_prime_i_[[theta_idx]][[i]][k]
-    phi_prime_1_ <<- lapply(1:n_theta, function(theta_idx) 
-      phi_prime_k(1, theta_idx, N_dot_, H_dot_, theta, frailty))
-    # phi_prime_1_ <<- phi_prime_k(1, 1, N_dot_, H_dot_, theta, frailty)
     phi_prime_2_ <<- lapply(1:n_theta, function(theta_idx) 
       phi_prime_k(2, theta_idx, N_dot_, H_dot_, theta, frailty))
     
@@ -226,68 +232,71 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
       ))/n_clusters
     
     ################################################################## Step II
-    
-    R_star <- clapply(cluster_names, cluster_sizes, function(i, j) {
+    R_star <- clustapply(function(i, j) {
       exp(sum(beta * X_[[i]][j, ]))
-    })
+    }, 0)
     
     # Split Q up into beta and theta components, then create a Q_ function
     # that accesses component by index r
     Q_beta_ <- lapply(1:n_beta, function(r) {
-      Q_beta(X_, R_star, N_dot, H_, H_dot_, theta, r, frailty)
+      Q_beta(X_, H_, R_star, phi_1_, phi_2_, phi_3_, r)
     })
     
     Q_theta_ <- lapply((n_beta+1):(n_beta+n_theta), function(r) {
-      Q_theta(X_, R_star, N_dot, H_, H_dot_, theta, r, frailty)
+      Q_theta(H_, R_star, phi_1_, phi_2_,
+              phi_prime_1_[[r - n_beta]], phi_prime_2_[[r - n_beta]], r)
     })
     
     # Q_[[r]] has the same shape as H_dot_
     Q_ <- c(Q_beta_, Q_theta_)
     
     # calligraphic Y
-    Ycal_ <- Ycal(X_, Y_, N_dot, H_dot_, beta, theta, frailty)
+    Ycal_ <- Ycal(X_, Y_, psi_, phi_1_, phi_2_, phi_3_, beta)
     
     # eta
-    eta_ <- eta(N_dot, H_dot_, theta, frailty)
+    eta_ <- eta(phi_1_, phi_2_, phi_3_)
     
     # Upsilon
-    Upsilon_ <- Upsilon(X_, K_, R_dot_, eta_, Ycal_, beta, theta, frailty)
+    Upsilon_ <- Upsilon(X_, K_, R_dot_, eta_, Ycal_, beta)
     
-    # Omega[[i]][j][s, t]
-    Omega <- clapply2(function(i, j) {
-      outer(1:tau, 1:tau, Vectorize(function(s, t) {
-        integrate(Vectorize(function(u) {
-          Ycal_[u]^(-2) * R_dot_[[i]][u] * eta_[[i]][u] * 
-            exp(sum(beta*X_[[i]][j,])) * N_dot_dot[u]
-        }), s, t, subdivisions = 1000)$value/n_clusters^2
-      }))
+    # Omega[[i]][[j]][s, t]
+    Omega <- clustlapply(function(i, j) {
+      outer(1:k_tau, 1:k_tau, Vectorize(function(s, t) {
+        if (s >= t) {
+          return(0)
+        } else {
+          integrate(Vectorize(function(u) {
+            Ycal_[u]^(-2) * R_dot_[[i]][u] * eta_[[i]][u] * 
+              exp(sum(beta * X_[[i]][j,])) * N_dot_dot[u]
+          }), s, t, subdivisions = 1000)$value/n_clusters^2
+        }}))
     })
     
-    p_hat <- vapply(1:tau, function(t) {
+    p_hat <- vapply(1:k_tau, function(t) {
       prod(vapply(1:t, function(s) {
-        1 + sum_clapply(function(i, j) {
+        1 + sum(unlist(clustapply(function(i, j) {
           (I_[[i]][j] * Upsilon_[s] + Omega[[i]][[j]][s,t]) * N_tilde[[i]][j, s]
-        })
+        }, 0)))
       }, 0))
     }, 0)
     
     # TODO: correct?
     QN_sum <- lapply(1:n_gamma, function(r) {
-      colSums(matrix(unlist(clapply2(function(i, j) {
+      colSums(do.call(rbind, clustapply(function(i, j) {
         Q_[[r]][[i]][j,] * N_tilde[[i]][j,]
-      })), ncol=tau))
+      }), rep(0, k_tau)))
     })
     
-    pi_ <- outer(1:n_gamma, 1:tau, Vectorize(function(r, s) {
+    pi_ <- lapply(1:n_gamma, function(r) {
+      vapply(1:tau, Vectorize(function(s) {
       integrate(Vectorize(function(t) {
         QN_sum[[r]][t]/p_hat[t]
       }), s, tau)$value/n_clusters
-      
-    }))
+    }), 0)})
     
     G <- outer(1:n_gamma, 1:n_gamma, Vectorize(function(r, l) {
       integrate(Vectorize(function(s) {
-        pi_[r, s] * pi_[l, s] * p_hat[s - 1]^2 * N_dot_dot[s]/Ycal_[s]^2
+        pi_[[r]][s] * pi_[[l]][s] * p_hat[s - 1]^2 * N_dot_dot[s]/Ycal_[s]^2
       }), 2, tau)$value/n_clusters
     }))
     
@@ -311,7 +320,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     # u_[i,r]
     u_ <- outer(1:n_clusters, 1:n_gamma, Vectorize(function(i, r) {
       integrate(Vectorize(function (s) {
-        Msum_[i, s] * pi_[r, s] * p_hat[s - 1]/Ycal_[s]
+        Msum_[i, s] * pi_[[r]][s] * p_hat[s - 1]/Ycal_[s]
       }), 2, tau)$value
     }))
     
@@ -371,7 +380,8 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
        fitter = fitter,
        fitmethod = control$fitmethod,
        method = 'fitfrail',
-       jacobian = score_jacobian,
+       score_jacobian = score_jacobian,
+       loglik_jacobian = loglik_jacobian,
        covariance = covariance,
        phi_1_=phi_1_,
        phi_3_=phi_3_
