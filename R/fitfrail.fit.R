@@ -259,79 +259,81 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     # Upsilon
     Upsilon_ <- Upsilon(X_, K_, R_dot_, eta_, Ycal_, beta)
     
-    # Omega[[i]][[j]][s, t]
-    Omega <- clustlapply(function(i, j) {
-      outer(1:k_tau, 1:k_tau, Vectorize(function(s, t) {
-        if (s >= t) {
-          return(0)
+    # Omega_[[i]][[j]][s:t]
+    Omega_ <- clustlapply(function(i, j) {
+      vapply(1:k_tau, function(s) {
+        if (s == 1) {
+          0
         } else {
-          integrate(Vectorize(function(u) {
-            Ycal_[u]^(-2) * R_dot_[[i]][u] * eta_[[i]][u] * 
-              exp(sum(beta * X_[[i]][j,])) * N_dot_dot[u]
-          }), s, t, subdivisions = 1000)$value/n_clusters^2
-        }}))
-    })
+          (N_dot_dot[s] - N_dot_dot[s-1]) *
+          Ycal_[s]^(-2) * R_dot_[[i]][s] * eta_[[i]][s] * 
+            exp(sum(beta * X_[[i]][j,])) 
+        }
+      }, 0)})
     
     p_hat <- vapply(1:k_tau, function(t) {
       prod(vapply(1:t, function(s) {
         1 + sum(unlist(clustapply(function(i, j) {
-          (I_[[i]][j] * Upsilon_[s] + Omega[[i]][[j]][s,t]) * N_tilde[[i]][j, s]
+          (I_[[i]][j] * Upsilon_[s] + sum(Omega_[[i]][[j]][s:t])) * N_tilde_[[i]][j, s]
         }, 0)))
       }, 0))
     }, 0)
     
-    # TODO: correct?
-    QN_sum <- lapply(1:n_gamma, function(r) {
-      colSums(do.call(rbind, clustapply(function(i, j) {
-        Q_[[r]][[i]][j,] * N_tilde[[i]][j,]
-      }), rep(0, k_tau)))
-    })
-    
+    # pi_[[r]][s]
     pi_ <- lapply(1:n_gamma, function(r) {
-      vapply(1:tau, Vectorize(function(s) {
-      integrate(Vectorize(function(t) {
-        QN_sum[[r]][t]/p_hat[t]
-      }), s, tau)$value/n_clusters
-    }), 0)})
+      vapply(1:k_tau, function(s) {
+        sum(vapply((s+1):k_tau, function(t) {
+          if (t >= k_tau) {
+            0
+          } else {
+            sum(unlist(clustapply(function(i, j) {
+              (N_tilde_[[i]][j,t] - N_tilde_[[i]][j,t-1]) *
+              Q_[[r]][[i]][j,t]/p_hat[t]
+            }, 0)))}}, 0))/n_clusters
+        }, 0)})
     
     G <- outer(1:n_gamma, 1:n_gamma, Vectorize(function(r, l) {
-      integrate(Vectorize(function(s) {
-        pi_[[r]][s] * pi_[[l]][s] * p_hat[s - 1]^2 * N_dot_dot[s]/Ycal_[s]^2
-      }), 2, tau)$value/n_clusters
+      sum(vapply(2:k_tau, function(s) {
+        (N_dot_dot[s] - N_dot_dot[s-1]) *
+        pi_[[r]][s] * pi_[[l]][s] * p_hat[s - 1]^2 * 1/Ycal_[s]^2
+      }, 0))/n_clusters
     }))
     
     ################################################################## Step III
     
     # M_[i,s]
-    M_ <- lapply(1:n_clusters, function(i) {
-      outer(1:cluster_sizes[[i]], 1:tau, Vectorize(function(j, t) {
-        if (t <= 2) {
-          N_[[i]][j, t]
-        } else {
-          N_[[i]][j, t] - integrate(Vectorize(function(u) {
-            exp(sum(beta * X_[[i]][j,])) * Y_[[i]][j, u] * psi_[[i]][u - 1] * Lambda_hat[u]
-          }), 2, t)$value
-        }
-      }))
-    })
+    M_ <- clustapply(function(i, j) {
+      vapply(1:k_tau, function(t) {
+        N_[[i]][j, t] *
+          sum(vapply(2:t, function(u) { 
+            if (t <= 2) {
+              0
+            } else {
+              (Lambda_hat[u] - Lambda_hat[u-1]) *
+              exp(sum(beta * X_[[i]][j,])) * Y_[[i]][j, u] * psi_[[i]][u - 1]
+            }
+        }, 0))
+      }, 0)
+    }, rep(0, k_tau))
     
-    Msum_ <- do.call(rbind, lapply(M_, colSums))
+    Msum_ <- lapply(M_, colSums)
     
     # u_[i,r]
-    u_ <- outer(1:n_clusters, 1:n_gamma, Vectorize(function(i, r) {
-      integrate(Vectorize(function (s) {
-        Msum_[i, s] * pi_[[r]][s] * p_hat[s - 1]/Ycal_[s]
-      }), 2, tau)$value
-    }))
+    u_ <- lapply(cluster_names, function(i) {
+      vapply(1:n_gamma, function(r) {
+      sum(vapply(2:k_tau, function (s) {
+          (Msum_[[i]][s] - Msum_[[i]][s-1]) *
+          pi_[[r]][s] * p_hat[s - 1]/Ycal_[s]
+      }, 0))}, 0)})
     
     C <- outer(1:n_gamma, 1:n_gamma, Vectorize(function(r, l) {
         Reduce('+', vapply(1:n_clusters, function(i) {
-          xi_[i,r] * u_[i,l] + xi_[i,l] * u_[i,r]
+          xi_[i,r] * u_[[i]][l] + xi_[i,l] * u_[[i]][r]
         }, 0))/n_clusters
     }))
     
     ################################################################## Step IV
-    D <- jacobian()
+    D <- score_jacobian()
     
     ################################################################## Step V
     D_inv <- solve(D)

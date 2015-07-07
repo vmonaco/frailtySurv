@@ -999,3 +999,51 @@ NumericVector xi_theta(List phi_1_,
   
   return xi_r;
 }
+
+struct Omega_prime_params {
+  NumericVector Y_cal_;
+  NumericVector R_dot_i;
+  NumericVector eta_i;
+  double exp_beta_X;
+  NumericVector N_dot_dot;
+};
+
+double Omega_prime(double u, void* data) {
+  struct Omega_prime_params *params = (struct Omega_prime_params *)data;
+  int idx = (int) u;
+  return pow(params->Y_cal_(idx), -2) * params->R_dot_i(idx) * 
+    params->eta_i(idx) * params->exp_beta_X * params->N_dot_dot(idx);
+}
+
+double integrate2(double (*f)(double,void*), void* data, double lower, double upper) {
+  gsl_integration_workspace *work = gsl_integration_workspace_alloc(LIMIT);
+  double result, error;
+  
+  gsl_function F;
+  F.function = f;
+  F.params = data;
+  
+  int ret = gsl_integration_qags(&F, lower, upper, EPSABS, EPSREL, LIMIT, work, &result, &error);
+  gsl_integration_workspace_free(work);
+  return result;
+}
+
+// [[Rcpp::export]]
+double Omega_(NumericVector Y_cal_,
+              NumericVector R_dot_i,
+              NumericVector eta_i,
+              double exp_beta_X,
+              NumericVector N_dot_dot,
+              double lower,
+              double upper) {
+  
+  Omega_prime_params params = (struct Omega_prime_params){
+    Y_cal_,
+    R_dot_i,
+    eta_i,
+    exp_beta_X,
+    N_dot_dot
+    };
+  
+  return integrate2(&Omega_prime, &params, lower, upper);
+}
