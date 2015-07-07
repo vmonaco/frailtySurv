@@ -557,3 +557,33 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// Omega
+List Omega(List Omega_, List X_, List N_, List R_dot_, List eta_, NumericVector Ycal_, NumericVector beta);
+RcppExport SEXP frailtyr_Omega(SEXP Omega_SEXP, SEXP X_SEXP, SEXP N_SEXP, SEXP R_dot_SEXP, SEXP eta_SEXP, SEXP Ycal_SEXP, SEXP betaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< List >::type Omega_(Omega_SEXP);
+    Rcpp::traits::input_parameter< List >::type X_(X_SEXP);
+    Rcpp::traits::input_parameter< List >::type N_(N_SEXP);
+    Rcpp::traits::input_parameter< List >::type R_dot_(R_dot_SEXP);
+    Rcpp::traits::input_parameter< List >::type eta_(eta_SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type Ycal_(Ycal_SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type beta(betaSEXP);
+    __result = Rcpp::wrap(Omega(Omega_, X_, N_, R_dot_, eta_, Ycal_, beta));
+    return __result;
+END_RCPP
+}
+// pi_r
+NumericVector pi_r(List Q_, List N_tilde_, NumericVector p_hat);
+RcppExport SEXP frailtyr_pi_r(SEXP Q_SEXP, SEXP N_tilde_SEXP, SEXP p_hatSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< List >::type Q_(Q_SEXP);
+    Rcpp::traits::input_parameter< List >::type N_tilde_(N_tilde_SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type p_hat(p_hatSEXP);
+    __result = Rcpp::wrap(pi_r(Q_, N_tilde_, p_hat));
+    return __result;
+END_RCPP
+}

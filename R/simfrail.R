@@ -31,17 +31,22 @@ simfrail <- function(reps,
     theta=fit$theta
     names(theta) <- paste("theta", 1:length(fit$theta))
     
-    lambda <- fit$lambdafn(base.time)
-    names(lambda) <- paste("lambda.", base.time, sep="")
-    
     Lambda <- fit$Lambdafn(base.time)
     names(Lambda) <- paste("Lambda.", base.time, sep="")
+    
+    covar <- fit$covariance()
+    var.beta <- diag(covar)[1:length(beta)]
+    names(var.beta) <- paste("var.beta", 1:length(fit$beta))
+    
+    var.theta <- diag(covar)[(length(beta)+1):(length(beta)+length(theta))]
+    names(var.theta) <- paste("var.theta", 1:length(theta))
     
     c(runtime,
       cens,
       beta,
       theta,
-      lambda,
+      var.beta,
+      var.theta,
       Lambda)
   }
   

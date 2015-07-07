@@ -228,8 +228,8 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
 
     ################################################################## Step I
     V <- Reduce('+', lapply(1:n_clusters, function(i) {
-      outer(xi_[i,], xi_[i,])}
-      ))/n_clusters
+      xi_[i,] %*% t(xi_[i,])
+      }))/n_clusters
     
     ################################################################## Step II
     R_star <- clustapply(function(i, j) {
@@ -250,85 +250,45 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     # Q_[[r]] has the same shape as H_dot_
     Q_ <- c(Q_beta_, Q_theta_)
     
-    # calligraphic Y
+    # calligraphic Y, Ycal_[t]
     Ycal_ <- Ycal(X_, Y_, psi_, phi_1_, phi_2_, phi_3_, beta)
     
-    # eta
+    # eta_[t]
     eta_ <- eta(phi_1_, phi_2_, phi_3_)
     
     # Upsilon
     Upsilon_ <- Upsilon(X_, K_, R_dot_, eta_, Ycal_, beta)
     
-    # Omega_[[i]][[j]][s:t]
-    Omega_ <- clustlapply(function(i, j) {
-      vapply(1:k_tau, function(s) {
-        if (s == 1) {
-          0
-        } else {
-          (N_dot_dot[s] - N_dot_dot[s-1]) *
-          Ycal_[s]^(-2) * R_dot_[[i]][s] * eta_[[i]][s] * 
-            exp(sum(beta * X_[[i]][j,])) 
-        }
-      }, 0)})
+    # Omega_[[i]][[j, t]
+    # Compute everything
+    Omega_ <- Omega(X_, N_, R_dot_, eta_, Ycal_, beta)
     
-    p_hat <- vapply(1:k_tau, function(t) {
-      prod(vapply(1:t, function(s) {
-        1 + sum(unlist(clustapply(function(i, j) {
-          (I_[[i]][j] * Upsilon_[s] + sum(Omega_[[i]][[j]][s:t])) * N_tilde_[[i]][j, s]
-        }, 0)))
-      }, 0))
-    }, 0)
+    # p_hat_[t]
+    p_hat_ <- p_hat(I_, Upsilon_, Omega_, N_)
     
     # pi_[[r]][s]
     pi_ <- lapply(1:n_gamma, function(r) {
-      vapply(1:k_tau, function(s) {
-        sum(vapply((s+1):k_tau, function(t) {
-          if (t >= k_tau) {
-            0
-          } else {
-            sum(unlist(clustapply(function(i, j) {
-              (N_tilde_[[i]][j,t] - N_tilde_[[i]][j,t-1]) *
-              Q_[[r]][[i]][j,t]/p_hat[t]
-            }, 0)))}}, 0))/n_clusters
-        }, 0)})
+      pi_r(Q_[[r]], N_tilde_, p_hat_)
+    })
     
     G <- outer(1:n_gamma, 1:n_gamma, Vectorize(function(r, l) {
-      sum(vapply(2:k_tau, function(s) {
-        (N_dot_dot[s] - N_dot_dot[s-1]) *
-        pi_[[r]][s] * pi_[[l]][s] * p_hat[s - 1]^2 * 1/Ycal_[s]^2
-      }, 0))/n_clusters
+      G_rl(pi_[[r]], pi_[[l]], p_hat_, Ycal_, N_)
     }))
     
     ################################################################## Step III
     
-    # M_[i,s]
-    M_ <- clustapply(function(i, j) {
-      vapply(1:k_tau, function(t) {
-        N_[[i]][j, t] *
-          sum(vapply(2:t, function(u) { 
-            if (t <= 2) {
-              0
-            } else {
-              (Lambda_hat[u] - Lambda_hat[u-1]) *
-              exp(sum(beta * X_[[i]][j,])) * Y_[[i]][j, u] * psi_[[i]][u - 1]
-            }
-        }, 0))
-      }, 0)
-    }, rep(0, k_tau))
+    # M_hat_[[i]][j,s]
+    M_hat_ <- M_hat(X_, N_, Y_, psi_, beta, Lambda)
     
-    Msum_ <- lapply(M_, colSums)
-    
-    # u_[i,r]
-    u_ <- lapply(cluster_names, function(i) {
-      vapply(1:n_gamma, function(r) {
-      sum(vapply(2:k_tau, function (s) {
-          (Msum_[[i]][s] - Msum_[[i]][s-1]) *
-          pi_[[r]][s] * p_hat[s - 1]/Ycal_[s]
-      }, 0))}, 0)})
+    # u_[[i]],r]
+    u_star_ <- lapply(cluster_names, function(i) {
+      rep(0, n_gamma)
+    })
+    u_star_ <- u_star(u_star_, pi_, p_hat_, Ycal_, M_hat_)
     
     C <- outer(1:n_gamma, 1:n_gamma, Vectorize(function(r, l) {
         Reduce('+', vapply(1:n_clusters, function(i) {
-          xi_[i,r] * u_[[i]][l] + xi_[i,l] * u_[[i]][r]
+          xi_[i,r] * u_star_[[i]][l] + xi_[i,l] * u_star_[[i]][r]
         }, 0))/n_clusters
     }))
     
@@ -337,7 +297,10 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     
     ################################################################## Step V
     D_inv <- solve(D)
-    D_inv %*% (V + G + C) %*% t(D_inv)
+    covar <- D_inv %*% (V + G + C) %*% t(D_inv)
+    # V by itself
+    # covar <- D_inv %*% (V) %*% t(D_inv)
+    covar
   }
   
   # The actual optimization takes place here
@@ -368,7 +331,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     if (t <= 0) {
       return(0);
     }
-    Lambda_hat[sum(t > time_steps)]
+    Lambda[sum(t > time_steps)]
   })
   
   list(beta = beta_hat,

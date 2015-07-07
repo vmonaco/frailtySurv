@@ -1000,50 +1000,231 @@ NumericVector xi_theta(List phi_1_,
   return xi_r;
 }
 
-struct Omega_prime_params {
-  NumericVector Y_cal_;
-  NumericVector R_dot_i;
-  NumericVector eta_i;
-  double exp_beta_X;
-  NumericVector N_dot_dot;
-};
-
-double Omega_prime(double u, void* data) {
-  struct Omega_prime_params *params = (struct Omega_prime_params *)data;
-  int idx = (int) u;
-  return pow(params->Y_cal_(idx), -2) * params->R_dot_i(idx) * 
-    params->eta_i(idx) * params->exp_beta_X * params->N_dot_dot(idx);
-}
-
-double integrate2(double (*f)(double,void*), void* data, double lower, double upper) {
-  gsl_integration_workspace *work = gsl_integration_workspace_alloc(LIMIT);
-  double result, error;
+// [[Rcpp::export]]
+List Omega(List X_,
+           List N_,
+           List R_dot_,
+           List eta_,
+           NumericVector Ycal_,
+           NumericVector beta) {
+  NumericVector tmp = R_dot_(0);
+  int n_timesteps = tmp.size();
+  int n_clusters = N_.size();
+  List Omega_ = clone(N_);
+  NumericVector dN_sum(n_timesteps);
   
-  gsl_function F;
-  F.function = f;
-  F.params = data;
+  for (int u = 1; u < n_timesteps; ++u) {
+    double dsum = 0;
+    for (int i = 0; i < n_clusters; ++i) {
+      NumericMatrix N_i = N_(i);
+      for (int j = 0; j < N_i.nrow(); ++j) {
+        dsum += N_i(j, u) - N_i(j, u - 1);
+      }
+    }
+    dN_sum(u) = dsum;
+  }
   
-  int ret = gsl_integration_qags(&F, lower, upper, EPSABS, EPSREL, LIMIT, work, &result, &error);
-  gsl_integration_workspace_free(work);
-  return result;
+  double integration;
+  for (int i = 0; i < n_clusters; ++i) {
+    NumericMatrix X_i = X_(i);
+    NumericMatrix N_i = N_(i);
+    NumericMatrix Omega_i = Omega_(i);
+    
+    NumericVector R_dot_i = R_dot_(i);
+    NumericVector eta_i = eta_(i);
+    
+    for (int j = 0; j < Omega_i.nrow(); ++j) {
+      // Rcout << Omega_i_j.nrow() << ", " << Omega_i_j.ncol() << std::endl;
+      for (int u = 0; u < n_timesteps; ++u) {
+        Omega_i(j, u) = R_dot_i(u) * eta_i(u) * exp(sum(beta * X_i(j, _))) * 
+          dN_sum(u)/pow(Ycal_(u), 2);
+      }
+      // Rcout << i << ", " << j << ", " << s << ", " << t << ", " << std::endl;
+//       for (int t = 0; t < n_timesteps; ++t) {
+//         for (int s = 0; s < t; ++s) {
+//           NumericVector::s
+//           Omega_i_j(s, t) = integration.()/pow(n_clusters, 2);
+//         }
+//       }
+    }
+  }
+  
+  return Omega_;
 }
 
 // [[Rcpp::export]]
-double Omega_(NumericVector Y_cal_,
-              NumericVector R_dot_i,
-              NumericVector eta_i,
-              double exp_beta_X,
-              NumericVector N_dot_dot,
-              double lower,
-              double upper) {
+NumericVector p_hat(List I_,
+                    NumericVector Upsilon_,
+                    List Omega_,
+                    List N_) {
+  int n_timesteps = Upsilon_.size();
+  int n_clusters = N_.size();
   
-  Omega_prime_params params = (struct Omega_prime_params){
-    Y_cal_,
-    R_dot_i,
-    eta_i,
-    exp_beta_X,
-    N_dot_dot
-    };
+  NumericVector p_hat_(n_timesteps);
   
-  return integrate2(&Omega_prime, &params, lower, upper);
+  for (int t = 0; t < n_timesteps; ++t) {
+    double product = 1;
+    for (int s = 0; s <= t; ++s) {
+      
+      double inner_sum = 0;
+      if (s > 0) {
+        for (int i = 0; i < n_clusters; ++i) {
+          NumericVector I_i = I_(i);
+          NumericMatrix N_i = N_(i);
+          NumericMatrix Omega_i = Omega_(i);
+          
+          for (int j = 0; j < N_i.nrow(); ++j) {
+            double omega_integral = 0;
+            for (int u = s; u <= t; ++u) omega_integral += Omega_i(j, u);
+            
+            inner_sum += (I_i(j) * Upsilon_(s) + omega_integral) * 
+              (N_i(j, s) - N_i(j, s - 1));
+          }
+        }
+      }
+      
+      product *= 1 + inner_sum;
+    }
+    
+    p_hat_(t) = product;
+  }
+  
+  
+  return p_hat_;
+}
+
+// [[Rcpp::export]]
+NumericVector pi_r(List Q_,
+                   List N_tilde_,
+                   NumericVector p_hat) {
+  
+  int n_timesteps = p_hat.size();
+  int k_tau = n_timesteps - 1;
+  int n_clusters = N_tilde_.size();
+  
+  NumericVector pi_r_(n_timesteps);
+  
+  double integration, inner_sum;
+  for (int s = 0; s < n_timesteps; ++s) {
+    integration = 0;
+    
+    for (int t = k_tau; t > s; --t) {
+      inner_sum = 0;
+      
+      for (int i = 0; i < n_clusters; ++i) {
+        NumericMatrix Q_i = Q_(i);
+        NumericMatrix N_tilde_i = N_tilde_(i);
+        
+        for (int j = 0; j < N_tilde_i.nrow(); ++j) {
+          inner_sum += (N_tilde_i(j, t) - N_tilde_i(j, t - 1)) * Q_i(j, t);
+        }
+      }
+      integration += inner_sum/p_hat(t);
+    }
+    
+    pi_r_(s) = integration/n_clusters;
+  }
+  
+  return pi_r_;
+}
+
+// [[Rcpp::export]]
+double G_rl(NumericVector pi_r,
+            NumericVector pi_l,
+            NumericVector p_hat,
+            NumericVector Ycal_,
+            List N_) {
+  
+  int n_timesteps = p_hat.size();
+  int k_tau = n_timesteps - 1;
+  int n_clusters = N_.size();
+  
+  double integration = 0;
+  for (int s = 0; s < n_timesteps; ++s) {
+    
+    double inner_sum = 0;
+    for (int i = 0; i < n_clusters; ++i) {
+      NumericMatrix N_i = N_(i);
+      for (int j = 0; j < N_i.nrow(); ++j) {
+        inner_sum += (N_i(j, s) - N_i(j, s - 1));
+      }
+    }
+    
+    integration += pi_r(s)*pi_l(s)*p_hat(s-1)*inner_sum/Ycal_(s);
+  }
+  
+  return integration/n_clusters;
+}
+
+// [[Rcpp::export]]
+List M_hat(List X_,
+           List N_,
+           List Y_,
+           List psi_,
+           NumericVector beta,
+           NumericVector Lambda) {
+  
+  int n_timesteps = Lambda.size();
+  int n_clusters = X_.size();
+  
+  List M_hat_ = clone(N_);
+  
+  for (int i = 0; i < n_clusters; ++i) {
+    NumericMatrix X_i = X_(i);
+    NumericMatrix N_i = N_(i);
+    NumericMatrix Y_i = Y_(i);
+    NumericMatrix M_hat_i = M_hat_(i);
+    NumericVector psi_i = psi_(i);
+    
+    for (int j = 0; j < X_i.nrow(); ++j) {
+      for (int t = 0; t < n_timesteps; ++t) {
+        double integration = 0;
+        
+        for (int u = 1; u <= t; ++u) {
+          integration += exp(sum(beta * X_i(j, _))) * Y_i(j, u) * psi_i(u - 1) * 
+            (Lambda(u) - Lambda(u - 1));
+        }
+        
+        M_hat_i(j, t) = N_i(j, t) - integration;
+      }
+    }
+  }
+  
+  return M_hat_;
+}
+
+// [[Rcpp::export]]
+List u_star(List u_star_,
+            List pi_,
+            NumericVector p_hat,
+            NumericVector Ycal_,
+            List M_) {
+  
+  int n_clusters = M_.size();
+  int n_timesteps = p_hat.size();
+  NumericVector tmp = u_star_(0);
+  int n_gamma = tmp.size();
+  
+  for (int i = 0; i < n_clusters; ++i) {
+    NumericMatrix M_i = M_(i);
+    NumericVector u_star_i = u_star_(i);
+    
+    for (int r = 0; r < n_gamma; ++r) {
+      NumericVector pi_r = pi_(r);
+      
+      double integration = 0;
+      for (int s = 1; s < n_timesteps; ++s) {
+        
+        double inner_sum = 0;
+        for (int j = 0; j < M_i.nrow(); ++j) {
+          inner_sum += M_i(j, s) - M_i(j, s - 1);
+        }
+        integration += pi_r(s) * p_hat(s - 1) * inner_sum/Ycal_(s);
+      }
+      
+      u_star_i(r) = integration;
+    }
+  }
+  
+  return u_star_;
 }

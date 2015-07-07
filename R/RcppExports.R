@@ -149,3 +149,11 @@ xi_theta <- function(phi_1_, phi_prime_1_, r) {
     .Call('frailtyr_xi_theta', PACKAGE = 'frailtyr', phi_1_, phi_prime_1_, r)
 }
 
+Omega <- function(Omega_, X_, N_, R_dot_, eta_, Ycal_, beta) {
+    .Call('frailtyr_Omega', PACKAGE = 'frailtyr', Omega_, X_, N_, R_dot_, eta_, Ycal_, beta)
+}
+
+pi_r <- function(Q_, N_tilde_, p_hat) {
+    .Call('frailtyr_pi_r', PACKAGE = 'frailtyr', Q_, N_tilde_, p_hat)
+}
+
