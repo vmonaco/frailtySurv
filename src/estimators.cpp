@@ -589,7 +589,7 @@ double jacobian_beta_beta(List X_,
   
   double out = 0;
   for (int i = 0; i < n_clusters; ++i) {
-    NumericVector K_i = K_(i); // Failure rank, whare T[r] = failure time
+    NumericVector K_i = K_(i); // Failure rank, whare T[k] = failure time
     NumericMatrix X_i = X_(i);
     NumericMatrix H_i = H_(i);
     

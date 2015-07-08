@@ -222,85 +222,82 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   # The covariance matrix is encapsulated in a function since it takes some effort
   # to compute. By default, it is only computed when accessed by the user
   covariance <- function() {
-    # First, gather some variables that were defined before the covar steps
-    # Sum over custers and members
-    N_dot_dot <- colSums(Reduce('+', N_))
-
+    
     ################################################################## Step I
     V <- Reduce('+', lapply(1:n_clusters, function(i) {
       xi_[i,] %*% t(xi_[i,])
       }))/n_clusters
     
     ################################################################## Step II
-    R_star <- clustapply(function(i, j) {
-      exp(sum(beta * X_[[i]][j, ]))
-    }, 0)
-    
-    # Split Q up into beta and theta components, then create a Q_ function
-    # that accesses component by index r
-    Q_beta_ <- lapply(1:n_beta, function(r) {
-      Q_beta(X_, H_, R_star, phi_1_, phi_2_, phi_3_, r)
-    })
-    
-    Q_theta_ <- lapply((n_beta+1):(n_beta+n_theta), function(r) {
-      Q_theta(H_, R_star, phi_1_, phi_2_,
-              phi_prime_1_[[r - n_beta]], phi_prime_2_[[r - n_beta]], r)
-    })
-    
-    # Q_[[r]] has the same shape as H_dot_
-    Q_ <- c(Q_beta_, Q_theta_)
-    
-    # calligraphic Y, Ycal_[t]
-    Ycal_ <- Ycal(X_, Y_, psi_, phi_1_, phi_2_, phi_3_, beta)
-    
-    # eta_[t]
-    eta_ <- eta(phi_1_, phi_2_, phi_3_)
-    
-    # Upsilon
-    Upsilon_ <- Upsilon(X_, K_, R_dot_, eta_, Ycal_, beta)
-    
-    # Omega_[[i]][[j, t]
-    # Compute everything
-    Omega_ <- Omega(X_, N_, R_dot_, eta_, Ycal_, beta)
-    
-    # p_hat_[t]
-    p_hat_ <- p_hat(I_, Upsilon_, Omega_, N_)
-    
-    # pi_[[r]][s]
-    pi_ <- lapply(1:n_gamma, function(r) {
-      pi_r(Q_[[r]], N_tilde_, p_hat_)
-    })
-    
-    G <- outer(1:n_gamma, 1:n_gamma, Vectorize(function(r, l) {
-      G_rl(pi_[[r]], pi_[[l]], p_hat_, Ycal_, N_)
-    }))
-    
-    ################################################################## Step III
-    
-    # M_hat_[[i]][j,s]
-    M_hat_ <- M_hat(X_, N_, Y_, psi_, beta, Lambda)
-    
-    # u_[[i]],r]
-    u_star_ <- lapply(cluster_names, function(i) {
-      rep(0, n_gamma)
-    })
-    u_star_ <- u_star(u_star_, pi_, p_hat_, Ycal_, M_hat_)
-    
-    C <- outer(1:n_gamma, 1:n_gamma, Vectorize(function(r, l) {
-        Reduce('+', vapply(1:n_clusters, function(i) {
-          xi_[i,r] * u_star_[[i]][l] + xi_[i,l] * u_star_[[i]][r]
-        }, 0))/n_clusters
-    }))
+#     R_star <- clustapply(function(i, j) {
+#       exp(sum(beta * X_[[i]][j, ]))
+#     }, 0)
+#     
+#     # Split Q up into beta and theta components, then create a Q_ function
+#     # that accesses component by index r
+#     Q_beta_ <- lapply(1:n_beta, function(r) {
+#       Q_beta(X_, H_, R_star, phi_1_, phi_2_, phi_3_, r)
+#     })
+#     
+#     Q_theta_ <- lapply((n_beta+1):(n_beta+n_theta), function(r) {
+#       Q_theta(H_, R_star, phi_1_, phi_2_,
+#               phi_prime_1_[[r - n_beta]], phi_prime_2_[[r - n_beta]], r)
+#     })
+#     
+#     # Q_[[r]] has the same shape as H_dot_
+#     Q_ <- c(Q_beta_, Q_theta_)
+#     
+#     # calligraphic Y, Ycal_[t]
+#     Ycal_ <- Ycal(X_, Y_, psi_, phi_1_, phi_2_, phi_3_, beta)
+#     
+#     # eta_[t]
+#     eta_ <- eta(phi_1_, phi_2_, phi_3_)
+#     
+#     # Upsilon
+#     Upsilon_ <- Upsilon(X_, K_, R_dot_, eta_, Ycal_, beta)
+#     
+#     # Omega_[[i]][[j, t]
+#     # Compute everything
+#     Omega_ <- Omega(X_, N_, R_dot_, eta_, Ycal_, beta)
+#     
+#     # p_hat_[t]
+#     p_hat_ <- p_hat(I_, Upsilon_, Omega_, N_)
+#     
+#     # pi_[[r]][s]
+#     pi_ <- lapply(1:n_gamma, function(r) {
+#       pi_r(Q_[[r]], N_tilde_, p_hat_)
+#     })
+#     
+#     G <- outer(1:n_gamma, 1:n_gamma, Vectorize(function(r, l) {
+#       G_rl(pi_[[r]], pi_[[l]], p_hat_, Ycal_, N_)
+#     }))
+#     
+#     ################################################################## Step III
+#     
+#     # M_hat_[[i]][j,s]
+#     M_hat_ <- M_hat(X_, N_, Y_, psi_, beta, Lambda)
+#     
+#     # u_[[i]],r]
+#     u_star_ <- lapply(cluster_names, function(i) {
+#       rep(0, n_gamma)
+#     })
+#     u_star_ <- u_star(u_star_, pi_, p_hat_, Ycal_, M_hat_)
+#     
+#     C <- outer(1:n_gamma, 1:n_gamma, Vectorize(function(r, l) {
+#         Reduce('+', vapply(1:n_clusters, function(i) {
+#           xi_[i,r] * u_star_[[i]][l] + xi_[i,l] * u_star_[[i]][r]
+#         }, 0))/n_clusters
+#     }))
     
     ################################################################## Step IV
     D <- score_jacobian()
     
     ################################################################## Step V
     D_inv <- solve(D)
-    covar <- D_inv %*% (V + G + C) %*% t(D_inv)
+    # covar <- D_inv %*% (V + G + C) %*% t(D_inv)
     # V by itself
-    # covar <- D_inv %*% (V) %*% t(D_inv)
-    covar
+    COV <- D_inv %*% (V) %*% t(D_inv)
+    COV/n_clusters
   }
   
   # The actual optimization takes place here
