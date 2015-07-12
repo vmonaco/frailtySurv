@@ -1821,6 +1821,29 @@ Analytic and empirical asymptotic results.
 Correlation with existing packages for gamma, log-normal frailty.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+Q_{ijr}\left(\hat{\gamma},\hat{\Lambda}_{0},t\right) & = & -\left\{\frac{\phi_{2i}\left(\hat{\gamma},\hat{\Lambda}_{0},\tau\right)}{\phi_{1i}\left(\hat{\gamma},\hat{\Lambda}_{0},\tau\right)}R_{ij}^{*}Z_{ijr}-\frac{\phi_{3i}\left(\hat{\gamma},\hat{\Lambda}_{0},\tau\right)}{\phi_{1i}\left(\hat{\gamma},\hat{\Lambda}_{0},\tau\right)}R_{ij}^{*}\sum_{l=1}^{m_{i}}H_{il}\left(t\right)Z_{ilr}\right.\\
+ &  & \left.+\frac{\phi_{2i}^{2}\left(\hat{\gamma},\hat{\Lambda}_{0},\tau\right)}{\phi_{1i}^{2}\left(\hat{\gamma},\hat{\Lambda}_{0},\tau\right)}R_{ij}^{*}\sum_{l=1}^{m_{i}}H_{il}\left(t\right)Z_{ilr}\right\}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+Q_{ij\left(p+1\right)}\left(\hat{\gamma},\hat{\Lambda}_{0},t\right) & = & R_{ij}^{*}\left\{ \frac{\phi_{2i}\left(\hat{\gamma},\hat{\Lambda}_{0},\tau\right)\phi_{1i}^{\left(\theta\right)}\left(\hat{\gamma},\hat{\Lambda}_{0},\tau\right)}{\phi_{1i}^{2}\left(\hat{\gamma},\hat{\Lambda}_{0},\tau\right)}-\frac{\phi_{2i}^{\left(\theta\right)}\left(\hat{\gamma},\hat{\Lambda}_{0},\tau\right)}{\phi_{1i}\left(\hat{\gamma},\hat{\Lambda}_{0},\tau\right)}\right\} 
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Example
 \end_layout

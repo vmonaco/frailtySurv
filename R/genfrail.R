@@ -1,5 +1,4 @@
 genfrail <- function(
-                     
                      beta = c(log(2)), # Covariate coefficients
                      covar.distr = c("normal", "uniform", "zero"),
                      covar.param = c(0,1),

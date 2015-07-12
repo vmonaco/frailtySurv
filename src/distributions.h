@@ -55,6 +55,7 @@ double deriv_deriv_lt_dgamma(int, double, double*, int, int);
 
 double dlognormal(double, double*);
 double deriv_dlognormal(double, double*, int);
+double deriv_deriv_dlognormal(double, double*, int, int);
 
 double dinvgauss(double, double*);
 double deriv_dinvgauss(double, double*, int);

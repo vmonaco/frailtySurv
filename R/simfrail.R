@@ -5,7 +5,7 @@ simfrail <- function(reps,
                      fitfrail.args,
                      base.time, # where to evaluate the baseline hazard function
                      mc.cores=0 # 0 to use all available cores, -1 to use all but 1, etc
-                     ) { 
+) { 
   
   # To make the result reproducable when parallelized, seed each run from 
   # a list of random seeds sampled from a meta seed
@@ -34,20 +34,27 @@ simfrail <- function(reps,
     Lambda <- fit$Lambdafn(base.time)
     names(Lambda) <- paste("Lambda.", base.time, sep="")
     
-    covar <- fit$covariance()
-    var.beta <- diag(covar)[1:length(beta)]
+    COV <- fit$COV
+    var.beta <- diag(COV)[1:length(beta)]
     names(var.beta) <- paste("var.beta", 1:length(fit$beta))
-    
-    var.theta <- diag(covar)[(length(beta)+1):(length(beta)+length(theta))]
+    var.theta <- diag(COV)[(length(beta)+1):(length(beta)+length(theta))]
     names(var.theta) <- paste("var.theta", 1:length(theta))
+    
+    sd.beta <- fit$SD[1:length(beta)]
+    names(sd.beta) <- paste("sd.beta", 1:length(fit$beta))
+    sd.theta <- fit$SD[(length(beta)+1):(length(beta)+length(theta))]
+    names(sd.theta) <- paste("sd.theta", 1:length(theta))
     
     c(runtime,
       cens,
       beta,
       theta,
+      sd.beta,
+      sd.theta,
       var.beta,
       var.theta,
-      Lambda)
+      Lambda
+    )
   }
   
   use.parallel <- mc.cores != 1
@@ -58,7 +65,7 @@ simfrail <- function(reps,
       mc.cores <- parallel::detectCores() + mc.cores
     }
     results <- parallel::mclapply(seeds, fn, mc.preschedule=FALSE, 
-                        mc.set.seed=TRUE, mc.cores=mc.cores, mc.silent=FALSE)
+                                  mc.set.seed=TRUE, mc.cores=mc.cores, mc.silent=FALSE)
   } else if (use.parallel && !have.parallel) {
     # Run in serial with a warning
     warning('Cannot run simfrail in parallel: requires the "parallel" package.')
@@ -166,15 +173,15 @@ plot.simfrail.hazard <- function(results, funs=c("cbh", "bh"),
   
   if ("cbh" %in% funs) {
     p1 <- plotter(results[,grepl("Lambda", names(results))], 
-                       "Cumulative baseline hazard",
-                       true.cbh)
+                  "Cumulative baseline hazard",
+                  true.cbh)
     plots <- c(plots, list(p1))
   }
   
   if ("bh" %in% funs) {
     p2 <- plotter(results[,grepl("lambda", names(results))], 
-                       "Baseline hazard",
-                       true.bh)
+                  "Baseline hazard",
+                  true.bh)
     plots <- c(plots, list(p2))
   }
   
@@ -211,12 +218,15 @@ simfrailcoxph <- function(reps, genfrail.args, coxph.args, seed=2015)
 }
 
 # A wrapper for coxph, gathers the coeffs, theta, censoring, runtime
-simcoxph <- function(reps, genfrail.args, coxph.args, lambda_points,
-                     mc.cores=parallel::detectCores(), seed=2015) { 
+simcoxph <- function(reps, 
+                     genfrail.args, 
+                     coxph.args, 
+                     base.time,
+                     mc.cores=0
+) { 
   
   # To make the result reproducable when parallelized, seed each run from 
   # a list of random seeds sampled from a meta seed
-  set.seed(seed)
   seeds <- sample(1:1e7, reps, replace=TRUE)
   
   fn <- function(s) {
@@ -230,9 +240,10 @@ simcoxph <- function(reps, genfrail.args, coxph.args, lambda_points,
     
     # Only interested in total elapsed time
     runtime <- system.time(fit <- do.call("coxph", as.list(coxph.args)))["elapsed"]
-    
     names(runtime) <- "runtime"
+    
     cens <- 1 - sum(data$status)/length(data$status)
+    names(cens) <- "cens"
     
     beta <- fit$coefficients
     names(beta) <- paste("beta", 1:length(beta))
@@ -251,25 +262,50 @@ simcoxph <- function(reps, genfrail.args, coxph.args, lambda_points,
       Lambda_hat[sum(t > time_steps)]
     })
     
-    Lambda <- Lambdafn(lambda_points)
-    names(Lambda) <- paste("Lambda.", lambda_points, sep="")
+    Lambda <- Lambdafn(base.time)
+    names(Lambda) <- paste("Lambda.", base.time, sep="")
     
-    # Output is: beta1, beta2, ..., [theta], censoring, runtime
+    COV <- vcov(fit)
+    var.beta <- diag(COV)[1:length(beta)]
+    names(var.beta) <- paste("var.beta", 1:length(beta))
+    #     var.theta <- diag(COV)[(length(beta)+1):(length(beta)+length(theta))]
+    #     names(var.theta) <- paste("var.theta", 1:length(theta))
+    
+    SD <- sqrt(diag(COV))
+    sd.beta <- SD[1:length(beta)]
+    names(sd.beta) <- paste("sd.beta", 1:length(beta))
+    #     sd.theta <- fit$SD[(length(beta)+1):(length(beta)+length(theta))]
+    #     names(sd.theta) <- paste("sd.theta", 1:length(theta))
+    
     c(runtime,
-      cens=cens,
+      cens,
       beta,
-      # theta,
+      theta,
+      sd.beta,
+      # sd.theta,
+      var.beta,
+      # var.theta,
       Lambda)
   }
   
-  # Run in parallel and make a row-observation matrix
-  results <- parallel::mclapply(seeds, fn, mc.preschedule=FALSE, 
-                      mc.set.seed=TRUE, mc.cores=mc.cores, mc.silent=FALSE)
-  # results <- lapply(seeds, fn)
+  use.parallel <- mc.cores != 1
+  have.parallel <- requireNamespace("parallel", quietly = TRUE)
+  if (use.parallel && have.parallel) {
+    # Run in parallel and make a row-observation matrix
+    if (mc.cores <= 0) {
+      mc.cores <- parallel::detectCores() + mc.cores
+    }
+    results <- parallel::mclapply(seeds, fn, mc.preschedule=FALSE, 
+                                  mc.set.seed=TRUE, mc.cores=mc.cores, mc.silent=FALSE)
+  } else if (use.parallel && !have.parallel) {
+    # Run in serial with a warning
+    warning('Cannot run simfrail in parallel: requires the "parallel" package.')
+    results <- lapply(seeds, fn)
+  } else {
+    # Run in serial
+    results <- lapply(seeds, fn)
+  }
+  
   results <- t(simplify2array(results))
-  
-  # TODO: Summarize everything somewhere else:
-  # results <- apply(results, 2, function(x) c(mean=mean(x), sd=sd(x)))
-  
   data.frame(results)
 }

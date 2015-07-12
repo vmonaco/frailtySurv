@@ -103,23 +103,6 @@ lt_dgamma_r <- function(p, s, theta) {
 #' pth derivative wrt. s
 #' 
 deriv_lt_dgamma_r <- function(p, s, theta) {
-#   tmp1 <- (1/theta)^(1/theta)
-#   tmp2 <- (-1)^p
-#   tmp3 <- gamma(p + 1/theta)
-#   tmp4 <- (1/theta + s)
-#   tmp5 <- (-1/theta - p)
-#   
-#   term1 <- tmp1 * tmp2 * tmp3 * tmp4^tmp5 * 
-#     ( log(tmp4)/theta^2 - tmp5/(theta^2 * tmp4) )
-#   
-#   term2 <- tmp1 * tmp2 * (-1/theta^2 - log(1/theta)/theta^2) * tmp3 * tmp4^tmp5
-#   
-#   term3 <- (1/theta)^(1/theta + 2) * tmp2 * tmp3 * digamma(p + 1/theta) * tmp4^tmp5
-#   
-#   term4 <- (1/theta)^(1/theta + 2) * tmp2 * digamma(1/theta) * tmp3 * tmp4^tmp5
-#   
-#   (term1 + term2 - term3 + term4)/gamma(1/theta)
-  
   # Without the tmp vars
   (((-1)^p * (1/theta)^(1/theta) * (((1/theta) + s)^(-((1/theta) + 
     p)) * (log(((1/theta) + s)) * (1/theta^2)) - ((1/theta) + 
@@ -417,6 +400,40 @@ lt_deriv_dpvf_coef_r <- function(p, j, alpha) {
 }
 
 #' 
+#' Coefficients for the PVF LT, numerical deriv wrt. alpha
+#' 
+lt_deriv_deriv_dpvf_coef_r_numeric <- function(p, j, alpha) {
+  return(grad(function(alpha) lt_deriv_dpvf_coef_r(p, j, alpha), alpha))
+}
+
+#' 
+#' Coefficients for the PVF LT
+#' 
+lt_deriv_deriv_dpvf_coef_r <- function(m, j, alpha) {
+  
+  if (m == j) return(0)
+  
+  if (j == 1) {
+    return((gamma(m - alpha) * trigamma(m - alpha) + gamma(m - alpha) * 
+            digamma(m - alpha) * digamma(m - alpha))/gamma(1 - alpha) - 
+            gamma(m - alpha) * digamma(m - alpha) * (gamma(1 - alpha) * 
+            digamma(1 - alpha))/gamma(1 - alpha)^2 - ((gamma(m - 
+            alpha) * (gamma(1 - alpha) * trigamma(1 - alpha) + gamma(1 - 
+            alpha) * digamma(1 - alpha) * digamma(1 - alpha)) + gamma(m - 
+            alpha) * digamma(m - alpha) * (gamma(1 - alpha) * digamma(1 - 
+            alpha)))/gamma(1 - alpha)^2 - gamma(m - alpha) * (gamma(1 - 
+            alpha) * digamma(1 - alpha)) * (2 * (gamma(1 - alpha) * digamma(1 - 
+            alpha) * gamma(1 - alpha)))/(gamma(1 - alpha)^2)^2))
+  }
+  
+  term1 <- lt_deriv_deriv_dpvf_coef_r(m - 1, j - 1, alpha)
+  term2 <- lt_deriv_deriv_dpvf_coef_r(m - 1, j, alpha) * ((m - 1) - j*alpha)
+  term3 <- -j * lt_deriv_dpvf_coef_r(m - 1, j, alpha)
+  
+  term1 + term2 + 2*term3
+}
+
+#' 
 #' Laplace transform of the one-parameter PVF distribution defined above
 #' 
 lt_dpvf_r <- function(p, s, alpha) {
@@ -466,6 +483,65 @@ deriv_lt_dpvf_r <- function(m, s, alpha) {
 }
 
 
+#'
+#' PVF LT 2nd deriv wrt. alpha, evaluated numerically
+#' 
+deriv_deriv_lt_dpvf_r_numeric <- function(p, s, alpha) {
+  grad(function(alpha) deriv_lt_dpvf_r(p, s, alpha), alpha)
+}
+
+#' 
+#' PVF LT 2nd deriv wrt. alpha
+#' 
+deriv_deriv_lt_dpvf_r <- function(m, s, alpha) {
+  if (m == 0) {
+    return(-(exp(-((1 + s)^alpha - 1)/alpha) * ((1 + s)^alpha * log((1 + 
+      s)) * log((1 + s))/alpha - (1 + s)^alpha * log((1 + s))/alpha^2 - 
+      ((1 + s)^alpha * log((1 + s))/alpha^2 - ((1 + s)^alpha - 
+      1) * (2 * alpha)/(alpha^2)^2)) - exp(-((1 + s)^alpha - 
+      1)/alpha) * ((1 + s)^alpha * log((1 + s))/alpha - ((1 + s)^alpha - 
+      1)/alpha^2) * ((1 + s)^alpha * log((1 + s))/alpha - ((1 + 
+      s)^alpha - 1)/alpha^2)))
+  }
+  
+  lt <- lt_dpvf_r(0, s, alpha)
+  dlt <- deriv_lt_dpvf_r(0, s, alpha)
+  ddlt <- deriv_deriv_lt_dpvf_r(0, s, alpha)
+  
+  sum1 <- sum(vapply(1:m, function(j)
+    lt_dpvf_coef_r(m, j, alpha) * (1 + s)^(j*alpha - m) * j^2 * log(1 + s)^2
+    , 0))
+  
+  sum2 <- sum(vapply(1:m, function(j)
+    lt_deriv_dpvf_coef_r(m, j, alpha) * (1 + s)^(j*alpha - m) * j * log(1 + s)
+    , 0))
+  
+  sum3 <- sum(vapply(1:m, function(j)
+    lt_deriv_deriv_dpvf_coef_r(m, j, alpha) * (1 + s)^(j*alpha - m)
+    , 0))
+  
+  sum4 <- sum(vapply(1:m, function(j)
+    lt_dpvf_coef_r(m, j, alpha) * (1 + s)^(j*alpha - m) * j * log(1 + s)
+    , 0))
+  
+  sum5 <- sum(vapply(1:m, function(j)
+    lt_dpvf_coef_r(m, j, alpha) * (1 + s)^(j*alpha - m)
+    , 0))
+  
+  sum6 <- sum(vapply(1:m, function(j)
+    lt_deriv_dpvf_coef_r(m, j, alpha) * (1 + s)^(j*alpha - m)
+    , 0))
+  
+  term1 <- (-1)^m * lt * sum1
+  term2 <- 2 * (-1)^m * lt * sum2
+  term3 <- (-1)^m * lt * sum3
+  term4 <- 2 * (-1)^m * dlt * sum4
+  term5 <- (-1)^m * ddlt * sum5
+  term6 <- 2 * (-1)^m * dlt * sum6
+  
+  term1 + term2 + term3 + term4 + term5 + term6
+}
+
 ################################################################################
 # Log-normal
 
@@ -494,6 +570,24 @@ deriv_dlognormal_r <- function(x, theta) {
 
 deriv_dlognormal_r_numeric <- function(x, theta) {
   grad(function(theta) dlognormal_r(x, theta), theta)
+}
+
+deriv_deriv_dlognormal_r <- function(x, theta) {
+  #   (log(x)^2 * exp(-(log(x)^2)/(2*theta)))/(2 * sqrt(2*pi) * theta^(5/2) * x) - 
+  #     (exp(-(log(x)^2)/(2*theta)))/(2 * sqrt(2*pi) * theta^(3/2) * x)
+  
+  log(x)^2 * (exp(-(log(x)^2)/(2 * theta)) * ((log(x)^2) * 2/(2 * 
+  theta)^2))/(2 * sqrt(2 * pi) * theta^(5/2) * x) - (log(x)^2 * 
+  exp(-(log(x)^2)/(2 * theta))) * (2 * sqrt(2 * pi) * (theta^((5/2) - 
+  1) * (5/2)) * x)/(2 * sqrt(2 * pi) * theta^(5/2) * x)^2 - 
+  (exp(-(log(x)^2)/(2 * theta)) * ((log(x)^2) * 2/(2 * theta)^2)/(2 * 
+  sqrt(2 * pi) * theta^(3/2) * x) - (exp(-(log(x)^2)/(2 * 
+  theta))) * (2 * sqrt(2 * pi) * (theta^((3/2) - 1) * (3/2)) * 
+  x)/(2 * sqrt(2 * pi) * theta^(3/2) * x)^2)
+}
+
+deriv_deriv_dlognormal_r_numeric <- function(x, theta) {
+  grad(function(theta) deriv_dlognormal_r(x, theta), theta)
 }
 
 ################################################################################

@@ -125,8 +125,7 @@ double phi_prime_prime(int k, int N_dot, double H_dot, double *theta, String fra
   phi_prime_prime_params phi_p;
   
   if (frailty == "lognormal") {
-    throw std::range_error("Unsupported frailty distribution");
-    // phi_p = (struct phi_prime_prime_params){k, N_dot, H_dot, theta, deriv_dlognormal, deriv_idx_1, deriv_idx_2};
+    phi_p = (struct phi_prime_prime_params){k, N_dot, H_dot, theta, deriv_deriv_dlognormal, deriv_idx_1, deriv_idx_2};
   } else if (frailty == "invgauss") {
     throw std::range_error("Unsupported frailty distribution");
     // phi_p = (struct phi_prime_prime_params){k, N_dot, H_dot, theta, deriv_dinvgauss, deriv_idx_1, deriv_idx_2};
@@ -201,11 +200,9 @@ List bh(NumericVector d_,
       H_dot_i(k) = 0;
       
       if (k == 0) {
-        phi_1_i(k) = phi(1, 0, 0, theta.begin(), frailty);
-        phi_2_i(k) = phi(2, 0, 0, theta.begin(), frailty);
-        psi_i(k) = phi_2_i(k)/phi_1_i(k);
-      } else {
-        psi_i(k) = 0;
+        phi_1_i(0) = phi(1, 0, 0, theta.begin(), frailty);
+        phi_2_i(0) = phi(2, 0, 0, theta.begin(), frailty);
+        psi_i(0) = phi_2_i(0)/phi_1_i(0);
       }
     }
   }
@@ -279,29 +276,30 @@ double loglikelihood(List X_,
                      List K_, 
                      List I_, 
                      List phi_1_,
-                     NumericVector Lambda, 
+                     NumericVector lambda, 
                      NumericVector beta) {
-  int k_tau = Lambda.size() - 1;
+  int k_tau = lambda.size() - 1;
   int n_clusters = X_.size();
   
-  double term1 = 0;
-  double term2 = 0;
+  double l = 0;
   for (int i = 0; i < n_clusters; ++i) {
+    
     NumericMatrix X_i = X_(i);
     NumericVector I_i = I_(i); // Failure indicator
     NumericVector K_i = K_(i); // R index
     NumericVector phi_1_i = phi_1_(i);
     
+    double term1 = 0;
     for (int j = 0; j < X_i.nrow(); j++) {
       // K_i[j] is an R index
       if (I_i(j) > 0) { 
-        term1 += log(Lambda(K_i(j)-1) - Lambda(K_i(j)-2)) + sum(beta * X_i(j, _));
+        term1 += log(lambda(K_i(j)-1)) + sum(beta * X_i(j, _));
       }
     }
-    term2 += log(phi_1_i(k_tau));
+    l += term1 + log(phi_1_i(k_tau));
   }
   
-  return term1 + term2;
+  return l;
 }
 
 // [[Rcpp::export]]
@@ -573,16 +571,16 @@ List dH_dtheta(NumericVector d_,
 
 // Eq. (34) in Gorfine (2008)
 // [[Rcpp::export]]
-double jacobian_beta_beta(List X_,
+double jacobian_beta_beta(int l,
+                          List X_,
                           List K_, 
                           List H_, 
                           List phi_1_,
                           List phi_2_,
                           List phi_3_,
                           List dH_dbeta_, 
-                          List dH_dot_dbeta_,
-                          int beta_idx_1) {
-  beta_idx_1 -= 1; // Convert R idx to C++ idx to avoid confusion
+                          List dH_dot_dbeta_) {
+  l -= 1; // Convert R idx to C++ idx to avoid confusion
   NumericVector tmp = dH_dot_dbeta_(0);
   int k_tau = tmp.size() - 1;
   int n_clusters = X_.size();
@@ -605,8 +603,8 @@ double jacobian_beta_beta(List X_,
     double tmp_term2 = 0;
     
     for (int j = 0; j < X_i.nrow(); j++) {
-      tmp_term1 += X_i(j, beta_idx_1) * dH_dbeta_i(j, K_i[j] - 1);
-      tmp_term2 += H_i(j, K_i[j] - 1) * X_i(j, beta_idx_1) * dH_dot_dbeta_i(k_tau);
+      tmp_term1 += X_i(j, l) * dH_dbeta_i(j, K_i(j) - 1);
+      tmp_term2 += H_i(j, K_i(j) - 1) * X_i(j, l) * dH_dot_dbeta_i(k_tau);
     }
     
     double term1 = tmp_term1 * phi_2_i(k_tau)/phi_1_i(k_tau);
@@ -625,7 +623,8 @@ double jacobian_beta_beta(List X_,
 
 // Eq. (35) in Gorfine (2008)
 // [[Rcpp::export]]
-double jacobian_beta_theta(List X_,
+double jacobian_beta_theta(int l,
+                           List X_,
                            List K_, 
                            List H_, 
                            List phi_1_,
@@ -634,9 +633,8 @@ double jacobian_beta_theta(List X_,
                            List phi_prime_1_,
                            List phi_prime_2_,
                            List dH_dtheta_, 
-                           List dH_dot_dtheta_,
-                           int beta_idx) {
-  beta_idx -= 1; // Convert R idx to C++ idx to avoid confusion
+                           List dH_dot_dtheta_) {
+  l -= 1; // Convert R idx to C++ idx to avoid confusion
   NumericVector tmp = dH_dot_dtheta_(0);
   int k_tau = tmp.size() - 1;
   int n_clusters = X_.size();
@@ -661,8 +659,8 @@ double jacobian_beta_theta(List X_,
     double tmp_term2 = 0;
     
     for (int j = 0; j < X_i.nrow(); j++) {
-      tmp_term1 += X_i(j, beta_idx) * dH_dtheta_i(j, K_i[j] - 1);
-      tmp_term2 += H_i(j, K_i[j] - 1) * X_i(j, beta_idx);
+      tmp_term1 += X_i(j, l) * dH_dtheta_i(j, K_i(j) - 1);
+      tmp_term2 += H_i(j, K_i(j) - 1) * X_i(j, l);
     }
     
     double term1 = tmp_term1 * phi_2_i(k_tau)/phi_1_i(k_tau);
@@ -749,6 +747,7 @@ double jacobian_theta_theta(List phi_1_,
 
 // [[Rcpp::export]]
 List Q_beta(List X_,
+            List K_,
             List H_, 
             List R_star,
             List phi_1_,
@@ -770,27 +769,29 @@ List Q_beta(List X_,
     // Matrices
     NumericMatrix X_i = X_(i);
     NumericMatrix H_i = H_(i);
+    NumericVector K_i = K_(i);
     
     // Vectors
     NumericVector R_star_i = R_star(i);
     NumericVector phi_1_i = phi_1_(i);
     NumericVector phi_2_i = phi_2_(i);
     NumericVector phi_3_i = phi_3_(i);
-    
-    for (int k = 0; k < n_timesteps; ++k) {
-      // TODO: j is reassigned in eq. on page 24?
-      double inner_sum = 0;
-      for (int j = 0; j < Q_beta_i.nrow(); ++j) {
-        inner_sum += H_i(j, k) * X_i(j, r);
-      }
-      
-      for (int j = 0; j < Q_beta_i.nrow(); ++j) {
-        double term1 = R_star_i(j) * X_i(j, r) * (phi_2_i(k_tau)/phi_1_i(k_tau));
-        double term2 = inner_sum * R_star_i(j) * (phi_3_i(k_tau)/phi_1_i(k_tau));
-        double term3 = inner_sum * R_star_i(j) * (pow(phi_2_i(k_tau), 2)/
-                                                  pow(phi_1_i(k_tau), 2));
+  
+    // TODO: j is reassigned in eq. on page 24?
+    for (int j = 0; j < Q_beta_i.nrow(); ++j) {
+      for (int k = 0; k < n_timesteps; ++k) {
+        double inner_sum = 0;
+        for (int l = 0; l < Q_beta_i.nrow(); ++l) {
+          inner_sum += H_i(l, k) * X_i(l, r);
+          // inner_sum += H_i(l, K_i(l)-1) * X_i(l, r);
+        }
+        
+        double term1 = X_i(j, r) * (phi_2_i(k_tau)/phi_1_i(k_tau));
+        double term2 = inner_sum * (phi_3_i(k_tau)/phi_1_i(k_tau));
+        double term3 = inner_sum * (pow(phi_2_i(k_tau), 2)/
+                                    pow(phi_1_i(k_tau), 2));
           
-        Q_beta_i(j, k) = -(term1 - term2 + term3);
+        Q_beta_i(j, k) = -R_star_i(j) * (term1 - term2 + term3);
       }
     }
   }
@@ -804,9 +805,7 @@ List Q_theta(List H_,
              List phi_1_,
              List phi_2_,
              List phi_prime_1_,
-             List phi_prime_2_,
-             int r) {
-  r -= 1; // Convert R idx to C++ idx to avoid confusion
+             List phi_prime_2_) {
   NumericVector tmp = phi_1_(0);
   int n_timesteps = tmp.size();
   int n_clusters = phi_1_.size();
@@ -827,9 +826,9 @@ List Q_theta(List H_,
     
     double term1 = phi_2_i(k_tau) * phi_prime_1_i(k_tau)/pow(phi_1_i(k_tau), 2);
     double term2 = phi_prime_2_i(k_tau)/phi_1_i(k_tau);
-      
-    for (int k = 0; k < n_timesteps; ++k) {
-      for (int j = 0; j < Q_theta_i.nrow(); ++j) {
+    
+    for (int j = 0; j < Q_theta_i.nrow(); ++j) {
+      for (int k = 0; k < n_timesteps; ++k) {
         Q_theta_i(j, k) = R_star_i(j) * (term1 - term2);
       }
     }
@@ -842,11 +841,8 @@ List Q_theta(List H_,
 NumericVector Ycal(List X_,
                    List Y_,
                    List psi_,
-                   List phi_1_,
-                   List phi_2_,
-                   List phi_3_,
                    NumericVector beta) {
-  NumericVector tmp = phi_1_(0);
+  NumericVector tmp = psi_(0);
   int n_timesteps = tmp.size();
   int n_clusters = X_.size();
   int k_tau = n_timesteps - 1;
@@ -854,7 +850,7 @@ NumericVector Ycal(List X_,
   NumericVector Ycal_(n_timesteps);
   NumericVector Upsilon_(n_timesteps);
   
-  for (int k = 0; k < n_timesteps; ++k) {
+  for (int s = 0; s < n_timesteps; ++s) {
     double outer_sum = 0;
     for (int i = 0; i < n_clusters; ++i) {
       // Matrices
@@ -863,18 +859,15 @@ NumericVector Ycal(List X_,
       
       // Vectors
       NumericVector psi_i = psi_(i);
-      NumericVector phi_1_i = phi_1_(i);
-      NumericVector phi_2_i = phi_2_(i);
-      NumericVector phi_3_i = phi_3_(i);
       
       double inner_sum = 0;
       for (int j = 0; j < X_i.nrow(); ++j) {
-        inner_sum += Y_i(j, k) * exp(sum(beta * X_i(j, _)));
+        inner_sum += Y_i(j, s) * exp(sum(beta * X_i(j, _)));
       }
       
-      outer_sum += inner_sum * psi_i(k);
+      outer_sum += psi_i(s) * inner_sum;
     }
-    Ycal_(k) = outer_sum/n_clusters;
+    Ycal_(s) = outer_sum/n_clusters;
   }
   
   return Ycal_;
@@ -891,17 +884,17 @@ List eta(List phi_1_,
   
   List eta_ = clone(phi_1_);
   
-  for (int k = 0; k < n_timesteps; ++k) {
-    for (int i = 0; i < n_clusters; ++i) {
-      // Output
-      NumericVector eta_i = eta_(i);
+  for (int i = 0; i < n_clusters; ++i) {
+    // Output
+    NumericVector eta_i = eta_(i);
+    
+    // Vectors
+    NumericVector phi_1_i = phi_1_(i);
+    NumericVector phi_2_i = phi_2_(i);
+    NumericVector phi_3_i = phi_3_(i);
       
-      // Vectors
-      NumericVector phi_1_i = phi_1_(i);
-      NumericVector phi_2_i = phi_2_(i);
-      NumericVector phi_3_i = phi_3_(i);
-      
-      eta_i(k) = (phi_3_i(k)/phi_1_i(k)) - pow(phi_2_i(k)/phi_1_i(k), 2);
+    for (int s = 0; s < n_timesteps; ++s) {
+      eta_i(s) = (phi_3_i(s)/phi_1_i(s)) - pow(phi_2_i(s)/phi_1_i(s), 2);
     }
   }
   
@@ -921,9 +914,9 @@ NumericVector Upsilon(List X_,
   
   NumericVector Upsilon_(n_timesteps);
   
-  for (int k = 0; k < n_timesteps; ++k) {
-    double factor2 = 0;
+  for (int s = 0; s < n_timesteps; ++s) {
     
+    double factor3 = 0;
     for (int i = 0; i < n_clusters; ++i) {
       // Matrices
       NumericMatrix X_i = X_(i);
@@ -934,13 +927,13 @@ NumericVector Upsilon(List X_,
       NumericVector eta_i = eta_(i);
       
       for (int j = 0; j < X_i.nrow(); ++j) {
-        if (K_i(j) > k) {
-          factor2 += R_dot_i(k) * eta_i(k) * exp(sum(beta * X_i(j, _)));
+        if ((K_i(j)-1) > s) {
+          factor3 += R_dot_i(s) * eta_i(s) * exp(sum(beta * X_i(j, _)));
         }
       }
     }
     
-    Upsilon_(k) = factor2/(pow(Ycal_(k),2) * pow(n_clusters,2));
+    Upsilon_(s) = pow(n_clusters, -2) * pow(Ycal_(s), -2) * factor3;
   }
   
   return Upsilon_;
@@ -1011,17 +1004,16 @@ List Omega(List X_,
   int n_timesteps = tmp.size();
   int n_clusters = N_.size();
   List Omega_ = clone(N_);
-  NumericVector dN_sum(n_timesteps);
   
+  // Precompute dN_ij sum over i,j
+  NumericVector dN_sum(n_timesteps);
   for (int u = 1; u < n_timesteps; ++u) {
-    double dsum = 0;
     for (int i = 0; i < n_clusters; ++i) {
       NumericMatrix N_i = N_(i);
       for (int j = 0; j < N_i.nrow(); ++j) {
-        dsum += N_i(j, u) - N_i(j, u - 1);
+        dN_sum(u) += N_i(j, u) - N_i(j, u - 1);
       }
     }
-    dN_sum(u) = dsum;
   }
   
   double integration;
@@ -1034,18 +1026,11 @@ List Omega(List X_,
     NumericVector eta_i = eta_(i);
     
     for (int j = 0; j < Omega_i.nrow(); ++j) {
-      // Rcout << Omega_i_j.nrow() << ", " << Omega_i_j.ncol() << std::endl;
-      for (int u = 0; u < n_timesteps; ++u) {
-        Omega_i(j, u) = R_dot_i(u) * eta_i(u) * exp(sum(beta * X_i(j, _))) * 
-          dN_sum(u)/pow(Ycal_(u), 2);
+      
+      for (int u = 1; u < n_timesteps; ++u) {
+        Omega_i(j, u) = pow(Ycal_(u), -2) * R_dot_i(u) * eta_i(u) * 
+          exp(sum(beta * X_i(j, _))) * dN_sum(u);
       }
-      // Rcout << i << ", " << j << ", " << s << ", " << t << ", " << std::endl;
-//       for (int t = 0; t < n_timesteps; ++t) {
-//         for (int s = 0; s < t; ++s) {
-//           NumericVector::s
-//           Omega_i_j(s, t) = integration.()/pow(n_clusters, 2);
-//         }
-//       }
     }
   }
   
@@ -1056,30 +1041,31 @@ List Omega(List X_,
 NumericVector p_hat(List I_,
                     NumericVector Upsilon_,
                     List Omega_,
-                    List N_) {
+                    List N_tilde_) {
   int n_timesteps = Upsilon_.size();
-  int n_clusters = N_.size();
+  int n_clusters = N_tilde_.size();
   
   NumericVector p_hat_(n_timesteps);
   
   for (int t = 0; t < n_timesteps; ++t) {
     double product = 1;
-    for (int s = 0; s <= t; ++s) {
-      
+    
+    for (int s = 1; s <= t; ++s) {
       double inner_sum = 0;
-      if (s > 0) {
-        for (int i = 0; i < n_clusters; ++i) {
-          NumericVector I_i = I_(i);
-          NumericMatrix N_i = N_(i);
-          NumericMatrix Omega_i = Omega_(i);
+      
+      for (int i = 0; i < n_clusters; ++i) {
+        NumericVector I_i = I_(i);
+        NumericMatrix N_tilde_i = N_tilde_(i);
+        NumericMatrix Omega_i = Omega_(i);
+        
+        for (int j = 0; j < N_tilde_i.nrow(); ++j) {
           
-          for (int j = 0; j < N_i.nrow(); ++j) {
-            double omega_integral = 0;
-            for (int u = s; u <= t; ++u) omega_integral += Omega_i(j, u);
-            
-            inner_sum += (I_i(j) * Upsilon_(s) + omega_integral) * 
-              (N_i(j, s) - N_i(j, s - 1));
-          }
+          double omega_integral = 0;
+          for (int u = s; u <= t; ++u) omega_integral += Omega_i(j, u);
+          omega_integral = pow(n_clusters, -2) * omega_integral;
+          
+          inner_sum += (I_i(j) * Upsilon_(s) + omega_integral) * 
+            (N_tilde_i(j, s) - N_tilde_i(j, s - 1));
         }
       }
       
@@ -1108,7 +1094,7 @@ NumericVector pi_r(List Q_,
   for (int s = 0; s < n_timesteps; ++s) {
     integration = 0;
     
-    for (int t = k_tau; t > s; --t) {
+    for (int t = s+1; t < n_timesteps; ++t) {
       inner_sum = 0;
       
       for (int i = 0; i < n_clusters; ++i) {
@@ -1116,7 +1102,7 @@ NumericVector pi_r(List Q_,
         NumericMatrix N_tilde_i = N_tilde_(i);
         
         for (int j = 0; j < N_tilde_i.nrow(); ++j) {
-          inner_sum += (N_tilde_i(j, t) - N_tilde_i(j, t - 1)) * Q_i(j, t);
+          inner_sum += Q_i(j, t) * (N_tilde_i(j, t) - N_tilde_i(j, t - 1));
         }
       }
       integration += inner_sum/p_hat(t);
@@ -1140,7 +1126,7 @@ double G_rl(NumericVector pi_r,
   int n_clusters = N_.size();
   
   double integration = 0;
-  for (int s = 0; s < n_timesteps; ++s) {
+  for (int s = 1; s < n_timesteps; ++s) {
     
     double inner_sum = 0;
     for (int i = 0; i < n_clusters; ++i) {
@@ -1150,7 +1136,7 @@ double G_rl(NumericVector pi_r,
       }
     }
     
-    integration += pi_r(s)*pi_l(s)*p_hat(s-1)*inner_sum/Ycal_(s);
+    integration += pi_r(s) * pi_l(s) * pow(p_hat(s - 1), 2) * inner_sum/pow(Ycal_(s), 2);
   }
   
   return integration/n_clusters;
@@ -1194,20 +1180,17 @@ List M_hat(List X_,
 }
 
 // [[Rcpp::export]]
-List u_star(List u_star_,
-            List pi_,
-            NumericVector p_hat,
-            NumericVector Ycal_,
-            List M_) {
-  
-  int n_clusters = M_.size();
+NumericMatrix u_star(List pi_,
+                     NumericVector p_hat,
+                     NumericVector Ycal_,
+                     List M_hat_) {
   int n_timesteps = p_hat.size();
-  NumericVector tmp = u_star_(0);
-  int n_gamma = tmp.size();
+  int n_clusters = M_hat_.size();
+  int n_gamma = pi_.size();
+  NumericMatrix u_star_(n_clusters, n_gamma);
   
   for (int i = 0; i < n_clusters; ++i) {
-    NumericMatrix M_i = M_(i);
-    NumericVector u_star_i = u_star_(i);
+    NumericMatrix M_hat_i = M_hat_(i);
     
     for (int r = 0; r < n_gamma; ++r) {
       NumericVector pi_r = pi_(r);
@@ -1216,13 +1199,13 @@ List u_star(List u_star_,
       for (int s = 1; s < n_timesteps; ++s) {
         
         double inner_sum = 0;
-        for (int j = 0; j < M_i.nrow(); ++j) {
-          inner_sum += M_i(j, s) - M_i(j, s - 1);
+        for (int j = 0; j < M_hat_i.nrow(); ++j) {
+          inner_sum += M_hat_i(j, s) - M_hat_i(j, s - 1);
         }
         integration += pi_r(s) * p_hat(s - 1) * inner_sum/Ycal_(s);
       }
       
-      u_star_i(r) = integration;
+      u_star_(i,r) = integration;
     }
   }
   

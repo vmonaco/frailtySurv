@@ -93,6 +93,18 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// deriv_deriv_dlognormal_c
+NumericVector deriv_deriv_dlognormal_c(NumericVector x, NumericVector theta);
+RcppExport SEXP frailtyr_deriv_deriv_dlognormal_c(SEXP xSEXP, SEXP thetaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type theta(thetaSEXP);
+    __result = Rcpp::wrap(deriv_deriv_dlognormal_c(x, theta));
+    return __result;
+END_RCPP
+}
 // dinvgauss_c
 NumericVector dinvgauss_c(NumericVector x, NumericVector theta);
 RcppExport SEXP frailtyr_dinvgauss_c(SEXP xSEXP, SEXP thetaSEXP) {
@@ -127,6 +139,83 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type j(jSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
     __result = Rcpp::wrap(lt_dpvf_coef(p, j, alpha));
+    return __result;
+END_RCPP
+}
+// lt_deriv_dpvf_coef
+double lt_deriv_dpvf_coef(int p, int j, double alpha);
+RcppExport SEXP frailtyr_lt_deriv_dpvf_coef(SEXP pSEXP, SEXP jSEXP, SEXP alphaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type j(jSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    __result = Rcpp::wrap(lt_deriv_dpvf_coef(p, j, alpha));
+    return __result;
+END_RCPP
+}
+// lt_deriv_deriv_dpvf_coef
+double lt_deriv_deriv_dpvf_coef(int m, int j, double alpha);
+RcppExport SEXP frailtyr_lt_deriv_deriv_dpvf_coef(SEXP mSEXP, SEXP jSEXP, SEXP alphaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< int >::type m(mSEXP);
+    Rcpp::traits::input_parameter< int >::type j(jSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    __result = Rcpp::wrap(lt_deriv_deriv_dpvf_coef(m, j, alpha));
+    return __result;
+END_RCPP
+}
+// dpvf_c
+NumericVector dpvf_c(NumericVector x, NumericVector alpha);
+RcppExport SEXP frailtyr_dpvf_c(SEXP xSEXP, SEXP alphaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
+    __result = Rcpp::wrap(dpvf_c(x, alpha));
+    return __result;
+END_RCPP
+}
+// lt_dpvf_c
+double lt_dpvf_c(int m, double s, double alpha);
+RcppExport SEXP frailtyr_lt_dpvf_c(SEXP mSEXP, SEXP sSEXP, SEXP alphaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< int >::type m(mSEXP);
+    Rcpp::traits::input_parameter< double >::type s(sSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    __result = Rcpp::wrap(lt_dpvf_c(m, s, alpha));
+    return __result;
+END_RCPP
+}
+// deriv_lt_dpvf_c
+double deriv_lt_dpvf_c(int m, double s, double alpha);
+RcppExport SEXP frailtyr_deriv_lt_dpvf_c(SEXP mSEXP, SEXP sSEXP, SEXP alphaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< int >::type m(mSEXP);
+    Rcpp::traits::input_parameter< double >::type s(sSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    __result = Rcpp::wrap(deriv_lt_dpvf_c(m, s, alpha));
+    return __result;
+END_RCPP
+}
+// deriv_deriv_lt_dpvf_c
+double deriv_deriv_lt_dpvf_c(int m, double s, double alpha);
+RcppExport SEXP frailtyr_deriv_deriv_lt_dpvf_c(SEXP mSEXP, SEXP sSEXP, SEXP alphaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< int >::type m(mSEXP);
+    Rcpp::traits::input_parameter< double >::type s(sSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    __result = Rcpp::wrap(deriv_deriv_lt_dpvf_c(m, s, alpha));
     return __result;
 END_RCPP
 }
@@ -165,44 +254,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type s(sSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
     __result = Rcpp::wrap(deriv_lt_dposstab_c(p, s, alpha));
-    return __result;
-END_RCPP
-}
-// dpvf_c
-NumericVector dpvf_c(NumericVector x, NumericVector alpha);
-RcppExport SEXP frailtyr_dpvf_c(SEXP xSEXP, SEXP alphaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
-    __result = Rcpp::wrap(dpvf_c(x, alpha));
-    return __result;
-END_RCPP
-}
-// lt_dpvf_c
-double lt_dpvf_c(int p, double s, double alpha);
-RcppExport SEXP frailtyr_lt_dpvf_c(SEXP pSEXP, SEXP sSEXP, SEXP alphaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< int >::type p(pSEXP);
-    Rcpp::traits::input_parameter< double >::type s(sSEXP);
-    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    __result = Rcpp::wrap(lt_dpvf_c(p, s, alpha));
-    return __result;
-END_RCPP
-}
-// deriv_lt_dpvf_c
-double deriv_lt_dpvf_c(int p, double s, double alpha);
-RcppExport SEXP frailtyr_deriv_lt_dpvf_c(SEXP pSEXP, SEXP sSEXP, SEXP alphaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< int >::type p(pSEXP);
-    Rcpp::traits::input_parameter< double >::type s(sSEXP);
-    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    __result = Rcpp::wrap(deriv_lt_dpvf_c(p, s, alpha));
     return __result;
 END_RCPP
 }
@@ -267,8 +318,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // loglikelihood
-double loglikelihood(List X_, List K_, List I_, List phi_1_, NumericVector Lambda, NumericVector beta);
-RcppExport SEXP frailtyr_loglikelihood(SEXP X_SEXP, SEXP K_SEXP, SEXP I_SEXP, SEXP phi_1_SEXP, SEXP LambdaSEXP, SEXP betaSEXP) {
+double loglikelihood(List X_, List K_, List I_, List phi_1_, NumericVector lambda, NumericVector beta);
+RcppExport SEXP frailtyr_loglikelihood(SEXP X_SEXP, SEXP K_SEXP, SEXP I_SEXP, SEXP phi_1_SEXP, SEXP lambdaSEXP, SEXP betaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -276,9 +327,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< List >::type K_(K_SEXP);
     Rcpp::traits::input_parameter< List >::type I_(I_SEXP);
     Rcpp::traits::input_parameter< List >::type phi_1_(phi_1_SEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type Lambda(LambdaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type beta(betaSEXP);
-    __result = Rcpp::wrap(loglikelihood(X_, K_, I_, phi_1_, Lambda, beta));
+    __result = Rcpp::wrap(loglikelihood(X_, K_, I_, phi_1_, lambda, beta));
     return __result;
 END_RCPP
 }
@@ -379,11 +430,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // jacobian_beta_beta
-double jacobian_beta_beta(List X_, List K_, List H_, List phi_1_, List phi_2_, List phi_3_, List dH_dbeta_, List dH_dot_dbeta_, int beta_idx_1);
-RcppExport SEXP frailtyr_jacobian_beta_beta(SEXP X_SEXP, SEXP K_SEXP, SEXP H_SEXP, SEXP phi_1_SEXP, SEXP phi_2_SEXP, SEXP phi_3_SEXP, SEXP dH_dbeta_SEXP, SEXP dH_dot_dbeta_SEXP, SEXP beta_idx_1SEXP) {
+double jacobian_beta_beta(int l, List X_, List K_, List H_, List phi_1_, List phi_2_, List phi_3_, List dH_dbeta_, List dH_dot_dbeta_);
+RcppExport SEXP frailtyr_jacobian_beta_beta(SEXP lSEXP, SEXP X_SEXP, SEXP K_SEXP, SEXP H_SEXP, SEXP phi_1_SEXP, SEXP phi_2_SEXP, SEXP phi_3_SEXP, SEXP dH_dbeta_SEXP, SEXP dH_dot_dbeta_SEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< int >::type l(lSEXP);
     Rcpp::traits::input_parameter< List >::type X_(X_SEXP);
     Rcpp::traits::input_parameter< List >::type K_(K_SEXP);
     Rcpp::traits::input_parameter< List >::type H_(H_SEXP);
@@ -392,17 +444,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< List >::type phi_3_(phi_3_SEXP);
     Rcpp::traits::input_parameter< List >::type dH_dbeta_(dH_dbeta_SEXP);
     Rcpp::traits::input_parameter< List >::type dH_dot_dbeta_(dH_dot_dbeta_SEXP);
-    Rcpp::traits::input_parameter< int >::type beta_idx_1(beta_idx_1SEXP);
-    __result = Rcpp::wrap(jacobian_beta_beta(X_, K_, H_, phi_1_, phi_2_, phi_3_, dH_dbeta_, dH_dot_dbeta_, beta_idx_1));
+    __result = Rcpp::wrap(jacobian_beta_beta(l, X_, K_, H_, phi_1_, phi_2_, phi_3_, dH_dbeta_, dH_dot_dbeta_));
     return __result;
 END_RCPP
 }
 // jacobian_beta_theta
-double jacobian_beta_theta(List X_, List K_, List H_, List phi_1_, List phi_2_, List phi_3_, List phi_prime_1_, List phi_prime_2_, List dH_dtheta_, List dH_dot_dtheta_, int beta_idx);
-RcppExport SEXP frailtyr_jacobian_beta_theta(SEXP X_SEXP, SEXP K_SEXP, SEXP H_SEXP, SEXP phi_1_SEXP, SEXP phi_2_SEXP, SEXP phi_3_SEXP, SEXP phi_prime_1_SEXP, SEXP phi_prime_2_SEXP, SEXP dH_dtheta_SEXP, SEXP dH_dot_dtheta_SEXP, SEXP beta_idxSEXP) {
+double jacobian_beta_theta(int l, List X_, List K_, List H_, List phi_1_, List phi_2_, List phi_3_, List phi_prime_1_, List phi_prime_2_, List dH_dtheta_, List dH_dot_dtheta_);
+RcppExport SEXP frailtyr_jacobian_beta_theta(SEXP lSEXP, SEXP X_SEXP, SEXP K_SEXP, SEXP H_SEXP, SEXP phi_1_SEXP, SEXP phi_2_SEXP, SEXP phi_3_SEXP, SEXP phi_prime_1_SEXP, SEXP phi_prime_2_SEXP, SEXP dH_dtheta_SEXP, SEXP dH_dot_dtheta_SEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< int >::type l(lSEXP);
     Rcpp::traits::input_parameter< List >::type X_(X_SEXP);
     Rcpp::traits::input_parameter< List >::type K_(K_SEXP);
     Rcpp::traits::input_parameter< List >::type H_(H_SEXP);
@@ -413,8 +465,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< List >::type phi_prime_2_(phi_prime_2_SEXP);
     Rcpp::traits::input_parameter< List >::type dH_dtheta_(dH_dtheta_SEXP);
     Rcpp::traits::input_parameter< List >::type dH_dot_dtheta_(dH_dot_dtheta_SEXP);
-    Rcpp::traits::input_parameter< int >::type beta_idx(beta_idxSEXP);
-    __result = Rcpp::wrap(jacobian_beta_theta(X_, K_, H_, phi_1_, phi_2_, phi_3_, phi_prime_1_, phi_prime_2_, dH_dtheta_, dH_dot_dtheta_, beta_idx));
+    __result = Rcpp::wrap(jacobian_beta_theta(l, X_, K_, H_, phi_1_, phi_2_, phi_3_, phi_prime_1_, phi_prime_2_, dH_dtheta_, dH_dot_dtheta_));
     return __result;
 END_RCPP
 }
@@ -450,25 +501,26 @@ BEGIN_RCPP
 END_RCPP
 }
 // Q_beta
-List Q_beta(List X_, List H_, List R_star, List phi_1_, List phi_2_, List phi_3_, int r);
-RcppExport SEXP frailtyr_Q_beta(SEXP X_SEXP, SEXP H_SEXP, SEXP R_starSEXP, SEXP phi_1_SEXP, SEXP phi_2_SEXP, SEXP phi_3_SEXP, SEXP rSEXP) {
+List Q_beta(List X_, List K_, List H_, List R_star, List phi_1_, List phi_2_, List phi_3_, int r);
+RcppExport SEXP frailtyr_Q_beta(SEXP X_SEXP, SEXP K_SEXP, SEXP H_SEXP, SEXP R_starSEXP, SEXP phi_1_SEXP, SEXP phi_2_SEXP, SEXP phi_3_SEXP, SEXP rSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< List >::type X_(X_SEXP);
+    Rcpp::traits::input_parameter< List >::type K_(K_SEXP);
     Rcpp::traits::input_parameter< List >::type H_(H_SEXP);
     Rcpp::traits::input_parameter< List >::type R_star(R_starSEXP);
     Rcpp::traits::input_parameter< List >::type phi_1_(phi_1_SEXP);
     Rcpp::traits::input_parameter< List >::type phi_2_(phi_2_SEXP);
     Rcpp::traits::input_parameter< List >::type phi_3_(phi_3_SEXP);
     Rcpp::traits::input_parameter< int >::type r(rSEXP);
-    __result = Rcpp::wrap(Q_beta(X_, H_, R_star, phi_1_, phi_2_, phi_3_, r));
+    __result = Rcpp::wrap(Q_beta(X_, K_, H_, R_star, phi_1_, phi_2_, phi_3_, r));
     return __result;
 END_RCPP
 }
 // Q_theta
-List Q_theta(List H_, List R_star, List phi_1_, List phi_2_, List phi_prime_1_, List phi_prime_2_, int r);
-RcppExport SEXP frailtyr_Q_theta(SEXP H_SEXP, SEXP R_starSEXP, SEXP phi_1_SEXP, SEXP phi_2_SEXP, SEXP phi_prime_1_SEXP, SEXP phi_prime_2_SEXP, SEXP rSEXP) {
+List Q_theta(List H_, List R_star, List phi_1_, List phi_2_, List phi_prime_1_, List phi_prime_2_);
+RcppExport SEXP frailtyr_Q_theta(SEXP H_SEXP, SEXP R_starSEXP, SEXP phi_1_SEXP, SEXP phi_2_SEXP, SEXP phi_prime_1_SEXP, SEXP phi_prime_2_SEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -478,25 +530,21 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< List >::type phi_2_(phi_2_SEXP);
     Rcpp::traits::input_parameter< List >::type phi_prime_1_(phi_prime_1_SEXP);
     Rcpp::traits::input_parameter< List >::type phi_prime_2_(phi_prime_2_SEXP);
-    Rcpp::traits::input_parameter< int >::type r(rSEXP);
-    __result = Rcpp::wrap(Q_theta(H_, R_star, phi_1_, phi_2_, phi_prime_1_, phi_prime_2_, r));
+    __result = Rcpp::wrap(Q_theta(H_, R_star, phi_1_, phi_2_, phi_prime_1_, phi_prime_2_));
     return __result;
 END_RCPP
 }
 // Ycal
-NumericVector Ycal(List X_, List Y_, List psi_, List phi_1_, List phi_2_, List phi_3_, NumericVector beta);
-RcppExport SEXP frailtyr_Ycal(SEXP X_SEXP, SEXP Y_SEXP, SEXP psi_SEXP, SEXP phi_1_SEXP, SEXP phi_2_SEXP, SEXP phi_3_SEXP, SEXP betaSEXP) {
+NumericVector Ycal(List X_, List Y_, List psi_, NumericVector beta);
+RcppExport SEXP frailtyr_Ycal(SEXP X_SEXP, SEXP Y_SEXP, SEXP psi_SEXP, SEXP betaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< List >::type X_(X_SEXP);
     Rcpp::traits::input_parameter< List >::type Y_(Y_SEXP);
     Rcpp::traits::input_parameter< List >::type psi_(psi_SEXP);
-    Rcpp::traits::input_parameter< List >::type phi_1_(phi_1_SEXP);
-    Rcpp::traits::input_parameter< List >::type phi_2_(phi_2_SEXP);
-    Rcpp::traits::input_parameter< List >::type phi_3_(phi_3_SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type beta(betaSEXP);
-    __result = Rcpp::wrap(Ycal(X_, Y_, psi_, phi_1_, phi_2_, phi_3_, beta));
+    __result = Rcpp::wrap(Ycal(X_, Y_, psi_, beta));
     return __result;
 END_RCPP
 }
@@ -558,19 +606,32 @@ BEGIN_RCPP
 END_RCPP
 }
 // Omega
-List Omega(List Omega_, List X_, List N_, List R_dot_, List eta_, NumericVector Ycal_, NumericVector beta);
-RcppExport SEXP frailtyr_Omega(SEXP Omega_SEXP, SEXP X_SEXP, SEXP N_SEXP, SEXP R_dot_SEXP, SEXP eta_SEXP, SEXP Ycal_SEXP, SEXP betaSEXP) {
+List Omega(List X_, List N_, List R_dot_, List eta_, NumericVector Ycal_, NumericVector beta);
+RcppExport SEXP frailtyr_Omega(SEXP X_SEXP, SEXP N_SEXP, SEXP R_dot_SEXP, SEXP eta_SEXP, SEXP Ycal_SEXP, SEXP betaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< List >::type Omega_(Omega_SEXP);
     Rcpp::traits::input_parameter< List >::type X_(X_SEXP);
     Rcpp::traits::input_parameter< List >::type N_(N_SEXP);
     Rcpp::traits::input_parameter< List >::type R_dot_(R_dot_SEXP);
     Rcpp::traits::input_parameter< List >::type eta_(eta_SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type Ycal_(Ycal_SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type beta(betaSEXP);
-    __result = Rcpp::wrap(Omega(Omega_, X_, N_, R_dot_, eta_, Ycal_, beta));
+    __result = Rcpp::wrap(Omega(X_, N_, R_dot_, eta_, Ycal_, beta));
+    return __result;
+END_RCPP
+}
+// p_hat
+NumericVector p_hat(List I_, NumericVector Upsilon_, List Omega_, List N_tilde_);
+RcppExport SEXP frailtyr_p_hat(SEXP I_SEXP, SEXP Upsilon_SEXP, SEXP Omega_SEXP, SEXP N_tilde_SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< List >::type I_(I_SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type Upsilon_(Upsilon_SEXP);
+    Rcpp::traits::input_parameter< List >::type Omega_(Omega_SEXP);
+    Rcpp::traits::input_parameter< List >::type N_tilde_(N_tilde_SEXP);
+    __result = Rcpp::wrap(p_hat(I_, Upsilon_, Omega_, N_tilde_));
     return __result;
 END_RCPP
 }
@@ -584,6 +645,51 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< List >::type N_tilde_(N_tilde_SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type p_hat(p_hatSEXP);
     __result = Rcpp::wrap(pi_r(Q_, N_tilde_, p_hat));
+    return __result;
+END_RCPP
+}
+// G_rl
+double G_rl(NumericVector pi_r, NumericVector pi_l, NumericVector p_hat, NumericVector Ycal_, List N_);
+RcppExport SEXP frailtyr_G_rl(SEXP pi_rSEXP, SEXP pi_lSEXP, SEXP p_hatSEXP, SEXP Ycal_SEXP, SEXP N_SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericVector >::type pi_r(pi_rSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type pi_l(pi_lSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type p_hat(p_hatSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type Ycal_(Ycal_SEXP);
+    Rcpp::traits::input_parameter< List >::type N_(N_SEXP);
+    __result = Rcpp::wrap(G_rl(pi_r, pi_l, p_hat, Ycal_, N_));
+    return __result;
+END_RCPP
+}
+// M_hat
+List M_hat(List X_, List N_, List Y_, List psi_, NumericVector beta, NumericVector Lambda);
+RcppExport SEXP frailtyr_M_hat(SEXP X_SEXP, SEXP N_SEXP, SEXP Y_SEXP, SEXP psi_SEXP, SEXP betaSEXP, SEXP LambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< List >::type X_(X_SEXP);
+    Rcpp::traits::input_parameter< List >::type N_(N_SEXP);
+    Rcpp::traits::input_parameter< List >::type Y_(Y_SEXP);
+    Rcpp::traits::input_parameter< List >::type psi_(psi_SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type Lambda(LambdaSEXP);
+    __result = Rcpp::wrap(M_hat(X_, N_, Y_, psi_, beta, Lambda));
+    return __result;
+END_RCPP
+}
+// u_star
+NumericMatrix u_star(List pi_, NumericVector p_hat, NumericVector Ycal_, List M_hat_);
+RcppExport SEXP frailtyr_u_star(SEXP pi_SEXP, SEXP p_hatSEXP, SEXP Ycal_SEXP, SEXP M_hat_SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< List >::type pi_(pi_SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type p_hat(p_hatSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type Ycal_(Ycal_SEXP);
+    Rcpp::traits::input_parameter< List >::type M_hat_(M_hat_SEXP);
+    __result = Rcpp::wrap(u_star(pi_, p_hat, Ycal_, M_hat_));
     return __result;
 END_RCPP
 }

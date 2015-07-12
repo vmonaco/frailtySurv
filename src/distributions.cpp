@@ -39,6 +39,17 @@ NumericVector vectorized_deriv_density(NumericVector *x, NumericVector *p,
   return out;
 }
 
+NumericVector vectorized_deriv_deriv_density(NumericVector *x, NumericVector *p, 
+                                       deriv_deriv_density_fn density,
+                                       int deriv_idx_1, int deriv_idx_2) {
+  int n = x->size();
+  NumericVector out(n);
+  for(int i = 0; i < n; ++i) {
+    out[i] = density((*x)[i], p->begin(), deriv_idx_1, deriv_idx_2);
+  }
+  return out;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Numerical derivatives of LT functions
 double lt_deriv(double w, void* data) {
@@ -232,6 +243,18 @@ double deriv_dlognormal(double x, double *params, int deriv_idx) {
   return (term1_numer/term1_denom) - (term2_numer/term2_denom);
 }
 
+double deriv_deriv_dlognormal(double x, double *params, int deriv_idx_1, int deriv_idx_2) {
+  double theta = params[0];
+  return pow(log(x), 2) * (exp(-(pow(log(x), 2))/(2 * theta)) * ((pow(log(x), 2)) * 
+   2/pow((2 * theta),2)))/(2 * sqrt(2 * PI) * pow(theta,5.0/2.0) * x) - (pow(log(x), 2) * 
+   exp(-(pow(log(x), 2))/(2 * theta))) * (2 * sqrt(2 * PI) * 
+   (pow(theta,((5.0/2.0) - 1)) * (5/2)) * x)/pow((2 * sqrt(2 * PI) * pow(theta,5.0/2.0) * x),2) - 
+   (exp(-(pow(log(x), 2))/(2 * theta)) * ((pow(log(x), 2)) * 2/pow((2 * theta),2))/(2 * 
+   sqrt(2 * PI) * pow(theta,3.0/2.0) * x) - (exp(-(pow(log(x), 2))/(2 * 
+   theta))) * (2 * sqrt(2 * PI) * (pow(theta,((3.0/2.0) - 1)) * (3.0/2.0)) * 
+   x)/pow((2 * sqrt(2 * PI) * pow(theta,3.0/2.0) * x),2));
+}
+
 // [[Rcpp::export]]
 NumericVector dlognormal_c(NumericVector x, NumericVector theta) {
   return vectorized_density(&x, &theta, dlognormal);
@@ -240,6 +263,11 @@ NumericVector dlognormal_c(NumericVector x, NumericVector theta) {
 // [[Rcpp::export]]
 NumericVector deriv_dlognormal_c(NumericVector x, NumericVector theta) {
   return vectorized_deriv_density(&x, &theta, deriv_dlognormal, 0);
+}
+
+// [[Rcpp::export]]
+NumericVector deriv_deriv_dlognormal_c(NumericVector x, NumericVector theta) {
+  return vectorized_deriv_deriv_density(&x, &theta, deriv_deriv_dlognormal, 0, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -271,7 +299,7 @@ NumericVector deriv_dinvgauss_c(NumericVector x, NumericVector theta) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Positive stable (PS)
+// Power-variance function (PVF)
 double dposstab(double x, double *params) {
   double alpha = params[0];
   
@@ -284,22 +312,160 @@ double dposstab(double x, double *params) {
   return factor1*factor2;
 }
 
+double dpvf(double x, double *params) {
+  double alpha = params[0];
+  double factor1 = dposstab(x * pow(alpha, 1/alpha), params);
+  double factor2 = pow(alpha, 1/alpha) * exp(-x) * exp(1/alpha);
+  return factor1*factor2;
+}
+
 // LT coefficients for PS and PVF distributions
 // [[Rcpp::export]]
 double lt_dpvf_coef(int p, int j, double alpha) {
   // Base cases
-  if ((p == 2) && (j == 1)) { return 1 - alpha; }
-  if ((p == 2) && (j == 2)) { return 1; }
-  if ((p == 3) && (j == 1)) { return (1 - alpha)*(2 - alpha); }
-  if ((p == 3) && (j == 2)) { return 3*(1 - alpha); }
-  if ((p == 3) && (j == 3)) { return 1; }
-  if (j == 1) { return tgamma(p - alpha)/tgamma(1 - alpha); }
-  if (p == j) { return 1; }
-  
-  // Not tail recursive. TODO: iterative version of this function
-  return lt_dpvf_coef(p - 1, j - 1, alpha) + 
-    lt_dpvf_coef(p - 1, j, alpha) * ((p - 1) - j*alpha);
+  if (p == j) return 1;
+  if (j == 1) return (tgamma(p - alpha)/tgamma(1 - alpha));
+      
+  double term1 = lt_dpvf_coef(p - 1, j - 1, alpha);
+  double term2 = lt_dpvf_coef(p - 1, j, alpha)*((p - 1) - j*alpha);
+  return term1 + term2;
 }
+
+// [[Rcpp::export]]
+double lt_deriv_dpvf_coef(int p, int j, double alpha) {
+  // Base cases
+  if (p == j) return 0;
+  if (j == 1) {
+    double numer = tgamma(p - alpha)*(gsl_sf_psi(1 - alpha) - gsl_sf_psi(p - alpha));
+    double denom = tgamma(1 - alpha);
+    return numer/denom;
+  }
+    
+  double term1 = lt_deriv_dpvf_coef(p - 1, j - 1, alpha);
+  double term2 = lt_deriv_dpvf_coef(p - 1, j, alpha) * ((p - 1) - j*alpha);
+  double term3 = -j * lt_dpvf_coef(p - 1, j, alpha);
+  return term1 + term2 + term3;
+}
+
+// [[Rcpp::export]]
+double lt_deriv_deriv_dpvf_coef(int m, int j, double alpha) {
+  // Base cases
+  if (m == j) return 0;
+    
+  if (j == 1) {
+    return((tgamma(m - alpha) * gsl_sf_psi_1(m - alpha) + tgamma(m - alpha) * 
+           gsl_sf_psi(m - alpha) * gsl_sf_psi(m - alpha))/tgamma(1 - alpha) - 
+           tgamma(m - alpha) * gsl_sf_psi(m - alpha) * (tgamma(1 - alpha) * 
+           gsl_sf_psi(1 - alpha))/pow(tgamma(1 - alpha),2) - ((tgamma(m - 
+           alpha) * (tgamma(1 - alpha) * gsl_sf_psi_1(1 - alpha) + tgamma(1 - 
+           alpha) * gsl_sf_psi(1 - alpha) * gsl_sf_psi(1 - alpha)) + tgamma(m - 
+           alpha) * gsl_sf_psi(m - alpha) * (tgamma(1 - alpha) * gsl_sf_psi(1 - 
+           alpha)))/pow(tgamma(1 - alpha),2) - tgamma(m - alpha) * (tgamma(1 - 
+           alpha) * gsl_sf_psi(1 - alpha)) * (2 * (tgamma(1 - alpha) * gsl_sf_psi(1 - 
+           alpha) * tgamma(1 - alpha)))/pow((pow(tgamma(1 - alpha),2)),2)));
+  }
+    
+  double term1 = lt_deriv_deriv_dpvf_coef(m - 1, j - 1, alpha);
+  double term2 = lt_deriv_deriv_dpvf_coef(m - 1, j, alpha) * ((m - 1) - j*alpha);
+  double term3 = -j * lt_deriv_dpvf_coef(m - 1, j, alpha);
+      
+  return term1 + term2 + 2*term3;
+}
+
+double lt_dpvf(int p, double s, double* params) {
+  double alpha = params[0];
+  
+  if (p == 0) {
+    return exp(-(pow(1 + s, alpha) - 1)/alpha);
+  }
+  
+  double factor1 = lt_dpvf(0, s, params);
+  
+  double factor2 = 0;
+  for (int j = 1; j <= p; ++j) {
+    factor2 += lt_dpvf_coef(p, j, alpha) * pow(1 + s, j*alpha - p);
+  }
+  
+  return pow(-1, p)*factor1*factor2;
+}
+
+double deriv_lt_dpvf(int p, double s, double* params, int deriv_idx) {
+  // deriv_idx ignored since only one parameter
+  double alpha = params[0];
+  
+  if (p == 0) {
+    double factor1 = exp((1 - pow(s + 1, alpha))/alpha);
+    double factor2_term1 = -(1 - pow(s + 1, alpha))/pow(alpha, 2);
+    double factor2_term2 = -(pow(s + 1, alpha) * log(s + 1))/alpha;
+    return factor1*(factor2_term1 + factor2_term2);
+  }
+  
+  lt_params lt_p = (struct lt_params){p, s, params, lt_dpvf, deriv_idx};
+  return derivative(&lt_deriv, &lt_p, params[deriv_idx]);
+}
+
+double deriv_deriv_lt_dpvf(int m, double s, double* params, int deriv_idx_1, int deriv_idx_2) {
+  // deriv_idx ignored since only one parameter
+  double alpha = params[0];
+  
+  if (m == 0) {
+    return -(exp(-(pow((1 + s),alpha) - 1)/alpha) * (pow((1 + s),alpha) * log((1 + 
+             s)) * log((1 + s))/alpha - pow((1 + s),alpha) * log((1 + s))/pow(alpha,2) - 
+             (pow((1 + s),alpha) * log((1 + s))/pow(alpha,2) - (pow((1 + s),alpha) - 
+             1) * (2 * alpha)/pow((pow(alpha,2)),2))) - exp(-(pow((1 + s),alpha) - 
+             1)/alpha) * (pow((1 + s),alpha) * log((1 + s))/alpha - (pow((1 + s),alpha) - 
+             1)/pow(alpha,2)) * (pow((1 + s),alpha) * log((1 + s))/alpha - (pow((1 + 
+             s),alpha) - 1)/pow(alpha,2)));
+  }
+  
+  double sum1, sum2, sum3, sum4, sum5, sum6;
+  sum1 = sum2 = sum3 = sum4 = sum5 = sum6 = 0;
+  
+  for (int j = 1; j <= m; ++j) {
+    sum1 += lt_dpvf_coef(m, j, alpha) * pow((1 + s),(j*alpha - m)) * pow(j,2) * pow(log(1 + s),2);
+    sum2 += lt_deriv_dpvf_coef(m, j, alpha) * pow((1 + s),(j*alpha - m)) * j * log(1 + s);
+    sum3 += lt_deriv_deriv_dpvf_coef(m, j, alpha) * pow((1 + s),(j*alpha - m));
+    sum4 += lt_dpvf_coef(m, j, alpha) * pow((1 + s),(j*alpha - m)) * j * log(1 + s);
+    sum5 += lt_dpvf_coef(m, j, alpha) * pow((1 + s),(j*alpha - m));
+    sum6 += lt_deriv_dpvf_coef(m, j, alpha) * pow((1 + s),(j*alpha - m));
+  }
+  
+  double lt = lt_dpvf(0, s, params);
+  double dlt = deriv_lt_dpvf(0, s, params, deriv_idx_1);
+  double ddlt = deriv_deriv_lt_dpvf(0, s, params, deriv_idx_1, deriv_idx_2);
+  
+  double term1 = pow(-1, m) * lt * sum1;
+  double term2 = 2 * pow(-1, m) * lt * sum2;
+  double term3 = pow(-1, m) * lt * sum3;
+  double term4 = 2 * pow(-1, m) * dlt * sum4;
+  double term5 = pow(-1, m) * ddlt * sum5;
+  double term6 = 2 * pow(-1, m) * dlt * sum6;
+    
+  return term1 + term2 + term3 + term4 + term5 + term6;
+}
+
+// [[Rcpp::export]]
+NumericVector dpvf_c(NumericVector x, NumericVector alpha) {
+  return vectorized_density(&x, &alpha, dpvf);
+}
+
+// [[Rcpp::export]]
+double lt_dpvf_c(int m, double s, double alpha) {
+  return lt_dpvf(m, s, &alpha);
+}
+
+// [[Rcpp::export]]
+double deriv_lt_dpvf_c(int m, double s, double alpha) {
+  return deriv_lt_dpvf(m, s, &alpha, 0);
+}
+
+// [[Rcpp::export]]
+double deriv_deriv_lt_dpvf_c(int m, double s, double alpha) {
+  return deriv_deriv_lt_dpvf(m, s, &alpha, 0, 0);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Positive stable (PS)
 
 // Laplace transform of positive stable
 double lt_dposstab(int p, double s, double* params) {
@@ -345,62 +511,6 @@ double lt_dposstab_c(int p, double s, double alpha) {
 // [[Rcpp::export]]
 double deriv_lt_dposstab_c(int p, double s, double alpha) {
   return deriv_lt_dposstab(p, s, &alpha, 0);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Power-variance function (PVF)
-double dpvf(double x, double *params) {
-  double alpha = params[0];
-  double factor1 = dposstab(x * pow(alpha, 1/alpha), params);
-  double factor2 = pow(alpha, 1/alpha) * exp(-x) * exp(1/alpha);
-  return factor1*factor2;
-}
-
-double lt_dpvf(int p, double s, double* params) {
-  double alpha = params[0];
-  
-  if (p == 0) {
-    return exp(-(pow(1 + s, alpha) - 1)/alpha);
-  }
-  
-  double factor1 = lt_dpvf(0, s, params);
-  
-  double factor2 = 0;
-  for (int j = 1; j <= p; ++j) {
-    factor2 += lt_dpvf_coef(p, j, alpha) * pow(1 + s, j*alpha - p);
-  }
-  
-  return pow(-1, p)*factor1*factor2;
-}
-
-double deriv_lt_dpvf(int p, double s, double* params, int deriv_idx) {
-  // deriv_idx ignored since only one parameter
-  double alpha = params[0];
-  
-  if (p == 0) {
-    double factor1 = exp((1 - pow(s + 1, alpha))/alpha);
-    double factor2_term1 = -(1 - pow(s + 1, alpha))/pow(alpha, 2);
-    double factor2_term2 = -(pow(s + 1, alpha) * log(s + 1))/alpha;
-    return factor1*(factor2_term1 + factor2_term2);
-  }
-  
-  lt_params lt_p = (struct lt_params){p, s, params, lt_dpvf, deriv_idx};
-  return derivative(&lt_deriv, &lt_p, params[deriv_idx]);
-}
-
-// [[Rcpp::export]]
-NumericVector dpvf_c(NumericVector x, NumericVector alpha) {
-  return vectorized_density(&x, &alpha, dpvf);
-}
-
-// [[Rcpp::export]]
-double lt_dpvf_c(int p, double s, double alpha) {
-  return lt_dpvf(p, s, &alpha);
-}
-
-// [[Rcpp::export]]
-double deriv_lt_dpvf_c(int p, double s, double alpha) {
-  return deriv_lt_dpvf(p, s, &alpha, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
