@@ -226,15 +226,18 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   # The covariance matrix is encapsulated in a function since it takes some effort
   # to compute. By default, it is only computed when accessed by the user
   covariance <- function() {
+    # jacobian is computed first, sets up some vars that are needed in steps 1-3
     jac <- score_jacobian()
     
     ################################################################## Step I
+    
     V <- Reduce('+', lapply(1:n_clusters, function(i) {
       VARS$xi_[i,] %*% t(VARS$xi_[i,])
       }))/n_clusters
     # V <- (t(xi_) %*% xi_)/n_clusters
     
     ################################################################## Step II
+    
     R_star <- clustapply(function(i, j) {
       exp(sum(VARS$beta * X_[[i]][j,]))
     }, 0)
@@ -297,25 +300,31 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     D_inv <- solve(jac)
     
     ################################################################## Step V
-    # V by itself
+    
     COV <- (D_inv %*% (V + G + C) %*% t(D_inv))/n_clusters
-    # SD <- sqrt(diag(COV))
-#     SD2 <- sqrt(diag((D_inv %*% (V) %*% t(D_inv))/n_clusters))
-    # return(list(jac=jac, COV=COV, D_inv=D_inv, V=V, G=G, C=C, SD=SD))
     COV
+    # SD <- sqrt(diag(COV))
+    # return(list(jac=jac, COV=COV, D_inv=D_inv, V=V, G=G, C=C, SD=SD))
   }
+  
+  theta_lower <- rep(1e-3, n_theta)
+  theta_upper <- rep(Inf, n_theta)
   
   # The actual optimization takes place here
   if (fitmethod == "loglik") {
-    fitter <- optim(gamma_init, fit_fn, 
-                    # gr=loglik_jacobian,
-                    lower=c(-Inf,0), upper=c(Inf,Inf), method="L-BFGS-B",
+    fitter <- optim(gamma_init, fit_fn,
+                    gr=loglik_jacobian,
+                    lower=c(rep(-Inf, n_beta),theta_lower), 
+                    upper=c(rep(Inf, n_beta), theta_upper), 
+                    method="L-BFGS-B",
                     control=list(fnscale=-1, factr=1e8, pgtol=1e-8)
                     )
     gamma_hat <- fitter$par
   } else if (control$fitmethod == "score") {
     fitter <- nleqslv(gamma_init, fit_fn, 
-                      control=list(maxit=control$iter.max,xtol=1e-8,ftol=1e-8,btol=1e-3),
+                      control=list(maxit=control$iter.max,
+                                   xtol=1e-8, ftol=1e-8, btol=1e-3,
+                                   allowSingular=TRUE),
                       method='Newton',
                       jac=score_jacobian,
                       jacobian=TRUE

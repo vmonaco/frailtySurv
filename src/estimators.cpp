@@ -113,12 +113,8 @@ double phi_prime_prime(int k, int N_dot, double H_dot, double *theta, String fra
   // Laplace transform integrals
   if (frailty == "gamma") {
     return deriv_deriv_lt_dgamma(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2) * pow(-1, N_dot + k - 1);
-  } else if (frailty == "posstab") {
-    throw std::range_error("Unsupported frailty distribution");
-    // return deriv_lt_dposstab(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
   } else if (frailty == "pvf") {
-    throw std::range_error("Unsupported frailty distribution");
-    // return deriv_lt_dpvf(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
+    return deriv_deriv_lt_dpvf(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2) * pow(-1, N_dot + k - 1);
   }
   
   // Numerical integration
@@ -127,8 +123,7 @@ double phi_prime_prime(int k, int N_dot, double H_dot, double *theta, String fra
   if (frailty == "lognormal") {
     phi_p = (struct phi_prime_prime_params){k, N_dot, H_dot, theta, deriv_deriv_dlognormal, deriv_idx_1, deriv_idx_2};
   } else if (frailty == "invgauss") {
-    throw std::range_error("Unsupported frailty distribution");
-    // phi_p = (struct phi_prime_prime_params){k, N_dot, H_dot, theta, deriv_dinvgauss, deriv_idx_1, deriv_idx_2};
+    phi_p = (struct phi_prime_prime_params){k, N_dot, H_dot, theta, deriv_deriv_dinvgauss, deriv_idx_1, deriv_idx_2};
   } else {
     throw std::range_error("Unsupported frailty distribution");
   }
@@ -141,11 +136,7 @@ double psi(int N_dot, double H_dot, double* theta, String frailty) {
 //   if (frailty == "gamma") {
 //     return (N_dot + 1/theta[0])/(H_dot + 1/theta[0]);
 //   }
-  // return phi(2, N_dot, H_dot, theta, frailty)/phi(1, N_dot, H_dot, theta, frailty);
-  double tmp1 = phi(1, N_dot, H_dot, theta, frailty);
-  double tmp2 = phi(2, N_dot, H_dot, theta, frailty);
-  // Rcout << tmp1 << " " << tmp2 << " " << N_dot << " " << H_dot << " " << theta << std::endl;
-  return tmp2/tmp1;
+  return phi(2, N_dot, H_dot, theta, frailty)/phi(1, N_dot, H_dot, theta, frailty);
 }
 
 // [[Rcpp::export]]

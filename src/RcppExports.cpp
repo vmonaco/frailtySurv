@@ -129,6 +129,18 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// deriv_deriv_dinvgauss_c
+NumericVector deriv_deriv_dinvgauss_c(NumericVector x, NumericVector theta);
+RcppExport SEXP frailtyr_deriv_deriv_dinvgauss_c(SEXP xSEXP, SEXP thetaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type theta(thetaSEXP);
+    __result = Rcpp::wrap(deriv_deriv_dinvgauss_c(x, theta));
+    return __result;
+END_RCPP
+}
 // lt_dpvf_coef
 double lt_dpvf_coef(int p, int j, double alpha);
 RcppExport SEXP frailtyr_lt_dpvf_coef(SEXP pSEXP, SEXP jSEXP, SEXP alphaSEXP) {

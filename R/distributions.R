@@ -597,6 +597,44 @@ rinvgauss_r <- function(n, theta) {
   statmod::rinvgauss(n, mean=1, shape=1/theta)
 }
 
+dinvgauss_r <- function(x, theta) {
+  exp(-((x - 1)^2)/(2*theta*x))/sqrt(2*pi*theta*(x^3))
+}
+
+deriv_dinvgauss_r_numeric <- function(x, theta) {
+  grad(function(theta) dinvgauss_r(x, theta), theta)
+}
+
+deriv_dinvgauss_r <- function(x, theta) {
+  exp(-((x - 1)^2)/(2 * theta * x)) * (((x - 1)^2) * (2 * x)/(2 * 
+  theta * x)^2)/sqrt(2 * pi * theta * (x^3)) - exp(-((x - 1)^2)/(2 * 
+  theta * x)) * (0.5 * (2 * pi * (x^3) * (2 * pi * theta * 
+  (x^3))^-0.5))/sqrt(2 * pi * theta * (x^3))^2
+}
+
+deriv_deriv_dinvgauss_r_numeric <- function(x, theta) {
+  grad(function(theta) deriv_dinvgauss_r(x, theta), theta)
+}
+
+deriv_deriv_dinvgauss_r <- function(x, theta) {
+  (exp(-((x - 1)^2)/(2 * theta * x)) * (((x - 1)^2) * (2 * x)/(2 * 
+  theta * x)^2) * (((x - 1)^2) * (2 * x)/(2 * theta * x)^2) - 
+  exp(-((x - 1)^2)/(2 * theta * x)) * (((x - 1)^2) * (2 * x) * 
+  (2 * (2 * x * (2 * theta * x)))/((2 * theta * x)^2)^2))/sqrt(2 * 
+  pi * theta * (x^3)) - exp(-((x - 1)^2)/(2 * theta * x)) * 
+  (((x - 1)^2) * (2 * x)/(2 * theta * x)^2) * (0.5 * (2 * pi * 
+  (x^3) * (2 * pi * theta * (x^3))^-0.5))/sqrt(2 * pi * theta * 
+  (x^3))^2 - ((exp(-((x - 1)^2)/(2 * theta * x)) * (((x - 1)^2) * 
+  (2 * x)/(2 * theta * x)^2) * (0.5 * (2 * pi * (x^3) * (2 * 
+  pi * theta * (x^3))^-0.5)) - exp(-((x - 1)^2)/(2 * theta * 
+  x)) * (0.5 * (2 * pi * (x^3) * ((2 * pi * theta * (x^3))^-(0.5 + 
+  1) * (0.5 * (2 * pi * (x^3)))))))/sqrt(2 * pi * theta * (x^3))^2 - 
+  exp(-((x - 1)^2)/(2 * theta * x)) * (0.5 * (2 * pi * (x^3) * 
+  (2 * pi * theta * (x^3))^-0.5)) * (2 * (0.5 * (2 * pi * 
+  (x^3) * (2 * pi * theta * (x^3))^-0.5) * sqrt(2 * pi * 
+  theta * (x^3))))/(sqrt(2 * pi * theta * (x^3))^2)^2)
+}
+
 ################################################################################
 # K-truncated Poisson
 

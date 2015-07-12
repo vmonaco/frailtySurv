@@ -211,6 +211,62 @@ sunderline Z}
 
 \end_layout
 
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+newcommand{
+\backslash
+expBetaZ}{
+\backslash
+exp
+\backslash
+left({
+\backslash
+bf 
+\backslash
+beta}^{
+\backslash
+mathrm{T}}{
+\backslash
+bf Z}_{ij}
+\backslash
+right)}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+newcommand{
+\backslash
+eBetaZ}{e^{
+\backslash
+sunderline
+\backslash
+beta^{T}
+\backslash
+sunderline Z_{ij}}}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Introduction
 \end_layout
@@ -224,7 +280,256 @@ key "gorfine2006prospective"
 \end_inset
 
 .
- Background, motivation, survival packages.
+\end_layout
+
+\begin_layout Subsection
+Background
+\end_layout
+
+\begin_layout Standard
+Survival analysis is the study of time intervals.
+ We are often faced with the task of predicting the time until an event
+ occurs, such as biological or mechanical failure, given some historical
+ data.
+ Or we may have to decide whether a covariate has any effect on the expected
+ survival time of an individual.
+ Several properties of survival data make survival analysis unique compared
+ to other temporal analyses.
+ Often, some of the data is censored, and we only know the time interval
+ during which an event did not occur.
+ This situation is common in clinical data when a subject becomes unavailable
+ for observation.
+ Since the time of the event is not known, the observation is said to be
+ 
+\emph on
+right censored
+\emph default
+.
+ Additionally, survival times generally come from skewed distributions 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "clark2003survival"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+In multivariate survival analysis, we may have to decide whether one or
+ more covariates have an effect on the expected survival time.
+ The covariates can be continuous or discrete.
+ For example, in clinical data it is common to consider age, gender, and
+ smoking habits as potential indicators for disease risk or life expectancy.
+ The decision whether to include any of these covariates in a model is usually
+ based on the results of statistical tests.
+\end_layout
+
+\begin_layout Standard
+The Cox Proportional Hazards (PH) regression model was introduced several
+ decades ago by Sir David Cox 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "cox1992regression"
+
+\end_inset
+
+.
+ This model defines a 
+\emph on
+hazard function
+\emph default
+, which is the risk of an event occurring at any given time as a function
+ of the observed covariates.
+ When dealing with clinical data, there are many scenarios where the survival
+ times are clustered.
+ This can be due to geographical clustering, subjects sharing a common gene,
+ or some other predisposition that cannot be observed directly.
+ To account for this clustering, the 
+\emph on
+shared frailty model
+\emph default
+ was introduced 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "therneau2000modeling"
+
+\end_inset
+
+.
+ This model makes the assumption that there exists a random variable, the
+ 
+\emph on
+frailty
+\emph default
+, which comprises the unobservable dependency between members of a cluster.
+ Given the observed covariates and the unobservable frailty, survival times
+ within a cluster are independent.
+\end_layout
+
+\begin_layout Standard
+The proposed project is an R implementation of a shared frailty model.
+ This proposal presents the motivation and strategy to develop an R package
+ capable of parameter estimation, data generation, and visualization, and
+ is largely an implementation of the algorithm proposed in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "gorfine2006prospective"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Motivation
+\end_layout
+
+\begin_layout Standard
+Currently, shared frailty model parameters are generally determined by a
+ penalized partial likelihood method 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ripatti2000estimation"
+
+\end_inset
+
+.
+ In 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "gorfine2006prospective"
+
+\end_inset
+
+, an alternative algorithm is proposed that avoids several limitations of
+ this approach, as well as expectation maximization (EM).
+ 
+\end_layout
+
+\begin_layout Standard
+The hazard function in a shared frailty model is given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\lambda_{ij}\left(t\right)=\omega_{i}\lambda_{0}\left(t\right)\expBetaZ
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $t$
+\end_inset
+
+ is time, 
+\begin_inset Formula $\omega_{i}$
+\end_inset
+
+ is the frailty value for family 
+\begin_inset Formula $i$
+\end_inset
+
+, 
+\begin_inset Formula $\lambda_{0}(t)$
+\end_inset
+
+ is the unspecified baseline hazard function, 
+\begin_inset Formula ${\bf \beta}$
+\end_inset
+
+ is the coefficient vector, and 
+\begin_inset Formula ${\bf Z_{ij}}$
+\end_inset
+
+ is the vector of covariates for individual 
+\begin_inset Formula $j$
+\end_inset
+
+ in family 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ The 
+\begin_inset Formula $\omega$
+\end_inset
+
+ comes from some distribution 
+\begin_inset Formula $f(\omega;{\bf \theta})$
+\end_inset
+
+, where 
+\begin_inset Formula ${\bf \theta}$
+\end_inset
+
+ is a parameter vector.
+ While only several frailty distributions have theoretical support and R
+ implementations for the penalized likelihood approach, the estimation procedure
+ provided in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "gorfine2006prospective"
+
+\end_inset
+
+ is capable of handling any frailty distribution with finite moments.
+ The implementation of a general shared frailty model will allow practitioners
+ to choose the appropriate frailty distribution based on their data as opposed
+ to using one of only several frailty distributions currently implemented.
+ Additionally, results obtained with the proposed package can be interpreted
+ with confidence, as this estimator has proved consistency and asymptotic
+ normality.
+\end_layout
+
+\begin_layout Subsection
+R packages for survival analysis
+\end_layout
+
+\begin_layout Standard
+There are currently several R packages available for the analysis and generation
+ of survival data with a shared frailty model.
+ Many of these packages are well documented, although it is not always clear
+ which one should be used 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hirsch2012software"
+
+\end_inset
+
+.
+ These are summarized in Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:survival-analysis-functions"
+
+\end_inset
+
+, with the supported frailty distributions and the average number of weekly
+ downloads from the RStudio CRAN mirror, which has made its download logs
+ available
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+An interesting dataset in its own right: 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://cran-logs.rstudio.com/
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -719,6 +1024,116 @@ No
 Additional: survMisc, survsim, MST.
 \end_layout
 
+\begin_layout Standard
+The survival, coxme, and frailtypack packages all use penalized partial
+ likelihood for parameter estimation, and are thus limited to only several
+ frailty distributions.
+ MST generates trees for multivariate survival data, phmm uses EM to estimate
+ parameters, and SurvBayes is no longer in the CRAN repository.
+ While some of these packages are able to generate survival data, such as
+ MST, most do not have this capability.
+ They either contain synthetic and/or real-world datasets or no data at
+ all.
+ The survsim package is dedicated to generating survival data, but it is
+ not capable of generating data for all of the models in other packages.
+ It is important for any generative model to be shipped with facilities
+ for generating synthetic data, as this is a common procedure in model validatio
+n.
+ In favor of self-contained functionality, the necessary data generation
+ procedures will be developed as part of the proposed package.
+\end_layout
+
+\begin_layout Standard
+The parfm package does support a number of frailty distributions that others
+ don't, but at a cost.
+ This package assumes that the baseline hazard function in Equation 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:share-frailty-model"
+
+\end_inset
+
+ is of known parametric form up to a few unknown parameters.
+ The proposed package, an implementation of 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "gorfine2006prospective"
+
+\end_inset
+
+, does not make this assumption; the baseline hazard function is unspecified
+ and estimated non-parametrically.
+\end_layout
+
+\begin_layout Standard
+To demonstrate the demand for survival analysis tools, the weekly downloads
+ of the packages in Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:survival-analysis-functions"
+
+\end_inset
+
+ are shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:RStudio-CRAN-mirror-weekly-downloads"
+
+\end_inset
+
+.
+ The survival package is by far the most popular since it contains standard
+ survival analysis functions that assume data independence.
+ This package shows download activity with increasingly larger spikes at
+ the beginning of the year since 2013.
+ Other packages also continue to grow in popularity, perhaps an indication
+ that niche functionality, such as a shared frailty model, is becoming more
+ desired.
+ The proposed package is a vital addition to the battery of survival analysis
+ tools available.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/packages_by-week.png
+	width 75col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+RStudio CRAN mirror weekly downloads of survival analysis packages
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:RStudio-CRAN-mirror-weekly-downloads"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Data generation
 \end_layout
@@ -734,7 +1149,7 @@ Data can be generated under a wide variety of conditions to simulate survival
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-S(t|{\bf Z}_{ij},\omega_{i})=\exp\left\{ -\Lambda_{0}\left(t\right)\omega_{i}\exp({\bf \beta'}{\bf Z}_{ij})\right\} \label{eq:share-frailty-survival}
+S(t|{\bf Z}_{ij},\omega_{i})=\exp\left\{ -\Lambda_{0}\left(t\right)\omega_{i}\exp\left({\bf \beta}^{\mbox{T}}{\bf Z}_{ij}\right)\right\} \label{eq:share-frailty-survival}
 \end{equation}
 
 \end_inset
@@ -830,7 +1245,7 @@ key "bender2005generating"
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-T_{ij}^{0}=\Lambda_{0}^{-1}\left[-\ln\left(u\right)\exp\left(-\beta^{'}{\bf X}_{ij}\right)\right]\label{eq:survival-time-direct}
+T_{ij}^{0}=\Lambda_{0}^{-1}\left[-\ln\left(u\right)\exp\left(-{\bf \beta}^{\mbox{T}}{\bf Z}_{ij}\right)\right]\label{eq:survival-time-direct}
 \end{equation}
 
 \end_inset
@@ -899,7 +1314,7 @@ key "crowther2013simulating"
  Alternatively, we may take the logarithm and solve 
 \begin_inset Formula 
 \begin{equation}
--\Lambda_{0}\left(t\right)\omega_{i}\exp({\bf \beta'}{\bf Z}_{ij})-\ln u=0\label{eq:survival-time-log-root}
+-\Lambda_{0}\left(t\right)\omega_{i}\exp\left({\bf \beta}^{\mbox{T}}{\bf Z}_{ij}\right)-\ln u=0\label{eq:survival-time-log-root}
 \end{equation}
 
 \end_inset
@@ -1636,9 +2051,95 @@ Model estimation
 \end_layout
 
 \begin_layout Standard
+The shared frailty model is an extension to the Cox proportional hazards
+ model where the data are clustered according to some unobserved random
+ effect.
+ The survival function takes the form of 
+\begin_inset Formula 
+\begin{equation}
+S(t|{\bf Z}_{ij},\omega_{i})=\exp\left\{ -\Lambda_{0}\left(t\right)\omega_{i}\expBetaZ\right\} \label{eq:share-frailty-model}
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $\omega_{i}$
+\end_inset
+
+ is the frailty term, which is shared by the members of cluster 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ The conditional hazard function is given by
 \begin_inset Formula 
 \[
-\ell=\sum_{i=1}^{n}\sum_{j=1}^{m_{i}}\delta_{ij}\log e^{\sunderline\beta^{T}\sunderline Z_{ij}}+\sum_{i=1}^{n}\log\mathcal{L}^{\left(m_{i}\right)}\left(H_{i.}\left(\tau\right)\right)
+\lambda_{ij}\left(t\right)=\omega_{i}\lambda_{0}\left(t\right)\expBetaZ
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\lambda_{0}\left(t\right)$
+\end_inset
+
+ is an unspecified baseline hazard.
+ The observed data consist of follow-up times 
+\begin_inset Formula $T_{ij}$
+\end_inset
+
+, covariates 
+\begin_inset Formula ${\bf Z}_{ij}$
+\end_inset
+
+, and failure indicator 
+\begin_inset Formula $\delta_{ij}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+frailtyr estimates the coefficients 
+\begin_inset Formula ${\bf \beta}$
+\end_inset
+
+, frailty distribution parameter vector 
+\begin_inset Formula ${\bf \theta}$
+\end_inset
+
+, and non-parametric baseline hazard 
+\begin_inset Formula $\lambda_{0}$
+\end_inset
+
+.
+ There are two estimation strategies that can be used.
+ The log-likelihood can be maximized directly with control parameter fitmethod=
+\begin_inset Quotes erd
+\end_inset
+
+loglik
+\begin_inset Quotes erd
+\end_inset
+
+, or the system of normalized score equations can be solved with fitmethod=
+\begin_inset Quotes erd
+\end_inset
+
+score
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Both methods yield comparable results and have advantages over the other,
+ which are explained in this section.
+\end_layout
+
+\begin_layout Standard
+Both the likelihood and score equations are functions of 
+\begin_inset Formula 
+\[
+H_{i.}\left(\tau\right)=\sum_{i=1}^{m_{i}}\Lambda_{0}\left(T_{ij}\right)\exp\left(\beta^{T}Z_{ij}\right)
 \]
 
 \end_inset
@@ -1647,37 +2148,15 @@ Model estimation
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula 
-\begin{eqnarray*}
-\sunderline U_{\bvec}=\frac{\partial}{\partial\bvec}\ell & = & \sum_{i=1}^{n}\left[\sum_{j=1}^{m_{i}}\delta_{ij}\Zvec_{ij}+\frac{\frac{\partial}{\partial\bvec}H_{i.}\left(\tau\right)\frac{\partial}{\partial H_{i.}\left(\tau\right)}\mathcal{L}^{\left(m_{i}\right)}\left(H_{i.}\left(\tau\right)\right)}{\mathcal{L}^{\left(m_{i}\right)}\left(H_{i.}\left(\tau\right)\right)}\right]\\
- & = & \sum_{i=1}^{n}\left[\sum_{j=1}^{m_{i}}\delta_{ij}\Zvec_{ij}+\sum_{j=1}^{m_{i}}H_{ij}\left(T_{ij}\right)\Zvec_{ij}\frac{\mathcal{L}^{\left(m_{i}+1\right)}\left(H_{i.}\left(\tau\right)\right)}{\mathcal{L}^{\left(m_{i}\right)}\left(H_{i.}\left(\tau\right)\right)}\right]
-\end{eqnarray*}
+The model formula is passed as
+\end_layout
 
-\end_inset
-
-
+\begin_layout Subsection
+Log-likelihood maximization
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula 
-\[
-U_{\theta}=\frac{\partial}{\partial\theta}\ell=\sum_{i=1}^{n}\frac{\frac{\partial}{\partial\theta}\mathcal{L}^{\left(m_{i}\right)}\left(H_{i.}\left(\tau\right)\right)}{\mathcal{L}^{\left(m_{i}\right)}\left(H_{i.}\left(\tau\right)\right)}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Maximize likelihood vs score equations
-\end_layout
-
-\begin_layout Standard
-Likelihood
-\end_layout
-
-\begin_layout Standard
+The full likelihood is given by 
 \begin_inset Formula 
 \begin{equation}
 L=\prod_{i=1}^{n}\prod_{j=1}^{m_{i}}\left\{ \lambda_{0}\left(T_{ij}\right)\exp\left(\beta^{T}Z_{ij}\right)\right\} ^{\delta_{ij}}\prod_{i=1}^{n}\int\omega^{N_{i.}\left(\tau\right)+1}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega\label{eq:likelihood}
@@ -1689,18 +2168,88 @@ L=\prod_{i=1}^{n}\prod_{j=1}^{m_{i}}\left\{ \lambda_{0}\left(T_{ij}\right)\exp\l
 \end_layout
 
 \begin_layout Standard
-Loglikelihood
-\end_layout
-
-\begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-l=\sum_{i=1}^{n}\sum_{j=1}^{m_{i}}\delta_{ij}\log\left\{ \lambda_{0}\left(T_{ij}\right)\exp\left(\beta^{T}Z_{ij}\right)\right\} +\sum_{i=1}^{n}\log\left[\int\omega^{N_{i.}\left(\tau\right)+1}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega\right]\label{eq:loglikelihood}
+L=\sum_{i=1}^{n}\sum_{j=1}^{m_{i}}\delta_{ij}\log\left\{ \lambda_{0}\left(T_{ij}\right)\exp\left(\beta^{T}Z_{ij}\right)\right\} +\sum_{i=1}^{n}\log\left[\int\omega^{N_{i.}\left(\tau\right)+1}\exp\left\{ -\omega H_{i.}\left(\tau\right)\right\} f\left(\omega\right)d\omega\right]\label{eq:loglikelihood}
 \end{equation}
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+The log-likelihood is given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\ell=\sum_{i=1}^{n}\sum_{j=1}^{m_{i}}\delta_{ij}\log\left\{ \lambda_{0}\left(T_{ij}\right)\eBetaZ\right\} +\sum_{i=1}^{n}\log\mathcal{L}^{\left(m_{i}\right)}\left(H_{i.}\left(\tau\right)\right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\tau$
+\end_inset
+
+ is the end of the observation period, 
+\begin_inset Formula $\mathcal{L}^{\left(m\right)}$
+\end_inset
+
+ is the 
+\begin_inset Formula $m$
+\end_inset
+
+th derivative of the Laplace transform of the frailty distribution, 
+\begin_inset Formula $H_{ij}\left(\tau\right)=\Lambda_{0}\left(\tau\right)\expBetaZ$
+\end_inset
+
+, 
+\begin_inset Formula $H_{i.}\left(\tau\right)=\sum_{j=1}^{m_{i}}H_{ij}\left(\tau\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Normalized score
+\end_layout
+
+\begin_layout Standard
+The log-likelihood derivatives are given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+\sunderline U_{\bvec}=\frac{\partial}{\partial\bvec}\ell & = & \sum_{i=1}^{n}\left[\sum_{j=1}^{m_{i}}\delta_{ij}\Zvec_{ij}+\frac{\frac{\partial}{\partial\bvec}H_{i.}\left(\tau\right)\frac{\partial}{\partial H_{i.}\left(\tau\right)}\mathcal{L}^{\left(m_{i}\right)}\left(H_{i.}\left(\tau\right)\right)}{\mathcal{L}^{\left(m_{i}\right)}\left(H_{i.}\left(\tau\right)\right)}\right]\\
+ & = & \sum_{i=1}^{n}\left[\sum_{j=1}^{m_{i}}\delta_{ij}\Zvec_{ij}+\sum_{j=1}^{m_{i}}H_{ij}\left(T_{ij}\right)\Zvec_{ij}\frac{\mathcal{L}^{\left(m_{i}+1\right)}\left(H_{i.}\left(\tau\right)\right)}{\mathcal{L}^{\left(m_{i}\right)}\left(H_{i.}\left(\tau\right)\right)}\right]
+\end{eqnarray*}
+
+\end_inset
+
+for 
+\begin_inset Formula $r=1,\dots,p$
+\end_inset
+
+ and 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+U_{\theta}=\frac{\partial}{\partial\theta}\ell=\sum_{i=1}^{n}\frac{\frac{\partial}{\partial\theta}\mathcal{L}^{\left(m_{i}\right)}\left(H_{i.}\left(\tau\right)\right)}{\mathcal{L}^{\left(m_{i}\right)}\left(H_{i.}\left(\tau\right)\right)}
+\]
+
+\end_inset
+
+for 
+\begin_inset Formula $r=p+1,\dots,q$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -1748,8 +2297,33 @@ U_{p+1}=\frac{1}{n}\sum_{i=1}^{n}\frac{\int\omega^{N_{i.}\left(\tau\right)}\exp\
 
 \end_layout
 
+\begin_layout Subsection
+Baseline hazard
+\end_layout
+
 \begin_layout Standard
-Baseline hazard estimation
+The baseline hazard must be re-estimated at each iteration in either estimation
+ strategy.
+ The baseline hazard at time 
+\begin_inset Formula $\tau_{k}$
+\end_inset
+
+, given by 
+\begin_inset Formula $\hat{\Lambda}_{0}\left(\tau_{k}\right)$
+\end_inset
+
+ is a function of 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+H_{i.}\left(\tau_{k-1}\right)=\sum_{i=1}^{m_{i}}\Lambda_{0}\left\{ \min\left(T_{ij},\tau_{k-1}\right)\right\} \exp\left(\beta^{T}Z_{ij}\right)
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1774,51 +2348,8 @@ Baseline hazard estimation
 
 \end_layout
 
-\begin_layout Standard
-Likelihood and score functions are function of
-\begin_inset Formula 
-\[
-H_{i.}\left(\tau\right)=\sum_{i=1}^{m_{i}}\Lambda_{0}\left(T_{ij}\right)\exp\left(\beta^{T}Z_{ij}\right)
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-H_{i.}\left(\tau_{k-1}\right)=\sum_{i=1}^{m_{i}}\Lambda_{0}\left\{ \min\left(T_{ij},\tau_{k-1}\right)\right\} \exp\left(\beta^{T}Z_{ij}\right)
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-TODO:
-\end_layout
-
-\begin_layout Standard
-LT to solve integrals
-\end_layout
-
-\begin_layout Standard
-Performance remarks
-\end_layout
-
-\begin_layout Standard
-fitfrail arguments, return value
-\end_layout
-
-\begin_layout Standard
-Analytic and empirical asymptotic results.
-\end_layout
-
-\begin_layout Standard
-Correlation with existing packages for gamma, log-normal frailty.
+\begin_layout Subsection
+Variance/Covariance
 \end_layout
 
 \begin_layout Standard
@@ -1842,6 +2373,34 @@ Q_{ij\left(p+1\right)}\left(\hat{\gamma},\hat{\Lambda}_{0},t\right) & = & R_{ij}
 \end_inset
 
 
+\end_layout
+
+\begin_layout Subsection
+Control parameters
+\end_layout
+
+\begin_layout Standard
+LT to solve integrals
+\end_layout
+
+\begin_layout Standard
+Performance remarks
+\end_layout
+
+\begin_layout Standard
+fitfrail arguments, return value
+\end_layout
+
+\begin_layout Standard
+Analytic and empirical asymptotic results.
+\end_layout
+
+\begin_layout Standard
+Correlation with existing packages for gamma, log-normal frailty.
+\end_layout
+
+\begin_layout Subsection
+Model object
 \end_layout
 
 \begin_layout Section

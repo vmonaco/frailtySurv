@@ -288,6 +288,26 @@ double deriv_dinvgauss(double x, double *p, int deriv_idx) {
   return term1_numer/term1_denom - term2_numer/term2_denom;
 }
 
+double deriv_deriv_dinvgauss(double x, double *p, int deriv_idx_1, int deriv_idx_2) {
+  double theta = p[0];
+  return (exp(-(pow((x - 1),2))/(2 * theta * x)) * ((pow((x - 1),2)) * (2 * x)/pow(2 * 
+          theta * x,2)) * ((pow((x - 1),2)) * (2 * x)/pow(2 * theta * x,2)) - 
+          exp(-(pow((x - 1),2))/(2 * theta * x)) * ((pow((x - 1),2)) * (2 * x) * 
+          (2 * (2 * x * (2 * theta * x)))/pow(pow(2 * theta * x,2),2)))/sqrt(2 * 
+          PI * theta * (pow(x,3))) - exp(-(pow((x - 1),2))/(2 * theta * x)) * 
+          ((pow((x - 1),2)) * (2 * x)/pow(2 * theta * x,2)) * (0.5 * (2 * PI * 
+          (pow(x,3)) * pow(2 * PI * theta * (pow(x,3)),-0.5)))/pow(sqrt(2 * PI * theta * 
+          (pow(x,3))),2) - ((exp(-(pow((x - 1),2))/(2 * theta * x)) * ((pow((x - 1),2)) * 
+          (2 * x)/pow(2 * theta * x,2)) * (0.5 * (2 * PI * (pow(x,3)) * pow(2 * 
+          PI * theta * (pow(x,3)),-0.5))) - exp(-(pow((x - 1),2))/(2 * theta * 
+          x)) * (0.5 * (2 * PI * (pow(x,3)) * (pow(2 * PI * theta * (pow(x,3)),-(0.5 + 
+          1)) * (0.5 * (2 * PI * (pow(x,3))))))))/pow(sqrt(2 * PI * theta * (pow(x,3))),2) - 
+          exp(-(pow((x - 1),2))/(2 * theta * x)) * (0.5 * (2 * PI * (pow(x,3)) * 
+          pow(2 * PI * theta * (pow(x,3)),-0.5))) * (2 * (0.5 * (2 * PI * 
+          (pow(x,3)) * pow((2 * PI * theta * (pow(x,3))),-0.5)) * sqrt(2 * PI * 
+          theta * (pow(x,3)))))/pow(pow(sqrt(2 * PI * theta * (pow(x,3))),2),2));
+}
+
 // [[Rcpp::export]]
 NumericVector dinvgauss_c(NumericVector x, NumericVector theta) {
   return vectorized_density(&x, &theta, dinvgauss);
@@ -296,6 +316,11 @@ NumericVector dinvgauss_c(NumericVector x, NumericVector theta) {
 // [[Rcpp::export]]
 NumericVector deriv_dinvgauss_c(NumericVector x, NumericVector theta) {
   return vectorized_deriv_density(&x, &theta, deriv_dinvgauss, 0);
+}
+
+// [[Rcpp::export]]
+NumericVector deriv_deriv_dinvgauss_c(NumericVector x, NumericVector theta) {
+  return vectorized_deriv_deriv_density(&x, &theta, deriv_deriv_dinvgauss, 0, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

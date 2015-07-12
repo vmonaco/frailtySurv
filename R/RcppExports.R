@@ -41,6 +41,10 @@ deriv_dinvgauss_c <- function(x, theta) {
     .Call('frailtyr_deriv_dinvgauss_c', PACKAGE = 'frailtyr', x, theta)
 }
 
+deriv_deriv_dinvgauss_c <- function(x, theta) {
+    .Call('frailtyr_deriv_deriv_dinvgauss_c', PACKAGE = 'frailtyr', x, theta)
+}
+
 lt_dpvf_coef <- function(p, j, alpha) {
     .Call('frailtyr_lt_dpvf_coef', PACKAGE = 'frailtyr', p, j, alpha)
 }
