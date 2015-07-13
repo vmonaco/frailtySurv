@@ -307,8 +307,8 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     # return(list(jac=jac, COV=COV, D_inv=D_inv, V=V, G=G, C=C, SD=SD))
   }
   
-  theta_lower <- rep(1e-3, n_theta)
-  theta_upper <- rep(Inf, n_theta)
+#   theta_lower <- rep(1e-3, n_theta)
+#   theta_upper <- rep(Inf, n_theta)
   
   # The actual optimization takes place here
   if (fitmethod == "loglik") {

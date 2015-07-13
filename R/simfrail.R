@@ -122,7 +122,7 @@ plot.simfrail.residuals <- function(results, true.values, title="") {
   legend("topright", legend=names(true.values), fill=1:n.vars, ncol=n.vars)
 }
 
-plot.simfrail.hazard <- function(results, funs=c("cbh", "bh"), 
+plot.simfrail.hazard <- function(results, funs=c("cbh"), 
                                  true.cbh=NULL, true.bh=NULL, title=NULL) {
   if (!requireNamespace("ggplot2", quietly = TRUE) || 
       !requireNamespace("reshape2", quietly = TRUE) || 

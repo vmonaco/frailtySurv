@@ -3,8 +3,8 @@
 library(frailtyr)
 
 SEED <- 2015 # Meta-seed for each simulation run
-N <- c(50,100,200,400)#,500,1000) # Number of clusters
-REPS <- 100 # Number of repetitions for each simulation
+N <- c(30,50) #c(50,100,200,400)#,500,1000) # Number of clusters
+REPS <- 8 # Number of repetitions for each simulation
 BASE.TIME <- 0:150 # where to evaluate the baseline hazard
 BASE.TIME.RES <- c(25,50,75,100) # where to evaluate residulas of the baseline hazard
 
@@ -199,18 +199,33 @@ simfrail.multigen.output <- function(name, title=NULL, outdir=OUTDIR, ...) {
 #                            frailty="invgauss", verbose=FALSE), 
 #                          base.time=BASE.TIME, 
 #                          param.name="N", param.values=N)
+# 
+# simfrail.multigen.output("lognormal-frailty_2-covars_cens30", "Lognormal frailty, 2 covariates",
+#                          reps=REPS, seed=SEED, 
+#                          genfrail.args=alist(
+#                            beta=c(log(2),log(3)),
+#                            frailty="lognormal", 
+#                            censor.params=c(110,15),
+#                            K=K, theta=THETA, covariates="uniform",
+#                            lambda_0=lambda_0,
+#                            Lambda_0=Lambda_0), 
+#                          fitfrail.args=alist(
+#                            formula=Surv(time, status) ~ Z1 + Z2  + cluster(family), 
+#                            frailty="lognormal", verbose=FALSE), 
+#                          base.time=0:130, 
+#                          param.name="N", param.values=N)
 
-simfrail.multigen.output("lognormal-frailty_2-covars_cens30", "Lognormal frailty, 2 covariates",
+simfrail.multigen.output("gamma-frailty_2-covars_N300-500", "Gamma frailty, 2 covariates",
                          reps=REPS, seed=SEED, 
                          genfrail.args=alist(
                            beta=c(log(2),log(3)),
-                           frailty="lognormal", 
-                           censor.params=c(110,15),
-                           K=K, theta=THETA, covariates="uniform",
-                           lambda_0=lambda_0,
+                           frailty="gamma", 
+                           censor.rate=0.30,
+                           K=K, theta=THETA, 
+                           covariates="uniform",
                            Lambda_0=Lambda_0), 
                          fitfrail.args=alist(
                            formula=Surv(time, status) ~ Z1 + Z2  + cluster(family), 
-                           frailty="lognormal", verbose=FALSE), 
-                         base.time=0:130, 
+                           frailty="gamma", verbose=FALSE), 
+                         base.time=BASE.TIME, 
                          param.name="N", param.values=N)

@@ -2152,6 +2152,18 @@ The model formula is passed as
 \end_layout
 
 \begin_layout Subsection
+Assumptions
+\end_layout
+
+\begin_layout Standard
+frailty distribution finite moments up to order 
+\begin_inset Formula $\left(m+2\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
 Log-likelihood maximization
 \end_layout
 
@@ -2678,7 +2690,17 @@ Positive stable
 \end_layout
 
 \begin_layout Standard
-The one-parameter positive stable distribution is given by 
+frailty can only generate data from a positive stable (PS) frailty distribution.
+ The method proposed in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "gorfine2006prospective"
+
+\end_inset
+
+ cannot be used for parameter estimation with a PS frailty distribution
+ due to infinite first moment.
+ The one-parameter positive stable distribution is given by 
 \begin_inset Formula $\omega\sim PS(\alpha)$
 \end_inset
 
