@@ -81,11 +81,11 @@ simfrail <- function(reps,
 
 # Perform simfrail for multiple param values to passed genfrail
 simfrail.multigen <- function(reps, seed, genfrail.args, fitfrail.args, base.time,
-                              param.name, param.values) {
+                              param.name, param.values, ...) {
   results <- lapply(param.values, function(pvalue) {
     genfrail.args[[param.name]] <- pvalue
     set.seed(seed) # seed before each run
-    partial.results <- simfrail(reps, genfrail.args, fitfrail.args, base.time)
+    partial.results <- simfrail(reps, genfrail.args, fitfrail.args, base.time, ...)
     # Name the first column as the parameter name
     setNames(cbind(param.name=toString(pvalue), partial.results), 
              c(param.name, names(partial.results)))
