@@ -16,7 +16,7 @@ print.fitfrail <- function(fit, digits=max(options()$digits - 4, 3), ...) {
   cat("\n")
   
   cat("Log likelihood:\n")
-  cat(signif(fit$loglik, digits))
+  cat(format(round(fit$loglik, digits), nsmall=2))
   cat("\n")
   
   invisible()

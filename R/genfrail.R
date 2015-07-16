@@ -34,7 +34,7 @@ genfrail <- function(
                      # Order of preference is: Lambda_0_inv, Lambda_0, lambda_0
                      lambda_0 = function(t, tau=4.6, C=0.01) (tau*(C*t)^tau)/t,
                      Lambda_0 = function(t, tau=4.6, C=0.01) (C*t)^tau,
-                     Lambda_0_inv = NULL, #function(t) (t^(1/4.6))/0.01,
+                     Lambda_0_inv = NULL, #function(t, tau=4.6, C=0.01) (t^(1/tau))/C,
                      # Round time to nearest 
                      round.base = NULL
                      ) {

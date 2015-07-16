@@ -33,6 +33,9 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   k_tau <- length(time_steps) # index of the last time step
   
   # d_[k] is the number of failures at time t_k
+#   d_ <- vapply(seq_along(time_steps), function(k) {
+#     sum(status[time == time_steps[k]])
+#   }, 0)
   d_ <- c(0, unname(status[time_sorted_idx]))
   
   # Variables indexed by [[i]][j,] where i is cluster name and j is member
@@ -93,13 +96,20 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   # VARS holds all the variables that depend on \hat{beta} and \hat{theta}
   VARS <- new.env()
   VARS$iter <- 1
+  VARS$N_ <- N_
+  VARS$N_dot_ <- N_dot_
+  VARS$N_tilde_ <- N_tilde_
+  VARS$Y_ <- Y_
+  VARS$K_ <- K_
+  VARS$time_steps <- time_steps
+  VARS$d_ <- d_
   
   verbose <- control$verbose
   fitmethod <- control$fitmethod
   # The objective function for either score equations or loglikelihood optimization
   # gamma is c(beta, theta), several global variables are updated since these are
   # reused in other places (jacobian, covar matrix)
-  fit_fn <- function(gamma, fitmethod=control$fitmethod) {
+  fit_fn <- function(gamma) {
     
     VARS$beta <- gamma[1:n_beta]
     VARS$theta <- gamma[(n_beta+1):(n_beta+n_theta)]
@@ -122,7 +132,8 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     VARS$phi_prime_1_ <- lapply(1:n_theta, function(theta_idx) 
       phi_prime_k(1, theta_idx, N_dot_, VARS$H_dot_, VARS$theta, frailty))
     
-    VARS$loglik <- loglikelihood(X_, K_, I_, VARS$phi_1_, VARS$lambda, VARS$beta)
+    VARS$loglik_vec <- loglikelihood(X_, K_, I_, VARS$phi_1_, VARS$lambda, VARS$beta)
+    VARS$loglik <- sum(VARS$loglik_vec)
     
     if (verbose) {
       if (VARS$iter == 1) {
@@ -135,15 +146,14 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
       cat(c(signif(c(VARS$iter, VARS$beta, VARS$theta, VARS$loglik), 4), "\n"), sep="\t")
       VARS$iter <- VARS$iter + 1
     }
-    
     # TODO: This could be done in parallel, not much gain though.
-    xi_beta_ <- vapply(1:n_beta, function(r) {
+    xi_beta_ <- matrix(vapply(1:n_beta, function(r) {
       xi_beta(X_, I_, VARS$H_, VARS$psi_, r)
-    }, rep(0, n_clusters))
+    }, rep(0, n_clusters)), nrow=n_clusters, ncol=n_beta)
     
-    xi_theta_ <- vapply(1:n_theta, function(r) {
+    xi_theta_ <- matrix(vapply(1:n_theta, function(r) {
       xi_theta(VARS$phi_1_, VARS$phi_prime_1_[[r]], r)
-    }, rep(0, n_clusters))
+    }, rep(0, n_clusters)), nrow=n_clusters, ncol=n_theta)
     
     # xi_[i,r], where i is cluster, r is param idx
     # Update globally, this is used in the jacobian and covariance matrix
@@ -154,6 +164,12 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
       VARS$loglik
     } else if (fitmethod == "score") {
       VARS$U_
+    } else if (fitmethod == "tmp") {
+      colSums(VARS$xi_)
+    } else if (fitmethod == "tmp1") {
+      VARS$xi_
+    } else if (fitmethod == "tmp2") {
+      VARS$loglik_vec
     }
   }
   
@@ -296,19 +312,28 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     }))/n_clusters
     
     ################################################################## Step IV
-    
+    if (frailty == "none") {
+      D_inv <- solve(jac[1:n_beta, 1:n_beta])
+      COV <- (D_inv %*% (V[1:n_beta, 1:n_beta] 
+                         + G[1:n_beta, 1:n_beta] 
+                         + C[1:n_beta, 1:n_beta]) %*% t(D_inv))/n_clusters
+      return(COV)
+    }
     D_inv <- solve(jac)
     
     ################################################################## Step V
     
     COV <- (D_inv %*% (V + G + C) %*% t(D_inv))/n_clusters
     COV
-    # SD <- sqrt(diag(COV))
-    # return(list(jac=jac, COV=COV, D_inv=D_inv, V=V, G=G, C=C, SD=SD))
   }
   
-#   theta_lower <- rep(1e-3, n_theta)
-#   theta_upper <- rep(Inf, n_theta)
+  if (frailty == "pvf") {
+    theta_lower <- 1e-5
+    theta_upper <- 1
+  } else {
+    theta_lower <- rep(1e-3, n_theta)
+    theta_upper <- rep(Inf, n_theta)
+  }
   
   # The actual optimization takes place here
   if (fitmethod == "loglik") {
@@ -317,7 +342,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
                     lower=c(rep(-Inf, n_beta),theta_lower), 
                     upper=c(rep(Inf, n_beta), theta_upper), 
                     method="L-BFGS-B",
-                    control=list(fnscale=-1, factr=1e8, pgtol=1e-8)
+                    control=list(fnscale=-1, factr=1e9)#, pgtol=1e-8)
                     )
     gamma_hat <- fitter$par
   } else if (control$fitmethod == "score") {
@@ -362,7 +387,8 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
        SD = sqrt(diag(COV)),
        score_jacobian = score_jacobian,
        fit_fn=fit_fn,
-       loglik_jacobian=loglik_jacobian
+       loglik_jacobian=loglik_jacobian,
+       VARS=VARS
        # TODO: estimated frailty values
        # TODO: use numerical jac for variance?
       )

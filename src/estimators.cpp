@@ -61,15 +61,18 @@ double phi_prime_prime_deriv(double w, void* data) {
 
 double phi(int k, int N_dot, double H_dot, double *theta, String frailty) {
   // Laplace transform integrals
-  if (frailty == "gamma") {
+  if (frailty == "none") {
+    return 1;
+  } else if (frailty == "gamma") {
     return lt_dgamma(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
-  } else if (frailty == "posstab") {
-    return lt_dposstab(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
   } else if (frailty == "pvf") {
     return lt_dpvf(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
   }
   // Numerical integration
   phi_params phi_p;
+//   if (frailty == "gamma") {
+//     phi_p = (struct phi_params){k, N_dot, H_dot, theta, dgamma};
+//   } else 
   if (frailty == "lognormal") {
     phi_p = (struct phi_params){k, N_dot, H_dot, theta, dlognormal};
   } else if (frailty == "invgauss") {
@@ -84,10 +87,10 @@ double phi(int k, int N_dot, double H_dot, double *theta, String frailty) {
 // phi using the derivative of the density wrt. parameter p[derive_idx]
 double phi_prime(int k, int N_dot, double H_dot, double *theta, String frailty, int deriv_idx) {
   // Laplace transform integrals
-  if (frailty == "gamma") {
+  if (frailty == "none") {
+    return 0;
+  } else if (frailty == "gamma") {
     return deriv_lt_dgamma(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
-  } else if (frailty == "posstab") {
-    return deriv_lt_dposstab(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
   } else if (frailty == "pvf") {
     return deriv_lt_dpvf(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
   }
@@ -111,7 +114,9 @@ double phi_prime(int k, int N_dot, double H_dot, double *theta, String frailty, 
 // phi using the derivative of the density wrt. parameter p[derive_idx]
 double phi_prime_prime(int k, int N_dot, double H_dot, double *theta, String frailty, int deriv_idx_1, int deriv_idx_2) {
   // Laplace transform integrals
-  if (frailty == "gamma") {
+  if (frailty == "none") {
+    return 0;
+  } else if (frailty == "gamma") {
     return deriv_deriv_lt_dgamma(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2) * pow(-1, N_dot + k - 1);
   } else if (frailty == "pvf") {
     return deriv_deriv_lt_dpvf(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2) * pow(-1, N_dot + k - 1);
@@ -119,7 +124,6 @@ double phi_prime_prime(int k, int N_dot, double H_dot, double *theta, String fra
   
   // Numerical integration
   phi_prime_prime_params phi_p;
-  
   if (frailty == "lognormal") {
     phi_p = (struct phi_prime_prime_params){k, N_dot, H_dot, theta, deriv_deriv_dlognormal, deriv_idx_1, deriv_idx_2};
   } else if (frailty == "invgauss") {
@@ -263,7 +267,7 @@ List bh(NumericVector d_,
 
 // This function is relatively simple, but uses some pre-computed quantities (eg. phi_1_)
 // [[Rcpp::export]]
-double loglikelihood(List X_,
+NumericVector loglikelihood(List X_,
                      List K_, 
                      List I_, 
                      List phi_1_,
@@ -272,7 +276,8 @@ double loglikelihood(List X_,
   int k_tau = lambda.size() - 1;
   int n_clusters = X_.size();
   
-  double l = 0;
+  // double l = 0;
+  NumericVector l(n_clusters);
   for (int i = 0; i < n_clusters; ++i) {
     
     NumericMatrix X_i = X_(i);
@@ -285,12 +290,69 @@ double loglikelihood(List X_,
       // K_i[j] is an R index
       if (I_i(j) > 0) { 
         term1 += log(lambda(K_i(j)-1)) + sum(beta * X_i(j, _));
+        // term1 += log(lambda(K_i(j)-1) * exp(sum(beta * X_i(j, _))));
       }
     }
-    l += term1 + log(phi_1_i(k_tau));
+    double term2 =  log(phi_1_i(k_tau));
+    l(i) = term1 + term2;
   }
   
   return l;
+}
+
+
+// [[Rcpp::export]]
+NumericVector xi_beta(List X_,
+                      List I_, 
+                      List H_,
+                      List psi_,
+                      int r) {
+  r -= 1;  // Convert R idx to C++ idx to avoid confusion
+  NumericVector tmp = psi_(0);
+  int k_tau = tmp.size() - 1;
+  int n_clusters = X_.size();
+  NumericVector xi_r(n_clusters);
+  
+  for (int i = 0; i < n_clusters; ++i) {
+    NumericMatrix X_i = X_(i);
+    NumericMatrix H_i = H_(i);
+    
+    NumericVector I_i = I_(i);
+    NumericVector psi_i = psi_(i);
+    
+    double term1 = 0;
+    double term2_factor1 = 0;
+    for (int j = 0; j < X_i.nrow(); j++) {
+      term1 += I_i(j) * X_i(j, r);
+      term2_factor1 += H_i(j, k_tau) * X_i(j, r);
+    }
+    
+    double term2 = term2_factor1 * psi_i(k_tau);
+    
+    xi_r(i) = term1 - term2;
+  }
+  
+  return xi_r;
+}
+
+// [[Rcpp::export]]
+NumericVector xi_theta(List phi_1_,
+                       List phi_prime_1_,
+                       int r) {
+  r -= 1;  // Convert R idx to C++ idx to avoid confusion
+  NumericVector tmp = phi_1_(0);
+  int k_tau = tmp.size() - 1;
+  int n_clusters = phi_1_.size();
+  NumericVector xi_r(n_clusters);
+  
+  for (int i = 0; i < n_clusters; ++i) {
+    NumericVector phi_1_i = phi_1_(i);
+    NumericVector phi_prime_1_i = phi_prime_1_(i);
+    
+    xi_r(i) = phi_prime_1_i(k_tau)/phi_1_i(k_tau);
+  }
+  
+  return xi_r;
 }
 
 // [[Rcpp::export]]
@@ -928,60 +990,6 @@ NumericVector Upsilon(List X_,
   }
   
   return Upsilon_;
-}
-
-// [[Rcpp::export]]
-NumericVector xi_beta(List X_,
-                      List I_, 
-                      List H_,
-                      List psi_,
-                      int r) {
-  r -= 1;  // Convert R idx to C++ idx to avoid confusion
-  NumericVector tmp = psi_(0);
-  int k_tau = tmp.size() - 1;
-  int n_clusters = X_.size();
-  NumericVector xi_r(n_clusters);
-  
-  for (int i = 0; i < n_clusters; ++i) {
-    NumericMatrix X_i = X_(i);
-    NumericMatrix H_i = H_(i);
-    
-    NumericVector I_i = I_(i);
-    NumericVector psi_i = psi_(i);
-    
-    double term1 = 0;
-    double term2_factor1 = 0;
-    for (int j = 0; j < X_i.nrow(); j++) {
-      term1 += I_i(j) * X_i(j, r);
-      term2_factor1 += H_i(j, k_tau) * X_i(j, r);
-    }
-    
-    double term2 = term2_factor1 * psi_i(k_tau);
-    
-    xi_r(i) = term1 - term2;
-  }
-  
-  return xi_r;
-}
-
-// [[Rcpp::export]]
-NumericVector xi_theta(List phi_1_,
-                       List phi_prime_1_,
-                       int r) {
-  r -= 1;  // Convert R idx to C++ idx to avoid confusion
-  NumericVector tmp = phi_1_(0);
-  int k_tau = tmp.size() - 1;
-  int n_clusters = phi_1_.size();
-  NumericVector xi_r(n_clusters);
-  
-  for (int i = 0; i < n_clusters; ++i) {
-    NumericVector phi_1_i = phi_1_(i);
-    NumericVector phi_prime_1_i = phi_prime_1_(i);
-    
-    xi_r(i) = phi_prime_1_i(k_tau)/phi_1_i(k_tau);
-  }
-  
-  return xi_r;
 }
 
 // [[Rcpp::export]]

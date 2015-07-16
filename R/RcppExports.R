@@ -105,6 +105,14 @@ loglikelihood <- function(X_, K_, I_, phi_1_, lambda, beta) {
     .Call('frailtyr_loglikelihood', PACKAGE = 'frailtyr', X_, K_, I_, phi_1_, lambda, beta)
 }
 
+xi_beta <- function(X_, I_, H_, psi_, r) {
+    .Call('frailtyr_xi_beta', PACKAGE = 'frailtyr', X_, I_, H_, psi_, r)
+}
+
+xi_theta <- function(phi_1_, phi_prime_1_, r) {
+    .Call('frailtyr_xi_theta', PACKAGE = 'frailtyr', phi_1_, phi_prime_1_, r)
+}
+
 phi_k <- function(s, N_dot_, H_dot_, theta, frailty) {
     .Call('frailtyr_phi_k', PACKAGE = 'frailtyr', s, N_dot_, H_dot_, theta, frailty)
 }
@@ -159,14 +167,6 @@ eta <- function(phi_1_, phi_2_, phi_3_) {
 
 Upsilon <- function(X_, K_, R_dot_, eta_, Ycal_, beta) {
     .Call('frailtyr_Upsilon', PACKAGE = 'frailtyr', X_, K_, R_dot_, eta_, Ycal_, beta)
-}
-
-xi_beta <- function(X_, I_, H_, psi_, r) {
-    .Call('frailtyr_xi_beta', PACKAGE = 'frailtyr', X_, I_, H_, psi_, r)
-}
-
-xi_theta <- function(phi_1_, phi_prime_1_, r) {
-    .Call('frailtyr_xi_theta', PACKAGE = 'frailtyr', phi_1_, phi_prime_1_, r)
 }
 
 Omega <- function(X_, N_, R_dot_, eta_, Ycal_, beta) {

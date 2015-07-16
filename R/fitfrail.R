@@ -32,8 +32,8 @@ fitfrail <- function(formula, data, control,
   # Default to the fitfrail.control defaults
   if (missing(control)) control <- fitfrail.control(...)
   
-  if (!match(frailty,c("gamma","lognormal","invgauss", "posstab", "pvf"), nomatch=0))
-    stop("frailty distribution ", frailty, " not supported yet.")
+  if (!match(frailty,c("none", "gamma","lognormal","invgauss", "pvf"), nomatch=0))
+    stop("Unsupported frailty distribution:", frailty)
   
   Y <- model.extract(mf, "response")
   if (!inherits(Y, "Surv")) stop("Response must be a survival object")
