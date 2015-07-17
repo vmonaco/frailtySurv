@@ -580,6 +580,29 @@ deriv_deriv_dlognormal_r_numeric <- function(x, theta) {
   grad(function(theta) deriv_dlognormal_r(x, theta), theta)
 }
 
+
+dlognormalmix <- function(x, theta) {
+  V <- theta[1]
+  M <- theta[2]
+  logsd1 <- sqrt( log( (sqrt(4*V + 1) + 1)/2 ) )
+  mean1 <- exp(logvar1^2 / 2)
+  mean2 <- mean1 + M
+  logsd2 <- sqrt( log( V/mean2^2 + 1 ) )
+  logmean2 <- log(mean2) - logsd2^2/2
+  dlnorm(x, 0, logsd1) + dlnorm(x, logmean2, logsd2)
+}
+
+rlognormalmix <- function(n, theta) {
+  V <- theta[1]
+  M <- theta[2]
+  logsd1 <- sqrt( log( (sqrt(4*V + 1) + 1)/2 ) )
+  mean1 <- exp(logvar1^2 / 2)
+  mean2 <- mean1 + M
+  logsd2 <- sqrt( log( V/mean2^2 + 1 ) )
+  logmean2 <- log(mean2) - logsd2^2/2
+  c(rlnorm(n/2, 0, logsd1) + rlnorm(n/2, logmean2, logsd2))
+}
+
 ################################################################################
 # TODO: Inverse Gaussian
 
