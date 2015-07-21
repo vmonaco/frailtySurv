@@ -1,4 +1,4 @@
-fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control, rownames) {
+fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control, rownames, V=NULL) {
   
   # TODO: error check for number of frailty distr params
   if (missing(theta_init)) # || length(theta_init) != n_frailty_params(frailty))
@@ -59,6 +59,10 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   n_clusters <- length(cluster_names)
 
   cluster_sizes <- table(cluster)
+  
+  if (is.null(V)) {
+    V <- rep(1, n_clusters)
+  }
   
   # Convenience function to apply a function over the cluster and members indices
   clustapply <- function(fn, FUN.VALUE) {
@@ -143,7 +147,8 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
               "loglik",
               "\n"), sep="\t")
       }
-      cat(c(signif(c(VARS$iter, VARS$beta, VARS$theta, VARS$loglik), 4), "\n"), sep="\t")
+      cat(c(VARS$iter, format(round(c(VARS$beta, VARS$theta, VARS$loglik), 
+                         4), nsmall=4, trim=TRUE), "\n"), sep="\t")
       VARS$iter <- VARS$iter + 1
     }
     # TODO: This could be done in parallel, not much gain though.
@@ -342,13 +347,14 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
                     lower=c(rep(-Inf, n_beta),theta_lower), 
                     upper=c(rep(Inf, n_beta), theta_upper), 
                     method="L-BFGS-B",
-                    control=list(fnscale=-1, factr=1e9)#, pgtol=1e-8)
+                    control=list(factr=control$reltol/.Machine$double.eps, 
+                                 pgtol=0, fnscale=-1)
                     )
     gamma_hat <- fitter$par
   } else if (control$fitmethod == "score") {
     fitter <- nleqslv(gamma_init, fit_fn, 
                       control=list(maxit=control$iter.max,
-                                   xtol=1e-8, ftol=1e-8, btol=1e-3,
+                                   xtol=0, ftol=control$abstol, btol=1e-3,
                                    allowSingular=TRUE),
                       method='Newton',
                       jac=score_jacobian,
@@ -371,6 +377,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   })
   
   COV <- covariance()
+  # COV <- matrix(0, n_gamma, n_gamma)
   
   list(beta = beta_hat,
        theta = theta_hat,

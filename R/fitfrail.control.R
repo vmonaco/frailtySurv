@@ -3,16 +3,17 @@
 #' 
 #' @export
 fitfrail.control <- function(fitmethod='score',
-                             eps=1e-9, 
-                             toler.chol=.Machine$double.eps^.75, 
-                             iter.max=20,
-                             toler.inf=sqrt(eps),
-                             verbose=TRUE) {
+                             abstol=1e-8,
+                             reltol=1e-5,
+                             iter.max=100,
+                             verbose=FALSE) {
   if (!fitmethod %in% c("score", "loglik")) stop("fitmethod must be one of: score, loglik")
   if (iter.max < 0) stop("Invalid value for iterations")
-  if (eps <= 0) stop ("Invalid convergence criteria")
+  if (abstol <= 0) stop ("Invalid absolute tolerance")
+  if (reltol <= 0) stop ("Invalid relative tolerence")
   list(fitmethod=fitmethod,
-       eps=eps,
+       abstol=abstol,
+       reltol=reltol,
        iter.max=as.integer(iter.max),
        verbose=as.logical(verbose))
 }

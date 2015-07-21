@@ -45,12 +45,16 @@ simfrail <- function(reps,
     sd.theta <- fit$SD[(length(beta)+1):(length(beta)+length(theta))]
     names(sd.theta) <- paste("sd.theta", 1:length(theta))
     
+    sd.Lambda <- rep(0, length(base.time))
+    names(sd.Lambda) <- paste("sd.Lambda", 1:length(base.time))
+    
     c(runtime,
       cens,
       beta,
       theta,
       sd.beta,
       sd.theta,
+      sd.Lambda,
       var.beta,
       var.theta,
       Lambda
@@ -76,7 +80,16 @@ simfrail <- function(reps,
   }
   
   results <- t(simplify2array(results))
-  data.frame(results)
+  results <- data.frame(results)
+  
+  results <- append(results, lapply(genfrail.args, eval))
+  results <- append(results, lapply(fitfrail.args, eval))
+  results$Lambda <- results$Lambda_0(base.time)
+  
+  results$reps <- reps
+  
+  class(results) <- "simfrail"
+  results
 }
 
 # Perform simfrail for multiple param values to passed genfrail
@@ -123,7 +136,7 @@ plot.simfrail.residuals <- function(results, true.values, title="") {
 }
 
 plot.simfrail.hazard <- function(results, funs=c("cbh"), 
-                                 true.cbh=NULL, true.bh=NULL, title=NULL) {
+                                 true.cbh=NULL, title=NULL) {
   if (!requireNamespace("ggplot2", quietly = TRUE) || 
       !requireNamespace("reshape2", quietly = TRUE) || 
       !requireNamespace("gridExtra", quietly = TRUE) ||
@@ -156,7 +169,8 @@ plot.simfrail.hazard <- function(results, funs=c("cbh"),
       stat_summary(fun.data="mean_cl_boot", geom="smooth") +
       theme(legend.position=c(0,1),
             legend.justification=c(0,1)) +
-      ylab(ylabel)
+      ylab(ylabel) + 
+      ggtitle(title)
     
     if (!is.null(true.values)) {
       p <- p + 
@@ -169,23 +183,9 @@ plot.simfrail.hazard <- function(results, funs=c("cbh"),
     p
   }
   
-  plots <- list()
-  
-  if ("cbh" %in% funs) {
-    p1 <- plotter(results[,grepl("Lambda", names(results))], 
-                  "Cumulative baseline hazard",
-                  true.cbh)
-    plots <- c(plots, list(p1))
-  }
-  
-  if ("bh" %in% funs) {
-    p2 <- plotter(results[,grepl("lambda", names(results))], 
-                  "Baseline hazard",
-                  true.bh)
-    plots <- c(plots, list(p2))
-  }
-  
-  do.call(gridExtra::grid.arrange, c(plots, list(ncol=2, main=title)))
+  plotter(results[,grepl("Lambda", names(results))], 
+          "Cumulative baseline hazard",
+          true.cbh)
 }
 
 # A wrapper for coxph, gathers the coeffs, theta, censoring, runtime

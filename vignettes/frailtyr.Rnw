@@ -359,6 +359,13 @@ integer.
 
 \subsection{Examples}
 
+<<label=frailty-distributions,echo=TRUE>>=
+library(frailtyr)
+set.seed(1234)
+genfrail(N=300, K=2, beta=c(log(2),log(3)), frailty="gamma", theta=2, 
+	   	 lambda_0=function(t, tau=4.6, C=0.01) (tau*(C*t)^tau)/t)
+@
+
 \label{sub:datagen-examples}
 
 Generating survival data from a model with known parameters.
