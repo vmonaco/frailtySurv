@@ -1,6 +1,5 @@
 summary.simfrail <- function(sim) {
   
-  # Compare the empirical SD to the mean estimated SD for each parameter
   true.beta <- sim$beta
   true.theta <- sim$theta
   true.Lambda <- sim$Lambda
@@ -17,18 +16,29 @@ summary.simfrail <- function(sim) {
   emp.sd.theta <- apply(est.theta, 1, sd)
   emp.sd.Lambda <- apply(est.Lambda, 1, sd)
   
+  emp.mean.beta <- apply(est.beta, 1, mean)
+  emp.mean.theta <- apply(est.theta, 1, mean)
+  emp.mean.Lambda <- apply(est.Lambda, 1, mean)
+  
   est.sd.beta <- apply(sd.beta, 1, mean)
   est.sd.theta <- apply(sd.theta, 1, mean)
   est.sd.Lambda <- apply(sd.Lambda, 1, mean)
   
-  cov.beta <- rowSums(est.beta - 2*sd.beta <= true.beta 
-                           & true.beta <= est.beta + 2*sd.beta)/sim$reps
-  cov.theta <- rowSums(est.theta - 2*sd.theta <= true.theta 
-                           & true.theta <= est.theta + 2*sd.theta)/sim$reps
-  cov.Lambda <- rowSums(est.Lambda - 2*sd.Lambda <= true.Lambda 
-                           & true.Lambda <= est.Lambda + 2*sd.Lambda)/sim$reps
+  # Coverage rates
+  cov.beta <- rowSums(est.beta - 1.96*sd.beta <= true.beta 
+                           & true.beta <= est.beta + 1.96*sd.beta)/sim$reps
+  cov.theta <- rowSums(est.theta - 1.96*sd.theta <= true.theta 
+                           & true.theta <= est.theta + 1.96*sd.theta)/sim$reps
+  cov.Lambda <- rowSums(est.Lambda - 1.96*sd.Lambda <= true.Lambda 
+                           & true.Lambda <= est.Lambda + 1.96*sd.Lambda)/sim$reps
   
-  summary <- data.frame(cov.beta=cov.beta)
+  s <- data.frame(
+    emp.mean=c(emp.mean.beta,emp.mean.theta,emp.mean.Lambda),
+    emp.sd=c(emp.sd.beta,emp.sd.theta,emp.sd.Lambda),
+    est.sd=c(est.sd.beta,est.sd.theta,est.sd.Lambda),
+    cov=c(cov.beta,cov.theta,cov.Lambda))
   
-  summary
+  class(s) <- "summary.simfrail"
+  
+  s
 }

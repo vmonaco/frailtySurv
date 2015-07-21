@@ -1,6 +1,6 @@
 genfrail <- function(
                      beta = c(log(2)), # Covariate coefficients
-                     covar.distr = c("normal", "uniform", "zero"),
+                     covar.distr = "uniform", #c("normal", "uniform", "zero"),
                      covar.param = c(0,1),
                      
                      # TODO: parameters names like this:
@@ -13,7 +13,7 @@ genfrail <- function(
                      theta = c(2), # Frailty distribution parameter vector
                      
                      # Censoring distribution and parameters vector
-                     censor.distr = c("normal", "lognormal", "none"),
+                     censor.distr = "normal", #c("normal", "lognormal", "none"),
                      censor.rate = NULL, # If specified, overrides mu
                      censor.mu = 130, # 5
                      censor.sigma = 15, # 0.5
@@ -32,9 +32,10 @@ genfrail <- function(
                      
                      # Only one of these needs to be specified
                      # Order of preference is: Lambda_0_inv, Lambda_0, lambda_0
-                     lambda_0 = function(t, tau=4.6, C=0.01) (tau*(C*t)^tau)/t,
-                     Lambda_0 = function(t, tau=4.6, C=0.01) (C*t)^tau,
+                     lambda_0 = NULL, #function(t, tau=4.6, C=0.01) (tau*(C*t)^tau)/t,
+                     Lambda_0 = NULL, #function(t, tau=4.6, C=0.01) (C*t)^tau,
                      Lambda_0_inv = NULL, #function(t, tau=4.6, C=0.01) (t^(1/tau))/C,
+                     
                      # Round time to nearest 
                      round.base = NULL
                      ) {
@@ -63,16 +64,20 @@ genfrail <- function(
   Z <- matrix(0, nrow=NK, ncol=p)
   for (j in 1:p) {
     if (covar.distr == "normal") {
-      Z[, j] <- rnorm(NK)
+      Z[, j] <- rnorm(NK, covar.param[1], covar.param[2])
+      covar.distr <- "normal"
     } else if (covar.distr == "uniform") {
-      Z[, j] <- runif(NK)
+      Z[, j] <- runif(NK, covar.param[1], covar.param[2])
+      covar.distr <- "uniform"
     } else if (covar.distr == "zero") {
       Z[, j] <- rep(0, NK)
+      covar.distr <- "zero"
+      covar.param <- ""
     }
   }
   
   cluster.frailty <- rep(1, N)
-  # Generate the frailty for each family
+  # Generate the frailty for each cluster
   # In each case, only generate random values for non-degenerate distributions
   if (frailty=="gamma") {
     if ( theta != 0 )
@@ -107,8 +112,16 @@ genfrail <- function(
   # With the inverse cumulative hazard, apply Bender's method
   if (!is.null(Lambda_0_inv)) {
     fail.time <- Lambda_0_inv(-log(u)/rate)
+    
+    # hazard attribute, for summary
+    hazard <- list(Lambda_0_inv=Lambda_0_inv)
+    
+    # Inverse to get the original CBH
+    Lambda_0 <- Vectorize(function(y) uniroot(function(x) 
+      Lambda_0_inv(x) - y, lower=0, upper=100, extendInt="yes")$root)
   # Otherwise, use the method described by Crowther
   } else {
+    
     if (is.null(Lambda_0) && !is.null(lambda_0)) {
       # numeric integral nested in the root finding
       Lambda_0 <- Vectorize(function(t) {
@@ -117,8 +130,13 @@ genfrail <- function(
         }
         integrate(lambda_0, 0, t, subdivisions = 1000L)$value
       })
-    } else if (is.null(Lambda_0)) {
-      stop("Need baseline hazard if cumulative baseline hazard is not specified.")
+      hazard <- list(lambda_0=lambda_0)
+    } else if (!is.null(Lambda_0)) {
+      hazard <- list(Lambda_0=Lambda_0)
+    } else {
+      warning("Using a default baseline hazard. Did you forget to pass Lambda_0?")
+      Lambda_0 <- function(t, tau=4.6, C=0.01) (C*t)^tau
+      hazard <- list(Lambda_0=Lambda_0)
     }
     
     # TODO: first try to invert the function analytically, maybe using Ryacas?
@@ -184,11 +202,27 @@ genfrail <- function(
     obs.time <- round.base*floor(obs.time/round.base + 0.5)
   }
   
+  # Covariates are named Z1, Z2, ...
   colnames(Z) <- paste("Z", 1:p, sep="")
-  dat <- data.frame(family=rep(1:N, cluster.sizes),
+  
+  dat <- data.frame(cluster=rep(1:N, cluster.sizes),
                     rep=unlist(lapply(cluster.sizes, function(m) rep(1:m))), 
                     time=obs.time, 
                     status=obs.status,
                     Z)
-  return(dat)
+  class(dat) <- append("genfrail", class(dat))
+  
+  # These are mostly needed for printing the summary and simulations
+  attributes(dat) <- append(attributes(dat), list(
+    created=Sys.time(),
+    beta=beta,
+    covar.distr=covar.distr,
+    covar.param=covar.param,
+    frailty=frailty,
+    theta=theta,
+    Lambda_0=Lambda_0,
+    hazard=hazard
+  ))
+  
+  dat
 }
