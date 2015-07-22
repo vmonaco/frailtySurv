@@ -149,7 +149,6 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
       }
       cat(c(VARS$iter, format(round(c(VARS$beta, VARS$theta, VARS$loglik), 
                          4), nsmall=4, trim=TRUE), "\n"), sep="\t")
-      VARS$iter <- VARS$iter + 1
     }
     # TODO: This could be done in parallel, not much gain though.
     xi_beta_ <- matrix(vapply(1:n_beta, function(r) {
@@ -164,6 +163,8 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
     # Update globally, this is used in the jacobian and covariance matrix
     VARS$xi_ <- cbind(xi_beta_, xi_theta_)
     VARS$U_ <- colMeans(VARS$xi_)
+    
+    VARS$iter <- VARS$iter + 1
     
     if (fitmethod == "loglik") {
       VARS$loglik
@@ -379,6 +380,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
   COV <- covariance()
   # COV <- matrix(0, n_gamma, n_gamma)
   
+  
   list(beta = beta_hat,
        theta = theta_hat,
        time_steps = time_steps,
@@ -389,14 +391,13 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
        Lambdafn = Lambdafn,
        fitter = fitter,
        fitmethod = control$fitmethod,
-       method = 'fitfrail',
        COV = COV,
        SD = sqrt(diag(COV)),
        score_jacobian = score_jacobian,
        fit_fn=fit_fn,
        loglik_jacobian=loglik_jacobian,
-       VARS=VARS
-       # TODO: estimated frailty values
-       # TODO: use numerical jac for variance?
+       VARS=VARS,
+       iter=VARS$iter,
+       frailty.variance=vfrailty[[frailty]](theta_hat)
       )
 }

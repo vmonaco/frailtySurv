@@ -8,8 +8,7 @@ genfrail <- function(
                      # covariate.distr = c("normal", "uniform"),
                      
                      # Frailty distribution and parameter vector
-                     frailty = c("gamma", "lognormal", "invgauss", 
-                                 "posstab", "pvf", "none"), 
+                     frailty = "gamma", #c("gamma", "lognormal", "invgauss", "posstab", "pvf", "none"), 
                      theta = c(2), # Frailty distribution parameter vector
                      
                      # Censoring distribution and parameters vector
@@ -65,14 +64,11 @@ genfrail <- function(
   for (j in 1:p) {
     if (covar.distr == "normal") {
       Z[, j] <- rnorm(NK, covar.param[1], covar.param[2])
-      covar.distr <- "normal"
     } else if (covar.distr == "uniform") {
       Z[, j] <- runif(NK, covar.param[1], covar.param[2])
-      covar.distr <- "uniform"
     } else if (covar.distr == "zero") {
       Z[, j] <- rep(0, NK)
-      covar.distr <- "zero"
-      covar.param <- ""
+      covar.param <- NULL
     }
   }
   

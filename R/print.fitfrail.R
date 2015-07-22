@@ -1,23 +1,33 @@
-print.fitfrail <- function(fit, digits=max(options()$digits - 4, 3), ...) {
+print.fitfrail <- function(fit, digits=max(options()$digits - 3, 3), ...) {
   
   savedig <- options(digits = digits)
   on.exit(options(savedig))
   
-  cat("Call:\n")
+  cat("Call: ")
   dput(fit$call)
-  cat("\n")
   
-  cat("Coefficents:\n")
-  cat(signif(fit$beta, digits))
-  cat("\n")
+  cat("\nCoefficients")
+  tmp <- cbind(fit$beta)
+  dimnames(tmp) <- list(names(fit$beta), "")
+  print(tmp, right=TRUE, print.gap = 32)
   
-  cat("Frailty distribution parameters:\n")
-  cat(signif(fit$theta, digits))
   cat("\n")
-  
-  cat("Log likelihood:\n")
-  cat(format(round(fit$loglik, digits), nsmall=2))
-  cat("\n")
+  cat("Frailty distribution parameters   ", 
+      toString(format(round(fit$theta, digits), digits=digits)), 
+      " (", fit$frailty, ")\n",
+      sep="")
+  cat("Frailty distribution variance     ", 
+      format(round(fit$frailty.variance, digits), digits=digits), 
+      "\n",
+      sep="")
+  cat("Log-likelihood                    ", 
+      format(round(fit$loglik, digits) , digits=digits), 
+      "\n", 
+      sep="")
+  cat("Converged                         ",
+      fit$iter,
+      " iterations\n", 
+      sep="")
   
   invisible()
 }
