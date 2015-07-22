@@ -35,11 +35,13 @@ dgamma_r <- function(x, theta) {
 #'
 #' Gamma random variable generation
 #'
+#' By LT: rlaptrans(n, lt_dgamma_r, p=0, theta=theta)
+#' 
 rgamma_r <- function(n, theta) {
-  rgamma(n, 1/theta, 1/theta)
-  
-  # Or using rlaptrans:
-  # rlaptrans(n, lt_dgamma_r, p=0, theta=theta)
+  if (theta == 0)
+    rep(1, n)
+  else
+    rgamma(n, 1/theta, 1/theta)
 }
 
 #'
@@ -233,7 +235,10 @@ dposstab_r <- function(x, alpha, K=100) {
 #' Random generation from a positive stable distribution
 #'
 rposstab_r <- function(n, alpha) {
-  rlaptrans(n, lt_dposstab_r, p=0, alpha=alpha)
+  if (theta == 1)
+    rep(1, n)
+  else
+    rlaptrans(n, lt_dposstab_r, p=0, alpha=alpha)
 }
 
 #'
@@ -265,7 +270,10 @@ dpvf_r <- function(x, alpha, K=100) {
 #' Generate samples from a PVF using its LT
 #' 
 rpvf_r <- function(n, alpha) {
-  rlaptrans(n, lt_dpvf_r, p=0, alpha=alpha)
+  if (theta == 1)
+    rep(1, n)
+  else
+    rlaptrans(n, lt_dpvf_r, p=0, alpha=alpha)
 }
 
 #' 
@@ -467,7 +475,10 @@ dlognormal_r <- function(x, theta) {
 #' Log-normal random generation
 #' 
 rlognormal_r <- function(n, theta) {
-  rlnorm(n, 0, sqrt(theta))
+  if (theta == 0)
+    rep(1, n)
+  else
+    rlnorm(n, 0, sqrt(theta))
 }
 
 #' 
@@ -524,7 +535,10 @@ dinvgauss_r <- function(x, theta) {
 }
 
 rinvgauss_r <- function(n, theta) {
-  statmod::rinvgauss(n, mean=1, shape=1/theta)
+  if (theta == 0)
+    rep(1, n)
+  else
+    statmod::rinvgauss(n, mean=1, shape=1/theta)
 }
 
 vinvgauss_r <- function(theta) {
@@ -583,6 +597,9 @@ dlognormalmix_r <- function(x, theta) {
 }
 
 rlognormalmix_r <- function(n, theta) {
+  if (theta[1] == 0)
+    return(rep(1, n))
+  
   V <- theta[1]/2
   M <- theta[2]
   logsd1 <- sqrt( log( (sqrt(4*V + 1) + 1)/2 ) )

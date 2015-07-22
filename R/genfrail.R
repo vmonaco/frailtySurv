@@ -3,10 +3,6 @@ genfrail <- function(
                      covar.distr = "uniform", #c("normal", "uniform", "zero"),
                      covar.param = c(0,1),
                      
-                     # TODO: parameters names like this:
-                     # coefficients = c(log(2)),
-                     # covariate.distr = c("normal", "uniform"),
-                     
                      # Frailty distribution and parameter vector
                      frailty = "gamma", #c("gamma", "lognormal", "invgauss", "posstab", "pvf", "none"), 
                      theta = c(2), # Frailty distribution parameter vector
@@ -72,26 +68,11 @@ genfrail <- function(
     }
   }
   
-  cluster.frailty <- rep(1, N)
   # Generate the frailty for each cluster
-  # In each case, only generate random values for non-degenerate distributions
-  if (frailty=="gamma") {
-    if ( theta != 0 )
-      cluster.frailty <- rgamma_r(N, theta)
-  } else if (frailty=="lognormal") {
-    if ( theta != 0 )
-      cluster.frailty <- rlognormal_r(N, theta)
-  } else if (frailty=="invgauss") {
-    if ( theta != 0 )
-      cluster.frailty <- rinvgauss_r(N, theta)
-  } else if (frailty=="posstab") {
-    if ( theta != 1 )
-      cluster.frailty <- rposstab_r(N, theta)
-  } else if (frailty=="pvf") {
-    if ( theta != 1 )
-      cluster.frailty <- rpvf_r(N, theta)
+  if (frailty %in% names(rfrailty)) {
+    cluster.frailty <- rfrailty[[frailty]](N, theta)
   } else if (frailty == "none") {
-    # do nothing, w is already 1
+    cluster.frailty <- rep(1, N)
   } else {
     stop("Wrong value for frailty: ", frailty)
   }

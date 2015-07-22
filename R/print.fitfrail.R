@@ -24,9 +24,11 @@ print.fitfrail <- function(fit, digits=max(options()$digits - 3, 3), ...) {
       format(round(fit$loglik, digits) , digits=digits), 
       "\n", 
       sep="")
-  cat("Converged                         ",
+  cat("Converged (method)                ",
       fit$iter,
-      " iterations\n", 
+      " iterations ",
+      ifelse(fit$fitmethod == "score", "(solved score equations)", "(maximized log-likelihood)"),
+      "\n",
       sep="")
   
   invisible()

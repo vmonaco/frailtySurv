@@ -1,10 +1,10 @@
-summary.genfrail <- function(gen, ...) {
+summary.genfrail <- function(dat, ...) {
   
-  s <- append(attributes(gen), list(
-      n.obs=length(gen$time),
-      n.clusters=length(unique(gen$cluster)),
-      mean.cluster=mean(table(gen$cluster)),
-      censor.rate=1 - sum(gen$status)/length(gen$time)
+  s <- append(attributes(dat), list(
+      n.obs=length(dat$time),
+      n.clusters=length(unique(dat$cluster)),
+      mean.cluster=mean(table(dat$cluster)),
+      censor.rate=1 - sum(dat$status)/length(dat$time)
   ))
   
   class(s) <- "summary.genfrail"

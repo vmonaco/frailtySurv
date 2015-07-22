@@ -8,7 +8,9 @@ print.summary.genfrail <- function(sum.dat, digits=4) {
     sprintf("Censorship        : %.2f", sum.dat$censor.rate), "\n",
     sprintf("Covariates        : %s(%s)", sum.dat$covar.distr, toString(sum.dat$covar.param)), "\n",
     sprintf("Coefficients      : %s", toString(format(round(sum.dat$beta, digits), nsmall=2))), "\n",
-    sprintf("Frailty           : %s(%s)", sum.dat$frailty, toString(sum.dat$theta)), "\n",
+            "Frailty           : ",
+    ifelse(sum.dat$frailty != "none", 
+           sprintf("%s(%s)", sum.dat$frailty, toString(sum.dat$theta)), "none"), "\n",
             "Baseline hazard   : ", gsub("\n", "", toString(sum.dat$hazard)), "\n",
   sep="")
   
