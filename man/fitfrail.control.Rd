@@ -4,9 +4,8 @@
 \alias{fitfrail.control}
 \title{Initialize control parameters}
 \usage{
-fitfrail.control(fitmethod = "score", eps = 1e-09,
-  toler.chol = .Machine$double.eps^0.75, iter.max = 20,
-  toler.inf = sqrt(eps), verbose = TRUE)
+fitfrail.control(fitmethod = "score", abstol = 1e-08, reltol = 1e-05,
+  iter.max = 100, verbose = FALSE)
 }
 \description{
 Initialize control parameters

@@ -1,5 +1,4 @@
-genfrail <- function(
-                     beta = c(log(2)), # Covariate coefficients
+genfrail <- function(beta = c(log(2)), # Covariate coefficients
                      covar.distr = "uniform", #c("normal", "uniform", "zero"),
                      covar.param = c(0,1),
                      
@@ -33,7 +32,7 @@ genfrail <- function(
                      
                      # Round time to nearest 
                      round.base = NULL
-                     ) {
+) {
   
   # Determine cluster sizes
   if (is.numeric(K) && length(K) == 1) {
@@ -192,11 +191,11 @@ genfrail <- function(
   # These are mostly needed for printing the summary and simulations
   attributes(dat) <- append(attributes(dat), list(
     created=Sys.time(),
-    beta=beta,
+    beta=setNames(beta, paste("beta.", 1:length(beta), sep="")),
+    theta=setNames(theta, paste("theta.", 1:length(theta), sep="")),
+    frailty=frailty,
     covar.distr=covar.distr,
     covar.param=covar.param,
-    frailty=frailty,
-    theta=theta,
     Lambda_0=Lambda_0,
     hazard=hazard
   ))

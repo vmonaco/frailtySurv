@@ -1,4 +1,5 @@
-fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control, rownames, V=NULL) {
+fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, 
+                         control, rownames, weights=NULL) {
   
   # TODO: error check for number of frailty distr params
   if (missing(theta_init)) # || length(theta_init) != n_frailty_params(frailty))
@@ -398,6 +399,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, control,
        loglik_jacobian=loglik_jacobian,
        VARS=VARS,
        iter=VARS$iter,
-       frailty.variance=vfrailty[[frailty]](theta_hat)
+       frailty.variance=vfrailty[[frailty]](theta_hat),
+       n.clusters=n_clusters
       )
 }

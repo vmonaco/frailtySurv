@@ -1,12 +1,12 @@
-fitfrail <- function(formula, data, control, 
-                     frailty=c("gamma","lognormal","invgauss", "pvf"), ...) {
+fitfrail <- function(formula, dat, control, 
+                     frailty=c("gamma","pvf","lognormal","invgauss"), ...) {
   
   Call <- match.call()
   
   # create a call to model.frame() that contains the formula (required)
   # and any other of the relevant optional arguments
   # then evaluate it in the proper frame
-  indx <- match(c("formula", "data"), names(Call), nomatch=0) 
+  indx <- match(c("formula", "dat"), names(Call), nomatch=0) 
   
   if (indx[1] == 0) stop("A formula argument is required")
   
@@ -14,7 +14,7 @@ fitfrail <- function(formula, data, control,
   temp[[1]] <- as.name('model.frame')  # change the function called
   
   special <- c("cluster")
-  temp$formula <- if(missing(data)) terms(formula, special) else terms(formula, special, data=data)
+  temp$formula <- if(missing(dat)) terms(formula, special) else terms(formula, special, dat=dat)
   
   mf <- eval(temp, parent.frame())
   if (nrow(mf) == 0) stop("No (non-missing) observations")
@@ -32,13 +32,13 @@ fitfrail <- function(formula, data, control,
   # Default to the fitfrail.control defaults
   if (missing(control)) control <- fitfrail.control(...)
   
-  if (!match(frailty,c("none", "gamma","lognormal","invgauss", "pvf"), nomatch=0))
+  if (!match(frailty,c("gamma","lognormal","invgauss", "pvf"), nomatch=0))
     stop("Unsupported frailty distribution:", frailty)
   
   Y <- model.extract(mf, "response")
   if (!inherits(Y, "Surv")) stop("Response must be a survival object")
   
-  cluster<- attr(Terms, "specials")$cluster
+  cluster <- attr(Terms, "specials")$cluster
   if (!length(cluster))
     stop("Missing cluster, use coxph or coxme if there is no hidden frailty")
   

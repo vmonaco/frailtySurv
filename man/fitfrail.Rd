@@ -9,7 +9,7 @@ fitfrail(formula, data, control,
 \item{formula}{a \code{formula} object, where the lhs is the response as a
 \code{\link[survival]{Surv}} object and the terms are on the right.}
 
-\item{data}{a data.frame that provides context for the formula}
+\item{dat}{a data.frame that provides context for the formula}
 
 \item{control}{control parameters in the form of a \code{\link{fitfrail.control}} object}
 

@@ -1,6 +1,3 @@
-print.simfrail <- function(sim) {
-  
-  cat("simfrail results\n")
-  
-  invisible()
+print.simfrail <- function(sim, ...) {
+  print(as.data.frame(sim))
 }
