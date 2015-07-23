@@ -4,8 +4,8 @@
 \alias{simfrail}
 \title{Repeatedly simulate survival data and fit a model}
 \usage{
-simfrail(reps, genfrail.args, fitfrail.args, base.time, cores = 0,
-  verbose = FALSE)
+simfrail(reps, genfrail.args, fitfrail.args, Lambda.time, vcov.args = list(),
+  cores = 0, verbose = FALSE, skip.SE = FALSE)
 }
 \arguments{
 \item{reps}{number of times to repeat the simulation}
@@ -14,7 +14,7 @@ simfrail(reps, genfrail.args, fitfrail.args, base.time, cores = 0,
 
 \item{fitfrail.args}{}
 
-\item{base.time}{}
+\item{Lambda.time}{}
 
 \item{cores}{}
 }

@@ -4,7 +4,8 @@
 \alias{vcov.fitfrail}
 \title{Compute the variance/covariance matrix for a fitted object}
 \usage{
-\method{vcov}{fitfrail}(fit, boot = TRUE, B = 100)
+\method{vcov}{fitfrail}(fit, boot = TRUE, B = 100, Lambda.time = NULL,
+  cores = 0)
 }
 \description{
 Compute the variance/covariance matrix for a fitted object

@@ -18,7 +18,8 @@ simfrail <- function(reps,
                      Lambda.time, # where to evaluate the baseline hazard function
                      vcov.args=list(),
                      cores=0, # 0 to use all available cores, -1 to use all but 1, etc
-                     verbose=FALSE
+                     verbose=FALSE,
+                     skip.SE=FALSE
 ) { 
   Call <- match.call()
   
@@ -52,21 +53,27 @@ simfrail <- function(reps,
     hat.Lambda <- setNames(fit$Lambdafn(Lambda.time), 
                            paste("hat.Lambda.", 1:length(Lambda.time), sep=""))
     
-    # Gather the estimated standard errors
-    vcov.args[["fit"]] <- fit
-    vcov.args[["include.Lambda"]] <- TRUE
-    vcov.args[["Lambda.time"]] <- Lambda.time
-    V <- do.call(vcov, vcov.args)
-    
-    SE <- sqrt(diag(V))
-    
-    se.beta <- setNames(SE[1:length(beta)],
-                        paste("se.beta.", 1:length(beta), sep=""))
-    se.theta <- setNames(SE[(length(beta)+1):(length(beta)+length(theta))],
-                         paste("se.theta.", 1:length(theta), sep=""))
-    se.Lambda <- setNames(SE[(length(beta)+length(theta)+1):
-                               ((length(beta)+length(theta))+length(Lambda))],
-                         paste("se.Lambda.", 1:length(Lambda.time), sep=""))
+    if (!skip.SE) {
+      # Gather the estimated standard errors
+      vcov.args[["fit"]] <- fit
+      vcov.args[["Lambda.time"]] <- Lambda.time
+      vcov.args[["cores"]] <- 1
+      V <- do.call(vcov, vcov.args)
+      
+      SE <- sqrt(diag(V))
+      
+      se.beta <- setNames(SE[1:length(beta)],
+                          paste("se.beta.", 1:length(beta), sep=""))
+      se.theta <- setNames(SE[(length(beta)+1):(length(beta)+length(theta))],
+                           paste("se.theta.", 1:length(theta), sep=""))
+      se.Lambda <- setNames(SE[(length(beta)+length(theta)+1):
+                                 ((length(beta)+length(theta))+length(Lambda))],
+                           paste("se.Lambda.", 1:length(Lambda.time), sep=""))
+    } else {
+      se.beta <- NULL
+      se.theta <- NULL
+      se.Lambda <- NULL
+    }
     
     c(seed=s,
       runtime=runtime,

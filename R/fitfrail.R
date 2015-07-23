@@ -1,4 +1,4 @@
-fitfrail <- function(formula, dat, control, 
+fitfrail <- function(formula, dat, control, weights=NULL,
                      frailty=c("gamma","pvf","lognormal","invgauss"), ...) {
   
   Call <- match.call()
@@ -82,7 +82,8 @@ fitfrail <- function(formula, dat, control,
   fit <- fitfrail.fit(X, Y, cluster, 
                            beta_init, theta_init, 
                            frailty,
-                           control, row.names(mf))
+                           control, row.names(mf),
+                      weights)
   class(fit) <- 'fitfrail'
   fit$call <- Call
   fit

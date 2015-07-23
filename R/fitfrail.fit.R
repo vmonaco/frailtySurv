@@ -1,5 +1,5 @@
 fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty, 
-                         control, rownames, weights=NULL) {
+                         control, rownames, weights) {
   
   # TODO: error check for number of frailty distr params
   if (missing(theta_init)) # || length(theta_init) != n_frailty_params(frailty))
@@ -28,7 +28,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty,
   status <- y[,2]
   
   # Sorted time
-  # time_steps <- c(0, sort(unique(time)))
+  Lambda.time <- c(0, sort(unique(time[status > 0])))
   time_sorted_idx <- order(time)
   time_steps <- c(0, time[time_sorted_idx])
   k_tau <- length(time_steps) # index of the last time step
@@ -61,8 +61,10 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty,
 
   cluster_sizes <- table(cluster)
   
-  if (is.null(V)) {
-    V <- rep(1, n_clusters)
+  if (is.null(weights)) {
+    weights <- rep(1, n_clusters)
+  } else {
+    stopifnot(length(weights) == n_clusters)
   }
   
   # Convenience function to apply a function over the cluster and members indices
@@ -138,13 +140,13 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty,
       phi_prime_k(1, theta_idx, N_dot_, VARS$H_dot_, VARS$theta, frailty))
     
     VARS$loglik_vec <- loglikelihood(X_, K_, I_, VARS$phi_1_, VARS$lambda, VARS$beta)
-    VARS$loglik <- sum(VARS$loglik_vec)
+    VARS$loglik <- sum(weights * VARS$loglik_vec)
     
     if (verbose) {
       if (VARS$iter == 1) {
         cat(c("Iter", 
-              paste("beta_", 1:n_beta, sep=""), 
-              paste("theta_", 1:n_theta, sep=""), 
+              paste("beta.", 1:n_beta, sep=""), 
+              paste("theta.", 1:n_theta, sep=""), 
               "loglik",
               "\n"), sep="\t")
       }
@@ -163,7 +165,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty,
     # xi_[i,r], where i is cluster, r is param idx
     # Update globally, this is used in the jacobian and covariance matrix
     VARS$xi_ <- cbind(xi_beta_, xi_theta_)
-    VARS$U_ <- colMeans(VARS$xi_)
+    VARS$U_ <- colMeans(weights * VARS$xi_)
     
     VARS$iter <- VARS$iter + 1
     
@@ -375,25 +377,20 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty,
     if (t <= 0) {
       return(0);
     }
-    VARS$Lambda[sum(t > time_steps)]
+    VARS$Lambda[sum(t >= time_steps)]
   })
   
-  COV <- covariance()
-  # COV <- matrix(0, n_gamma, n_gamma)
-  
-  
-  list(beta = beta_hat,
-       theta = theta_hat,
+  list(beta = setNames(beta_hat, paste("beta.", names(beta_hat), sep="")),
+       theta = setNames(theta_hat, paste("theta.", 1:length(theta_hat), sep="")),
        time_steps = time_steps,
        d_ = d_,
        Lambda = VARS$Lambda,
+       Lambda.time=Lambda.time,
        loglik = VARS$loglik,
        frailty = frailty,
        Lambdafn = Lambdafn,
        fitter = fitter,
        fitmethod = control$fitmethod,
-       COV = COV,
-       SD = sqrt(diag(COV)),
        score_jacobian = score_jacobian,
        fit_fn=fit_fn,
        loglik_jacobian=loglik_jacobian,
