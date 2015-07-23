@@ -148,8 +148,8 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
     obs.time <- fail.time
   } else {
     if (!is.null(censor.rate)) {
-      if (!is.null(censor.mu))
-        warning("Censoring rate will override mean")
+#       if (!is.null(censor.mu))
+#         warning("Censoring rate will override mean")
       
       stopifnot(0 <= censor.rate && censor.rate <= 1)
       

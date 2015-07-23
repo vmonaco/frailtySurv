@@ -235,7 +235,7 @@ dposstab_r <- function(x, alpha, K=100) {
 #' Random generation from a positive stable distribution
 #'
 rposstab_r <- function(n, alpha) {
-  if (theta == 1)
+  if (alpha == 1)
     rep(1, n)
   else
     rlaptrans(n, lt_dposstab_r, p=0, alpha=alpha)
@@ -270,7 +270,7 @@ dpvf_r <- function(x, alpha, K=100) {
 #' Generate samples from a PVF using its LT
 #' 
 rpvf_r <- function(n, alpha) {
-  if (theta == 1)
+  if (alpha == 1)
     rep(1, n)
   else
     rlaptrans(n, lt_dpvf_r, p=0, alpha=alpha)
