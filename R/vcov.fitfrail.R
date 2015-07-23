@@ -48,7 +48,7 @@ vcov.fitfrail <- function(fit, boot=TRUE, B=100,
     # Run in serial
     hats <- lapply(seeds, fn)
   }
-  return(hats)
+  
   hats <- t(simplify2array(hats))
   
   cov(hats)

@@ -340,7 +340,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty,
     theta_lower <- 1e-5
     theta_upper <- 1
   } else {
-    theta_lower <- rep(1e-3, n_theta)
+    theta_lower <- rep(1e-1, n_theta)
     theta_upper <- rep(Inf, n_theta)
   }
   

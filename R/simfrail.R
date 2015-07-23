@@ -55,10 +55,7 @@ simfrail <- function(reps,
     
     if (!skip.SE) {
       # Gather the estimated standard errors
-      vcov.args[["fit"]] <- fit
-      vcov.args[["Lambda.time"]] <- Lambda.time
-      vcov.args[["cores"]] <- 1
-      V <- do.call(vcov, vcov.args)
+      V <- do.call(vcov, c(list(fit=fit, Lambda.time=Lambda.time, cores=1), vcov.args))
       
       SE <- sqrt(diag(V))
       

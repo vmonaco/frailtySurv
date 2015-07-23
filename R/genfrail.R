@@ -181,7 +181,7 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
   # Covariates are named Z1, Z2, ...
   colnames(Z) <- paste("Z", 1:p, sep="")
   
-  dat <- data.frame(cluster=rep(1:N, cluster.sizes),
+  dat <- data.frame(family=rep(1:N, cluster.sizes),
                     rep=unlist(lapply(cluster.sizes, function(m) rep(1:m))), 
                     time=obs.time, 
                     status=obs.status,

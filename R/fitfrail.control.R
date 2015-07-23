@@ -4,7 +4,7 @@
 #' @export
 fitfrail.control <- function(fitmethod='score',
                              abstol=1e-8,
-                             reltol=1e-5,
+                             reltol=1e-6,
                              iter.max=100,
                              verbose=FALSE) {
   if (!fitmethod %in% c("score", "loglik")) stop("fitmethod must be one of: score, loglik")

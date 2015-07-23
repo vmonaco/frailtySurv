@@ -180,26 +180,22 @@ List bh(NumericVector d_,
   List phi_1_ = clone(N_dot);
   List phi_2_ = clone(N_dot);
   
-  // Zero everything out
-  for (int k = 0; k < n_timesteps; ++k) {
-    for (int i = 0; i < n_clusters; ++i) {
-      NumericMatrix H_i = H_(i);
-      NumericVector H_dot_i = H_dot(i);
-      NumericVector phi_1_i = phi_1_(i);
-      NumericVector phi_2_i = phi_2_(i);
-      NumericVector psi_i = psi_(i);
-      
-      for (int j = 0; j < H_i.nrow(); ++j) {
-        H_i(j, k) = 0;
-      }
-      H_dot_i(k) = 0;
-      
-      if (k == 0) {
-        phi_1_i(0) = phi(1, 0, 0, theta.begin(), frailty);
-        phi_2_i(0) = phi(2, 0, 0, theta.begin(), frailty);
-        psi_i(0) = phi_2_i(0)/phi_1_i(0);
-      }
+  // Compute k=0
+  for (int i = 0; i < n_clusters; ++i) {
+    NumericMatrix H_i = H_(i);
+    NumericVector H_dot_i = H_dot(i);
+    NumericVector phi_1_i = phi_1_(i);
+    NumericVector phi_2_i = phi_2_(i);
+    NumericVector psi_i = psi_(i);
+    
+    for (int j = 0; j < H_i.nrow(); ++j) {
+      H_i(j, 0) = 0;
     }
+    H_dot_i(0) = 0;
+    
+    phi_1_i(0) = phi(1, 0, 0, theta.begin(), frailty);
+    phi_2_i(0) = phi(2, 0, 0, theta.begin(), frailty);
+    psi_i(0) = phi_2_i(0)/phi_1_i(0);
   }
   
   // k starts from 1, not a typo; values at k=0 are set above
@@ -221,7 +217,7 @@ List bh(NumericVector d_,
           tmp += Y_i(j, k) * exp(sum(beta * X_i(j, _)));
         }
         
-        denom += tmp * psi_i(k - 1);
+        denom += psi_i(k - 1) * tmp;
       }
       
       lambda(k) = d_(k)/denom;
