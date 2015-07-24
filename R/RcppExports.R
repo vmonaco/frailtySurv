@@ -97,8 +97,8 @@ phi_prime_c <- function(k, N_dot, H_dot, theta, frailty, deriv_idx) {
     .Call('frailtyr_phi_prime_c', PACKAGE = 'frailtyr', k, N_dot, H_dot, theta, frailty, deriv_idx)
 }
 
-bh <- function(d_, X_, K_, Y_, N_dot, beta, theta, frailty) {
-    .Call('frailtyr_bh', PACKAGE = 'frailtyr', d_, X_, K_, Y_, N_dot, beta, theta, frailty)
+bh <- function(d_, X_, K_, Y_, N_, N_dot, beta, theta, frailty, weights) {
+    .Call('frailtyr_bh', PACKAGE = 'frailtyr', d_, X_, K_, Y_, N_, N_dot, beta, theta, frailty, weights)
 }
 
 loglikelihood <- function(X_, K_, I_, phi_1_, lambda, beta) {

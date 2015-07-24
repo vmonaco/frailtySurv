@@ -159,10 +159,12 @@ List bh(NumericVector d_,
         List X_, 
         List K_,
         List Y_, 
+        List N_,
         List N_dot,
         NumericVector beta, 
         NumericVector theta, 
-        String frailty) {
+        String frailty,
+        NumericVector weights) {
   
   int n_timesteps = d_.size();
   int n_clusters = X_.size();
@@ -201,26 +203,31 @@ List bh(NumericVector d_,
   // k starts from 1, not a typo; values at k=0 are set above
   for (int k = 1; k < n_timesteps; ++k) {
     double denom = 0;
+    double numer = 0;
     
     // Optimize by ignoring 0 terms, need to do the inner sums otherwise
     if (d_(k) > 0) {
       for (int i = 0; i < n_clusters; ++i) {
         NumericMatrix X_i = X_(i);
         NumericMatrix Y_i = Y_(i);
+        NumericMatrix N_i = N_(i);
         NumericVector N_dot_i = N_dot(i);
         NumericVector H_dot_i = H_dot(i);
         
         NumericVector psi_i = psi_(i);
         
-        double tmp = 0;
+        double denom_inner_sum = 0;
+        double numer_inner_sum = 0;
         for (int j = 0; j < X_i.nrow(); ++j) {
-          tmp += Y_i(j, k) * exp(sum(beta * X_i(j, _)));
+          denom_inner_sum += Y_i(j, k) * exp(sum(beta * X_i(j, _)));
+          numer_inner_sum += N_i(j, k) - N_i(j, k - 1);
         }
         
-        denom += psi_i(k - 1) * tmp;
+        denom += weights(i) * psi_i(k - 1) * denom_inner_sum;
+        numer += weights(i) * numer_inner_sum;
       }
       
-      lambda(k) = d_(k)/denom;
+      lambda(k) = numer/denom;
     } else {
       lambda(k) = 0;
     }

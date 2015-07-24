@@ -126,7 +126,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty,
     }, rep(0, k_tau))
     VARS$R_dot_ <- lapply(VARS$R_, colSums)
     
-    bh_ <- bh(d_, X_, K_, Y_, N_dot_, VARS$beta, VARS$theta, frailty)
+    bh_ <- bh(d_, X_, K_, Y_, N_, N_dot_, VARS$beta, VARS$theta, frailty, weights)
     
     VARS$H_ <- bh_$H_
     VARS$H_dot_ <- bh_$H_dot

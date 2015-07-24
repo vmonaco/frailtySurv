@@ -4,7 +4,7 @@
 \alias{fitfrail.control}
 \title{Initialize control parameters}
 \usage{
-fitfrail.control(fitmethod = "score", abstol = 1e-08, reltol = 1e-05,
+fitfrail.control(fitmethod = "score", abstol = 1e-08, reltol = 1e-06,
   iter.max = 100, verbose = FALSE)
 }
 \description{
