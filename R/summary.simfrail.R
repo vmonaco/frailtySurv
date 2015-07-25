@@ -24,7 +24,11 @@ summary.simfrail <- function(sim) {
     reps=attr(sim, "reps"),
     N=unique(sim$N),
     mean.K=mean(sim$mean.K),
-    frailty=attr(sim, "frailty")
+    frailty=attr(sim, "frailty"),
+    description=paste("Simulation: ", 
+                    attr(sim, "reps"), " reps, ",
+                    toString(unique(sim$N)), " clusters (avg. size ", mean(sim$mean.K), "), ",
+                    toString(attr(sim, "frailty")), " frailty", sep="")
   ))
   
   sum.sim

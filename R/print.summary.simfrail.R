@@ -7,11 +7,7 @@ print.summary.simfrail <- function(sum.sim, n.Lambda=3,
   savedig <- options(digits = digits)
   on.exit(options(savedig))
   
-  cat("Simulation: ", 
-      attr(sum.sim, "reps"), " reps, ",
-      attr(sum.sim, "N"), " clusters (avg. size ", attr(sum.sim, "mean.K"), "), ",
-      "and ", toString(attr(sum.sim, "frailty")), " frailty",
-      "\n", sep="")
+  cat(attr(sum.sim, "description"), "\n")
   
   dat <- as.data.frame(sum.sim)
   Lambda.cols <- names(dat)[grepl("^Lambda", names(dat))]

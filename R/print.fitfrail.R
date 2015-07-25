@@ -1,4 +1,4 @@
-print.fitfrail <- function(fit, digits=max(options()$digits - 3, 3), ...) {
+print.fitfrail <- function(fit, digits=max(options()$digits - 4, 3), ...) {
   
   savedig <- options(digits = digits)
   on.exit(options(savedig))
@@ -6,25 +6,22 @@ print.fitfrail <- function(fit, digits=max(options()$digits - 3, 3), ...) {
   cat("Call: ")
   dput(fit$call)
   
-  cat("\nCoefficients")
-  tmp <- cbind(fit$beta)
-  dimnames(tmp) <- list(names(fit$beta), "")
-  print(tmp, right=TRUE, print.gap = 32)
+  cat("\n")
+  tmp <- data.frame(Covariate=names(fit$beta), Coefficient=fit$beta)
+  print(format(tmp, width=11, justify="left", nsmall=digits), print.gap=5, row.names=FALSE, right=FALSE)
   
   cat("\n")
-  cat("Frailty distribution parameters   ", 
-      toString(format(round(fit$theta, digits), digits=digits)), 
-      " (", fit$frailty, ")\n",
-      sep="")
-  cat("Frailty distribution variance     ", 
-      format(round(fit$frailty.variance, digits), digits=digits), 
+  cat("Frailty distribution   ", 
+      fit$frailty, 
+      "(", toString(format(fit$theta, nsmall=digits)), "), ",
+      "VAR = ", format(fit$frailty.variance, nsmall=digits), 
       "\n",
       sep="")
-  cat("Log-likelihood                    ", 
-      format(round(fit$loglik, digits) , digits=digits), 
+  cat("Log-likelihood         ", 
+      format(fit$loglik, nsmall=digits), 
       "\n", 
       sep="")
-  cat("Converged (method)                ",
+  cat("Converged (method)     ",
       fit$iter,
       " iterations ",
       ifelse(fit$fitmethod == "score", "(solved score equations)", "(maximized log-likelihood)"),

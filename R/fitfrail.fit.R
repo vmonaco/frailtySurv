@@ -380,7 +380,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty,
     VARS$Lambda[sum(t >= time_steps)]
   })
   
-  list(beta = setNames(beta_hat, paste("beta.", names(beta_hat), sep="")),
+  list(beta = beta_hat, #setNames(beta_hat, paste("beta.", names(beta_hat), sep="")),
        theta = setNames(theta_hat, paste("theta.", 1:length(theta_hat), sep="")),
        time_steps = time_steps,
        d_ = d_,
