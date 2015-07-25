@@ -2,12 +2,30 @@
 % Please edit documentation in R/vcov.fitfrail.R
 \name{vcov.fitfrail}
 \alias{vcov.fitfrail}
-\title{Compute the variance/covariance matrix for a fitted object}
+\title{Compute the variance/covariance matrix for a fitfrail object}
 \usage{
 \method{vcov}{fitfrail}(fit, boot = TRUE, B = 100, Lambda.time = NULL,
   cores = 0)
 }
+\arguments{
+\item{fit}{a fitfrail object}
+
+\item{boot}{whether to use a weighted bootstrap. If boot == FALSE, a consistent
+estimator is used}
+
+\item{B}{number of repetitions in the weighted bootstrap. Defaults to 100.}
+
+\item{Lambda.time}{time points where the variance/covariance should be
+evaluated. If Lambda.time == NULL, then the points where
+the cumulative baseline hazard increases (where failures
+occur) are used.}
+
+\item{cores}{number of cores to use when computing the covariance matrix in parallel}
+}
+\value{
+V variance/covariance matrix for the fitfrail model parameters
+}
 \description{
-Compute the variance/covariance matrix for a fitted object
+Compute the variance/covariance matrix for a fitfrail object
 }
 

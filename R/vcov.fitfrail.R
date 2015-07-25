@@ -1,5 +1,16 @@
+#' Compute the variance/covariance matrix for a fitfrail object
 #' 
-#' Compute the variance/covariance matrix for a fitted object
+#' @param fit a fitfrail object
+#' @param boot whether to use a weighted bootstrap. If boot == FALSE, a consistent
+#'             estimator is used
+#' @param B number of repetitions in the weighted bootstrap. Defaults to 100.
+#' @param Lambda.time time points where the variance/covariance should be 
+#'                    evaluated. If Lambda.time == NULL, then the points where 
+#'                    the cumulative baseline hazard increases (where failures 
+#'                    occur) are used.
+#' @param cores number of cores to use when computing the covariance matrix in parallel
+#' 
+#' @return variance/covariance matrix for the fitfrail model parameters
 #' 
 #' @export
 vcov.fitfrail <- function(fit, boot=TRUE, B=100,
@@ -10,6 +21,11 @@ vcov.fitfrail <- function(fit, boot=TRUE, B=100,
   if (is.null(Lambda.time)) {
     Lambda.time <- fit$Lambda.time
   }
+  
+  # If V has already been computed and matches the size we expect
+  if (!is.null(fit[["V"]]) && 
+      nrow(fit[["V"]]) == (length(fit$beta)+length(fit$theta)+length(Lambda.time)))
+    return(fit[["V"]])
   
   fn <- function(s) {
     set.seed(s)
@@ -24,7 +40,7 @@ vcov.fitfrail <- function(fit, boot=TRUE, B=100,
     c(
       new.fit$beta,
       new.fit$theta,
-      setNames(new.fit$Lambdafn(Lambda.time), paste("Lambda.", 1:length(Lambda.time), sep=""))
+      setNames(new.fit$Lambdafn(Lambda.time), paste("Lambda.", format(Lambda.time, nsmall=2), sep=""))
     )
   }
   
@@ -51,5 +67,10 @@ vcov.fitfrail <- function(fit, boot=TRUE, B=100,
   
   hats <- t(simplify2array(hats))
   
-  cov(hats)
+  V <- cov(hats)
+  
+  # Cache the value for quick access later
+  eval.parent(substitute(fit[["V"]] <- V))
+  
+  V
 }

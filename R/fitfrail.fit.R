@@ -397,6 +397,7 @@ fitfrail.fit <- function(x, y, cluster, beta_init, theta_init, frailty,
        VARS=VARS,
        iter=VARS$iter,
        frailty.variance=vfrailty[[frailty]](theta_hat),
-       n.clusters=n_clusters
+       n.clusters=n_clusters,
+       V=NULL
       )
 }
