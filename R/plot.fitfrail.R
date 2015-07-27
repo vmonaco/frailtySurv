@@ -47,7 +47,7 @@ plot.fitfrail.fitter <- function(fit, show.loglik=TRUE, ...) {
   
 }
 
-plot.fitfrail.hazard <- function(fit, boot=TRUE, ...) {
+plot.fitfrail.hazard <- function(fit, boot=TRUE, CI=0.95, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Plotting requires the ggplot2 package")
   }
@@ -62,14 +62,16 @@ plot.fitfrail.hazard <- function(fit, boot=TRUE, ...) {
     xlab("Time") + 
     ylab("Cumulative baseline hazard") + 
     theme(legend.position="none") +
+    scale_x_continuous(breaks=seq(0, round(end), by=10))
     ggtitle(attr(fit, "description"))
   
   if (boot) {
     COV <- vcov(fit, boot=TRUE, ...)
     se.Lambda <- sqrt(diag(COV))[(fit$VARS$n.gamma+1):nrow(COV)]
     
-    LB <- fit$Lambda$Lambda - 1.96*se.Lambda
-    UB <- fit$Lambda$Lambda + 1.96*se.Lambda
+    Z.score <- qnorm((1-CI)/2)
+    LB <- fit$Lambda$Lambda - Z.score*se.Lambda
+    UB <- fit$Lambda$Lambda + Z.score*se.Lambda
     
     time <- c(fit$Lambda$time[2:length(fit$Lambda$time)], 
               fit$Lambda$time[length(fit$Lambda$time)] + mean(diff(fit$Lambda$time)))

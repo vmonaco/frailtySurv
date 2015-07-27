@@ -55,7 +55,7 @@ plot.simfrail.residuals <- function(sim, n.Lambda=3, ...) {
   legend("topright", legend=names(values), fill=1:n.vars, ncol=n.vars)
 }
 
-plot.simfrail.hazard <- function(sim, title=NULL, ...) {
+plot.simfrail.hazard <- function(sim, title=NULL, CI=0.95, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE) || 
       !requireNamespace("reshape2", quietly = TRUE)) {
     stop("Plotting requires the ggplot2, reshape2 packages")
@@ -77,8 +77,9 @@ plot.simfrail.hazard <- function(sim, title=NULL, ...) {
   values <- data.frame(x=Lambda.time, y=values)
   values$type <- "Actual"
   
+  Z.score <- qnorm((1-CI)/2)
   mean.se <- colMeans(se)
-  se <- data.frame(x=Lambda.time, lower=values$y-1.96*mean.se, upper=values$y+1.96*mean.se)
+  se <- data.frame(x=Lambda.time, lower=values$y-Z.score*mean.se, upper=values$y+Z.score*mean.se)
   se$type <- "Estimated 95% CI"
   
   p <- ggplot(melthats, aes(x=Time,y=value,color=type)) +
