@@ -89,6 +89,7 @@ double deriv_dgamma(double x, double *p, int deriv_idx) {
 
 double lt_dgamma(int p, double s, double* params) {
   double theta = params[0];
+  
   return pow(-1, p) * pow(1/theta, 1/theta) * 
     pow((1/theta) + s, -((1/theta) + p)) * 
     tgamma((1/theta) + p)/tgamma((1/theta));

@@ -61,9 +61,7 @@ double phi_prime_prime_deriv(double w, void* data) {
 
 double phi(int k, int N_dot, double H_dot, double *theta, String frailty) {
   // Laplace transform integrals
-  if (frailty == "none") {
-    return 1;
-  } else if (frailty == "gamma") {
+  if (frailty == "gamma") {
     return lt_dgamma(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
   } else if (frailty == "pvf") {
     return lt_dpvf(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
@@ -87,9 +85,7 @@ double phi(int k, int N_dot, double H_dot, double *theta, String frailty) {
 // phi using the derivative of the density wrt. parameter p[derive_idx]
 double phi_prime(int k, int N_dot, double H_dot, double *theta, String frailty, int deriv_idx) {
   // Laplace transform integrals
-  if (frailty == "none") {
-    return 0;
-  } else if (frailty == "gamma") {
+  if (frailty == "gamma") {
     return deriv_lt_dgamma(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
   } else if (frailty == "pvf") {
     return deriv_lt_dpvf(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
@@ -114,9 +110,7 @@ double phi_prime(int k, int N_dot, double H_dot, double *theta, String frailty, 
 // phi using the derivative of the density wrt. parameter p[derive_idx]
 double phi_prime_prime(int k, int N_dot, double H_dot, double *theta, String frailty, int deriv_idx_1, int deriv_idx_2) {
   // Laplace transform integrals
-  if (frailty == "none") {
-    return 0;
-  } else if (frailty == "gamma") {
+  if (frailty == "gamma") {
     return deriv_deriv_lt_dgamma(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2) * pow(-1, N_dot + k - 1);
   } else if (frailty == "pvf") {
     return deriv_deriv_lt_dpvf(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2) * pow(-1, N_dot + k - 1);

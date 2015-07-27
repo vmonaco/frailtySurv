@@ -700,10 +700,10 @@ init.frailty <- list(
 )
 
 lb.frailty <- list(
-  gamma=0,
-  pvf=0,
-  invgauss=0,
-  lognormal=0
+  gamma=1e-2,
+  pvf=1e-5,
+  invgauss=1e-5,
+  lognormal=1e-5
 )
 
 ub.frailty <- list(
