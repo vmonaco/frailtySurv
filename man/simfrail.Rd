@@ -25,4 +25,7 @@ sim
 Generate data and fit a model many times.
 Reproduceable results can be obtained by simply setting the seed before calling simfrail.
 }
+\examples{
+TODO
+}
 

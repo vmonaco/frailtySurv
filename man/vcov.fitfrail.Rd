@@ -2,10 +2,9 @@
 % Please edit documentation in R/vcov.fitfrail.R
 \name{vcov.fitfrail}
 \alias{vcov.fitfrail}
-\title{Compute the variance/covariance matrix for a fitfrail object}
+\title{Compute covariance matrix for fitfrail model}
 \usage{
-\method{vcov}{fitfrail}(fit, boot = TRUE, B = 100, Lambda.time = NULL,
-  cores = 0)
+vcov.fitfrail <- function(fit, boot=TRUE)
 }
 \arguments{
 \item{fit}{a fitfrail object}
@@ -23,9 +22,12 @@ occur) are used.}
 \item{cores}{number of cores to use when computing the covariance matrix in parallel}
 }
 \value{
-V variance/covariance matrix for the fitfrail model parameters
+variance/covariance matrix for the fitfrail model parameters
 }
 \description{
-Compute the variance/covariance matrix for a fitfrail object
+Compute the variance/covariance matrix for fitfrail estimated parameters
+}
+\examples{
+TODO
 }
 

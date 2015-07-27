@@ -11,6 +11,9 @@
 #' 
 #' @return sim
 #' 
+#' @examples 
+#' TODO
+#' 
 #' @export
 simfrail <- function(reps, 
                      genfrail.args, 

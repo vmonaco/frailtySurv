@@ -9,7 +9,7 @@ plot.simfrail <- function(sim, type=c("residuals","hazard"), ...) {
 plot.simfrail.residuals <- function(sim, n.Lambda=3, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE) || 
       !requireNamespace("reshape2", quietly = TRUE)) {
-    stop("Plotting residuals requires the ggplot2, and reshape2 packages")
+    stop("Plotting requires the ggplot2, and reshape2 packages")
   }
   require(reshape2)
   
@@ -57,14 +57,11 @@ plot.simfrail.residuals <- function(sim, n.Lambda=3, ...) {
 
 plot.simfrail.hazard <- function(sim, title=NULL, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE) || 
-      !requireNamespace("reshape2", quietly = TRUE) || 
-      !requireNamespace("gridExtra", quietly = TRUE) ||
-      !requireNamespace("Hmisc", quietly = TRUE)) {
-    stop("Plotting the hazard requires the ggplot2, gridExtra, reshape2, and Hmisc packages")
+      !requireNamespace("reshape2", quietly = TRUE)) {
+    stop("Plotting requires the ggplot2, reshape2 packages")
   }
   require(ggplot2)
   require(reshape2)
-  require(gridExtra)
   
   hats <- sim[,grepl("^hat.Lambda", names(sim))]
   se <- sim[,grepl("^se.Lambda", names(sim))]

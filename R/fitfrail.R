@@ -71,20 +71,26 @@ fitfrail <- function(formula, dat, control, weights=NULL,
   X <- X[, !xdrop, drop=FALSE]
   
   # Initialize beta to the coeffs determined by a coxph model without hidden frailty
-  beta_init <- coxph.fit(X, Y, strata=NULL, 
+  init.beta <- coxph.fit(X, Y, strata=NULL, 
                           offset=NULL, init=NULL, 
                           control=coxph.control(), weights=NULL, 
                           method="efron", row.names(mf))$coefficients
   
   # TODO: theta should initialize to a zero vector, dependening the num density args
-  theta_init <- c(0.5)
+  init.theta <- init.frailty[[frailty]]
   
   fit <- fitfrail.fit(X, Y, cluster, 
-                           beta_init, theta_init, 
+                           init.beta, init.theta, 
                            frailty,
                            control, row.names(mf),
                       weights)
   class(fit) <- 'fitfrail'
   fit$call <- Call
+  
+  attr(fit, "description") <- paste("fitfrail: ", 
+                                    fit$VARS$n.clusters, " clusters (avg. size ", 
+                                    mean(fit$VARS$cluster_sizes), "), ",
+                                    toString(frailty), " frailty", sep="")
+  
   fit
 }

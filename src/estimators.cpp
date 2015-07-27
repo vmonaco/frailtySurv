@@ -293,7 +293,6 @@ NumericVector loglikelihood(List X_,
       // K_i[j] is an R index
       if (I_i(j) > 0) { 
         term1 += log(lambda(K_i(j)-1)) + sum(beta * X_i(j, _));
-        // term1 += log(lambda(K_i(j)-1) * exp(sum(beta * X_i(j, _))));
       }
     }
     double term2 =  log(phi_1_i(k_tau));

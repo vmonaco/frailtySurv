@@ -691,3 +691,24 @@ vfrailty <- list(
   lognormal=vlognormal_r,
   invgauss=vinvgauss_r
 )
+
+init.frailty <- list(
+  gamma=1,
+  pvf=0.5,
+  invgauss=1,
+  lognormal=1
+)
+
+lb.frailty <- list(
+  gamma=0,
+  pvf=0,
+  invgauss=0,
+  lognormal=0
+)
+
+ub.frailty <- list(
+  gamma=Inf,
+  pvf=1,
+  invgauss=Inf,
+  lognormal=Inf
+)

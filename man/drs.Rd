@@ -11,7 +11,7 @@ subject, one row for each eye:
   \item{status}{outcome at the end of the observation period, where
   1=blindness and 0 indicates censorship}
   \item{treated}{a binary covariate, where 1=treated or 0=untreated}
-  \item{age_at_onset}{age at the onset of diabetes}
+  \item{age_at_onset}{age (in years) at the onset of diabetes}
   \item{laser_type}{type of laser used for treatment, where 1=xenon, 2=argon}
   \item{diabetes_type}{type of diabetes, where 1=juvenile (age at dx < 20) and 2=adult}
 
