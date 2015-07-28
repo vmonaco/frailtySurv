@@ -39,8 +39,7 @@ plot.simfrail.residuals <- function(sim, n.Lambda=3, ...) {
     function(col) sim[[paste("hat.", col, sep="")]] - sim[[col]], rep(0, nrow(sim)))))
   
   # Select N and residuals columns, start with res
-  var.names <- names(values)
-  n.vars <- length(values)
+  n.vars <- length(value.cols)
   
   residuals.melt <- reshape2::melt(residuals, id = c("N"))
   cases <- c(t(unique(residuals.melt["N"])))
@@ -52,7 +51,7 @@ plot.simfrail.residuals <- function(sim, n.Lambda=3, ...) {
           xlab="N", ylab="Residual",
           main=attr(summary(sim), "description"))
   abline(h=0)
-  legend("topright", legend=names(values), fill=1:n.vars, ncol=n.vars)
+  legend("topright", legend=value.cols, fill=1:n.vars, ncol=n.vars)
 }
 
 plot.simfrail.hazard <- function(sim, title=NULL, CI=0.95, ...) {

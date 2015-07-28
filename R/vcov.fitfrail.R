@@ -27,7 +27,7 @@ vcov.fitfrail <- function(fit, boot=FALSE, B=100,
   
   # Use the time points where CBH increases
   if (is.null(Lambda.time)) {
-    Lambda.time <- fit$Lambda.time
+    Lambda.time <- fit$Lambda$time
   }
   
   # If V has already been computed the same way and matches the size we expect
@@ -51,7 +51,7 @@ vcov.fitfrail <- function(fit, boot=FALSE, B=100,
       
       c(new.fit$beta,
         new.fit$theta,
-        setNames(new.fit$Lambdafn(Lambda.time), 
+        setNames(new.fit$fun.Lambda(Lambda.time), 
                  paste("Lambda.", format(Lambda.time, nsmall=2), sep="")))
     }
     
@@ -89,17 +89,17 @@ vcov.fitfrail <- function(fit, boot=FALSE, B=100,
     Q_ <- c(Q_beta_, Q_theta_)
     
     # calligraphic Y, Ycal_[t]
-    Ycal_ <- Ycal(X_, Y_, psi_, hat.beta)
+    Ycal_ <- Ycal(X_, R_star, Y_, psi_, hat.beta)
     
     # eta_[t]
     eta_ <- eta(phi_1_, phi_2_, phi_3_)
     
     # Upsilon
-    Upsilon_ <- Upsilon(X_, K_, R_dot_, eta_, Ycal_, hat.beta)
+    Upsilon_ <- Upsilon(X_, R_star, K_, R_dot_, eta_, Ycal_, hat.beta)
     
     # Omega_[[i]][[j, t]
     # Compute everything
-    Omega_ <- Omega(X_, N_, R_dot_, eta_, Ycal_, hat.beta)
+    Omega_ <- Omega(X_, R_star, N_, R_dot_, eta_, Ycal_, hat.beta)
     
     # p_hat_[t]
     p_hat_ <- p_hat(I_, Upsilon_, Omega_, N_tilde_)
@@ -116,7 +116,7 @@ vcov.fitfrail <- function(fit, boot=FALSE, B=100,
     ################################################################## Step III
     
     # M_hat_[[i]][j,s]
-    M_hat_ <- M_hat(X_, N_, Y_, psi_, hat.beta, Lambda)
+    M_hat_ <- M_hat(X_, R_star, N_, Y_, psi_, hat.beta, Lambda)
     
     # u_star_[i,r]
     u_star_ <- u_star(pi_, p_hat_, Ycal_, M_hat_)

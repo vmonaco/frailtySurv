@@ -150,7 +150,7 @@ double phi_prime_c(int k, int N_dot, double H_dot, double theta, String frailty,
 // Baseline hazard estimator, returns some other useful vars
 // [[Rcpp::export]]
 List bh(NumericVector d_,
-        List X_, 
+        List R_star, 
         List K_,
         List Y_, 
         List N_,
@@ -161,7 +161,7 @@ List bh(NumericVector d_,
         NumericVector weights) {
   
   int n_timesteps = d_.size();
-  int n_clusters = X_.size();
+  int n_clusters = R_star.size();
   
   // Lambda_hat is the baseline cumulative hazard estimate
   NumericVector Lambda(n_timesteps);
@@ -202,7 +202,7 @@ List bh(NumericVector d_,
     // Optimize by ignoring 0 terms, need to do the inner sums otherwise
     if (d_(k) > 0) {
       for (int i = 0; i < n_clusters; ++i) {
-        NumericMatrix X_i = X_(i);
+        NumericVector R_star_i = R_star(i);
         NumericMatrix Y_i = Y_(i);
         NumericMatrix N_i = N_(i);
         NumericVector N_dot_i = N_dot(i);
@@ -212,8 +212,8 @@ List bh(NumericVector d_,
         
         double denom_inner_sum = 0;
         double numer_inner_sum = 0;
-        for (int j = 0; j < X_i.nrow(); ++j) {
-          denom_inner_sum += Y_i(j, k) * exp(sum(beta * X_i(j, _)));
+        for (int j = 0; j < R_star_i.size(); ++j) {
+          denom_inner_sum += Y_i(j, k) * R_star_i(j);
           numer_inner_sum += N_i(j, k) - N_i(j, k - 1);
         }
         
@@ -229,7 +229,7 @@ List bh(NumericVector d_,
     Lambda(k) = Lambda(k - 1) + lambda(k);
     
     for (int i = 0; i < n_clusters; ++i) {
-      NumericMatrix X_i = X_(i);
+      NumericVector R_star_i = R_star(i);
       NumericVector K_i = K_(i);
       NumericMatrix H_i = H_(i);
       NumericVector H_dot_i = H_dot(i);
@@ -239,30 +239,39 @@ List bh(NumericVector d_,
       NumericVector phi_2_i = phi_2_(i);
       NumericVector psi_i = psi_(i);
       
-      for (int j = 0; j < X_i.nrow(); ++j) {
-        // K_ is the rank of failure as an R index
-        int k_min = min(NumericVector::create(K_i(j) - 1, k));
-        H_i(j, k) = Lambda(k_min) * exp(sum(beta * X_i(j, _)));
-      }
+      
       // Updates for the next iteration
-      H_dot_i(k) = sum(H_i( _ , k));
-      phi_1_i(k) = phi(1, N_dot_i(k), H_dot_i(k), theta.begin(), frailty);
-      phi_2_i(k) = phi(2, N_dot_i(k), H_dot_i(k), theta.begin(), frailty);
-      psi_i(k) = phi_2_i(k)/phi_1_i(k);
+      if (d_(k) > 0) {
+        for (int j = 0; j < R_star_i.size(); ++j) {
+          // K_ is the rank of failure as an R index
+          int k_min = min(NumericVector::create(K_i(j) - 1, k));
+          H_i(j, k) = Lambda(k_min) * R_star_i(j);
+        }
+        
+        H_dot_i(k) = sum(H_i( _ , k));
+        phi_1_i(k) = phi(1, N_dot_i(k), H_dot_i(k), theta.begin(), frailty);
+        phi_2_i(k) = phi(2, N_dot_i(k), H_dot_i(k), theta.begin(), frailty);
+        psi_i(k) = phi_2_i(k)/phi_1_i(k);
+      } else {
+        H_i(_, k) = H_i(_, k - 1);
+        H_dot_i(k) = H_dot_i(k - 1);
+        phi_1_i(k) = phi_1_i(k - 1);
+        phi_2_i(k) = phi_2_i(k - 1);
+        psi_i(k) = psi_i(k - 1);
+      }
     }
   }
   
   return List::create(Named("H_") = H_,
-                            Named("H_dot") = H_dot,
-                            Named("Lambda") = Lambda,
-                            Named("lambda") = lambda,
-                            Named("psi_") = psi_,
-                            Named("phi_1_") = phi_1_,
-                            Named("phi_2_") = phi_2_
-                            );
+                      Named("H_dot") = H_dot,
+                      Named("Lambda") = Lambda,
+                      Named("lambda") = lambda,
+                      Named("psi_") = psi_,
+                      Named("phi_1_") = phi_1_,
+                      Named("phi_2_") = phi_2_
+  );
 }
 
-// This function is relatively simple, but uses some pre-computed quantities (eg. phi_1_)
 // [[Rcpp::export]]
 NumericVector loglikelihood(List X_,
                      List K_, 
@@ -444,6 +453,7 @@ List dH_dbeta(int s,
               List K_,
               List R_,
               List R_dot_,
+              List R_star,
               List phi_1_,
               List phi_2_,
               List phi_3_,
@@ -507,6 +517,7 @@ List dH_dbeta(int s,
     
     for (int i = 0; i < n_clusters; ++i) {
       NumericMatrix X_i = X_(i);
+      NumericVector R_star_i = R_star(i);
       NumericVector K_i = K_(i);
       NumericMatrix dH_dbeta_i = dH_dbeta_(i);
       NumericVector dH_dot_dbeta_i = dH_dot_dbeta_(i);
@@ -514,8 +525,8 @@ List dH_dbeta(int s,
       for (int j = 0; j < X_i.nrow(); ++j) {
         // K_ is the rank of failure as an R index
         int k_min = min(NumericVector::create(K_i(j) - 1, k));
-        dH_dbeta_i(j, k) = dLambda_dbeta(k_min) * exp(sum(beta * X_i(j, _))) + 
-          Lambda(k_min) * exp(sum(beta * X_i(j, _))) * X_i(j, s);
+        dH_dbeta_i(j, k) = dLambda_dbeta(k_min) * R_star_i(j) + 
+          Lambda(k_min) * R_star_i(j) * X_i(j, s);
       }
       
       dH_dot_dbeta_i(k) = sum(dH_dbeta_i( _ , k));
@@ -536,6 +547,7 @@ List dH_dtheta(NumericVector d_,
                List K_,
                List R_,
                List R_dot_,
+               List R_star,
                List phi_1_,
                List phi_2_,
                List phi_3_,
@@ -599,6 +611,7 @@ List dH_dtheta(NumericVector d_,
     
     for (int i = 0; i < n_clusters; ++i) {
       NumericMatrix X_i = X_(i);
+      NumericVector R_star_i = R_star(i);
       NumericVector K_i = K_(i);
       NumericMatrix dH_dtheta_i = dH_dtheta_(i);
       NumericVector dH_dot_dtheta_i = dH_dot_dtheta_(i);
@@ -606,7 +619,7 @@ List dH_dtheta(NumericVector d_,
       for (int j = 0; j < X_i.nrow(); ++j) {
         // K_ is the rank of failure as an R index
         int k_min = min(NumericVector::create(K_i(j) - 1, k));
-        dH_dtheta_i(j, k) = dLambda_dtheta(k_min) * exp(sum(beta * X_i(j, _)));
+        dH_dtheta_i(j, k) = dLambda_dtheta(k_min) * R_star_i(j);
       }
       dH_dot_dtheta_i(k) = sum(dH_dtheta_i( _ , k));
     }
@@ -888,6 +901,7 @@ List Q_theta(List H_,
 
 // [[Rcpp::export]]
 NumericVector Ycal(List X_,
+                   List R_star,
                    List Y_,
                    List psi_,
                    NumericVector beta) {
@@ -907,11 +921,12 @@ NumericVector Ycal(List X_,
       NumericMatrix Y_i = Y_(i);
       
       // Vectors
+      NumericVector R_star_i = R_star(i);
       NumericVector psi_i = psi_(i);
       
       double inner_sum = 0;
       for (int j = 0; j < X_i.nrow(); ++j) {
-        inner_sum += Y_i(j, s) * exp(sum(beta * X_i(j, _)));
+        inner_sum += Y_i(j, s) * R_star_i(j);
       }
       
       outer_sum += psi_i(s) * inner_sum;
@@ -952,6 +967,7 @@ List eta(List phi_1_,
 
 // [[Rcpp::export]]
 NumericVector Upsilon(List X_,
+                      List R_star,
                       List K_,
                       List R_dot_,
                       List eta_,
@@ -971,13 +987,14 @@ NumericVector Upsilon(List X_,
       NumericMatrix X_i = X_(i);
       
       // Vectors
+      NumericVector R_star_i = R_star(i);
       NumericVector K_i = K_(i);
       NumericVector R_dot_i = R_dot_(i);
       NumericVector eta_i = eta_(i);
       
       for (int j = 0; j < X_i.nrow(); ++j) {
         if ((K_i(j)-1) > s) {
-          factor3 += R_dot_i(s) * eta_i(s) * exp(sum(beta * X_i(j, _)));
+          factor3 += R_dot_i(s) * eta_i(s) * R_star_i(j);
         }
       }
     }
@@ -990,6 +1007,7 @@ NumericVector Upsilon(List X_,
 
 // [[Rcpp::export]]
 List Omega(List X_,
+           List R_star,
            List N_,
            List R_dot_,
            List eta_,
@@ -1017,6 +1035,7 @@ List Omega(List X_,
     NumericMatrix N_i = N_(i);
     NumericMatrix Omega_i = Omega_(i);
     
+    NumericVector R_star_i = R_star(i);
     NumericVector R_dot_i = R_dot_(i);
     NumericVector eta_i = eta_(i);
     
@@ -1024,7 +1043,7 @@ List Omega(List X_,
       
       for (int u = 1; u < n_timesteps; ++u) {
         Omega_i(j, u) = pow(Ycal_(u), -2) * R_dot_i(u) * eta_i(u) * 
-          exp(sum(beta * X_i(j, _))) * dN_sum(u);
+          R_star_i(j) * dN_sum(u);
       }
     }
   }
@@ -1139,6 +1158,7 @@ double G_rl(NumericVector pi_r,
 
 // [[Rcpp::export]]
 List M_hat(List X_,
+           List R_star,
            List N_,
            List Y_,
            List psi_,
@@ -1155,6 +1175,7 @@ List M_hat(List X_,
     NumericMatrix N_i = N_(i);
     NumericMatrix Y_i = Y_(i);
     NumericMatrix M_hat_i = M_hat_(i);
+    NumericVector R_star_i = R_star(i);
     NumericVector psi_i = psi_(i);
     
     for (int j = 0; j < X_i.nrow(); ++j) {
@@ -1162,7 +1183,7 @@ List M_hat(List X_,
         double integration = 0;
         
         for (int u = 1; u <= t; ++u) {
-          integration += exp(sum(beta * X_i(j, _))) * Y_i(j, u) * psi_i(u - 1) * 
+          integration += R_star_i(j) * Y_i(j, u) * psi_i(u - 1) * 
             (Lambda(u) - Lambda(u - 1));
         }
         

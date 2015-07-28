@@ -53,7 +53,7 @@ simfrail <- function(reps,
                          paste("hat.beta.", 1:length(beta), sep=""))
     hat.theta <- setNames(fit$theta, 
                           paste("hat.theta.", 1:length(theta), sep=""))
-    hat.Lambda <- setNames(fit$Lambdafn(Lambda.time), 
+    hat.Lambda <- setNames(fit$fun.Lambda(Lambda.time), 
                            paste("hat.Lambda.", 1:length(Lambda.time), sep=""))
     
     if (!skip.SE) {
@@ -205,14 +205,14 @@ simcoxph <- function(reps,
     Lambda_hat <- c(0, bh$hazard)
     time_steps <- c(0, bh$time)
     
-    Lambdafn <- Vectorize(function(t) {
+    fun.Lambda <- Vectorize(function(t) {
       if (t <= 0) {
         return(0);
       }
       Lambda_hat[sum(t > time_steps)]
     })
     
-    Lambda <- Lambdafn(Lambda.time)
+    Lambda <- fun.Lambda(Lambda.time)
     names(Lambda) <- paste("Lambda.", Lambda.time, sep="")
     
     COV <- vcov(fit)

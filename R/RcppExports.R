@@ -97,8 +97,8 @@ phi_prime_c <- function(k, N_dot, H_dot, theta, frailty, deriv_idx) {
     .Call('frailtyr_phi_prime_c', PACKAGE = 'frailtyr', k, N_dot, H_dot, theta, frailty, deriv_idx)
 }
 
-bh <- function(d_, X_, K_, Y_, N_, N_dot, beta, theta, frailty, weights) {
-    .Call('frailtyr_bh', PACKAGE = 'frailtyr', d_, X_, K_, Y_, N_, N_dot, beta, theta, frailty, weights)
+bh <- function(d_, R_star, K_, Y_, N_, N_dot, beta, theta, frailty, weights) {
+    .Call('frailtyr_bh', PACKAGE = 'frailtyr', d_, R_star, K_, Y_, N_, N_dot, beta, theta, frailty, weights)
 }
 
 loglikelihood <- function(X_, K_, I_, phi_1_, lambda, beta) {
@@ -125,12 +125,12 @@ phi_prime_prime_k <- function(s, theta_idx_1, theta_idx_2, N_dot_, H_dot_, theta
     .Call('frailtyr_phi_prime_prime_k', PACKAGE = 'frailtyr', s, theta_idx_1, theta_idx_2, N_dot_, H_dot_, theta, frailty, kstart)
 }
 
-dH_dbeta <- function(s, d_, X_, K_, R_, R_dot_, phi_1_, phi_2_, phi_3_, Lambda, lambda, beta, theta, frailty) {
-    .Call('frailtyr_dH_dbeta', PACKAGE = 'frailtyr', s, d_, X_, K_, R_, R_dot_, phi_1_, phi_2_, phi_3_, Lambda, lambda, beta, theta, frailty)
+dH_dbeta <- function(s, d_, X_, K_, R_, R_dot_, R_star, phi_1_, phi_2_, phi_3_, Lambda, lambda, beta, theta, frailty) {
+    .Call('frailtyr_dH_dbeta', PACKAGE = 'frailtyr', s, d_, X_, K_, R_, R_dot_, R_star, phi_1_, phi_2_, phi_3_, Lambda, lambda, beta, theta, frailty)
 }
 
-dH_dtheta <- function(d_, X_, K_, R_, R_dot_, phi_1_, phi_2_, phi_3_, phi_prime_1_, phi_prime_2_, Lambda, lambda, beta) {
-    .Call('frailtyr_dH_dtheta', PACKAGE = 'frailtyr', d_, X_, K_, R_, R_dot_, phi_1_, phi_2_, phi_3_, phi_prime_1_, phi_prime_2_, Lambda, lambda, beta)
+dH_dtheta <- function(d_, X_, K_, R_, R_dot_, R_star, phi_1_, phi_2_, phi_3_, phi_prime_1_, phi_prime_2_, Lambda, lambda, beta) {
+    .Call('frailtyr_dH_dtheta', PACKAGE = 'frailtyr', d_, X_, K_, R_, R_dot_, R_star, phi_1_, phi_2_, phi_3_, phi_prime_1_, phi_prime_2_, Lambda, lambda, beta)
 }
 
 jacobian_beta_beta <- function(l, X_, K_, H_, phi_1_, phi_2_, phi_3_, dH_dbeta_, dH_dot_dbeta_) {
@@ -157,20 +157,20 @@ Q_theta <- function(H_, R_star, phi_1_, phi_2_, phi_prime_1_, phi_prime_2_) {
     .Call('frailtyr_Q_theta', PACKAGE = 'frailtyr', H_, R_star, phi_1_, phi_2_, phi_prime_1_, phi_prime_2_)
 }
 
-Ycal <- function(X_, Y_, psi_, beta) {
-    .Call('frailtyr_Ycal', PACKAGE = 'frailtyr', X_, Y_, psi_, beta)
+Ycal <- function(X_, R_star, Y_, psi_, beta) {
+    .Call('frailtyr_Ycal', PACKAGE = 'frailtyr', X_, R_star, Y_, psi_, beta)
 }
 
 eta <- function(phi_1_, phi_2_, phi_3_) {
     .Call('frailtyr_eta', PACKAGE = 'frailtyr', phi_1_, phi_2_, phi_3_)
 }
 
-Upsilon <- function(X_, K_, R_dot_, eta_, Ycal_, beta) {
-    .Call('frailtyr_Upsilon', PACKAGE = 'frailtyr', X_, K_, R_dot_, eta_, Ycal_, beta)
+Upsilon <- function(X_, R_star, K_, R_dot_, eta_, Ycal_, beta) {
+    .Call('frailtyr_Upsilon', PACKAGE = 'frailtyr', X_, R_star, K_, R_dot_, eta_, Ycal_, beta)
 }
 
-Omega <- function(X_, N_, R_dot_, eta_, Ycal_, beta) {
-    .Call('frailtyr_Omega', PACKAGE = 'frailtyr', X_, N_, R_dot_, eta_, Ycal_, beta)
+Omega <- function(X_, R_star, N_, R_dot_, eta_, Ycal_, beta) {
+    .Call('frailtyr_Omega', PACKAGE = 'frailtyr', X_, R_star, N_, R_dot_, eta_, Ycal_, beta)
 }
 
 p_hat <- function(I_, Upsilon_, Omega_, N_tilde_) {
@@ -185,8 +185,8 @@ G_rl <- function(pi_r, pi_l, p_hat, Ycal_, N_) {
     .Call('frailtyr_G_rl', PACKAGE = 'frailtyr', pi_r, pi_l, p_hat, Ycal_, N_)
 }
 
-M_hat <- function(X_, N_, Y_, psi_, beta, Lambda) {
-    .Call('frailtyr_M_hat', PACKAGE = 'frailtyr', X_, N_, Y_, psi_, beta, Lambda)
+M_hat <- function(X_, R_star, N_, Y_, psi_, beta, Lambda) {
+    .Call('frailtyr_M_hat', PACKAGE = 'frailtyr', X_, R_star, N_, Y_, psi_, beta, Lambda)
 }
 
 u_star <- function(pi_, p_hat, Ycal_, M_hat_) {

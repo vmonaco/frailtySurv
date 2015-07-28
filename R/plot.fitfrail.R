@@ -56,7 +56,7 @@ plot.fitfrail.hazard <- function(fit, boot=TRUE, CI=0.95, ...) {
   
   Lambda <- fit$Lambda
   end <- Lambda$time[nrow(Lambda)] + mean(diff(fit$Lambda$time))
-  Lambda[nrow(Lambda)+1,] <- c(end, fit$Lambdafn(end))
+  Lambda[nrow(Lambda)+1,] <- c(end, fit$fun.Lambda(end))
   
   p <- qplot(time, Lambda, data = Lambda, geom="step") +
     geom_rug(sides="b", size=0.5) +

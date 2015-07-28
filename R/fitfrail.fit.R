@@ -14,9 +14,6 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
   # more complex, but avoids repeating expensive computations
   VARS <- environment()
   
-  # Num observations
-  # n <- nrow(y)
-  
   # Size of beta, theta, and gamma = c(beta, theta)
   n.beta <- length(init.beta)
   n.theta <- length(init.theta)
@@ -27,19 +24,16 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
   time <- y[,1]
   status <- y[,2]
   
-  # Unique time steps where failures occur
-  Lambda.time <- c(0, sort(unique(time[status > 0])))
-  
-#   time_sorted_idx <- order(time)
-#   time_steps <- c(0, time[time_sorted_idx])
-  time_steps <- c(0, sort(unique(time)))
+  time_sorted_idx <- order(time)
+  time_steps <- c(0, time[time_sorted_idx])
+  # time_steps <- c(0, sort(unique(time)))
   k_tau <- length(time_steps) # index of the last time step
   
   # d_[k] is the number of failures at time t_k
-  d_ <- vapply(seq_along(time_steps), function(k) {
-    sum(status[time == time_steps[k]])
-  }, 0)
-  # d_ <- c(0, unname(status[time_sorted_idx]))
+#   d_ <- vapply(seq_along(time_steps), function(k) {
+#     sum(status[time == time_steps[k]])
+#   }, 0)
+  d_ <- c(0, unname(status[time_sorted_idx]))
   
   # Variables indexed by [[i]][j,] where i is cluster name and j is member
   X_ <- split.data.frame(x, cluster) # Covariates
@@ -52,8 +46,8 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
   }
   
   # Index of the observed time, K_[[i]][j]
-  K_ <- split(1 + increasing_rank(time), cluster) 
-  # K_ <- split(1 + rank(time, ties.method="first"), cluster)
+  # K_ <- split(1 + increasing_rank(time), cluster) 
+  K_ <- split(1 + rank(time, ties.method="first"), cluster)
   
   # Cluster names and sizes
   cluster_names <- levels(cluster)
@@ -101,7 +95,6 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
     }, rep(0, k_tau))
   
   iter <- 0
-  
   trace <- matrix(nrow=0, ncol=n.gamma+2)
   colnames(trace) <- c("Iteration",
                        paste("beta.", names(init.beta), sep=""),
@@ -130,7 +123,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
         exp(sum(hat.beta * X_[[i]][j,]))
       }, 0)
       
-      bh_ <- bh(d_, X_, K_, Y_, N_, N_dot_, hat.beta, hat.theta, frailty, weights)
+      bh_ <- bh(d_, R_star, K_, Y_, N_, N_dot_, hat.beta, hat.theta, frailty, weights)
       
       H_ <- bh_$H_
       H_dot_ <- bh_$H_dot
@@ -197,14 +190,14 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
                           N_dot_, H_dot_, hat.theta, frailty, k_tau)})})
     
     dH_dbeta_ <- lapply(1:n.beta, function(s) {
-      dH_dbeta(s, d_, X_, K_, R_, R_dot_, 
+      dH_dbeta(s, d_, X_, K_, R_, R_dot_, R_star,
                phi_1_, phi_2_, phi_3_, 
                Lambda, lambda,
                hat.beta, hat.theta, frailty)
     })
     
     dH_dtheta_ <- lapply(1:n.theta, function(s) {
-      dH_dtheta(d_, X_, K_, R_, R_dot_,
+      dH_dtheta(d_, X_, K_, R_, R_dot_, R_star,
                 phi_1_, phi_2_, phi_3_,
                 phi_prime_1_[[s]], phi_prime_2_[[s]],
                 Lambda, lambda, hat.beta)
@@ -275,23 +268,27 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
   hat.beta <- hat.gamma[1:n.beta]
   hat.theta <- hat.gamma[(n.beta+1):(n.gamma)]
   
-  Lambdafn <- Vectorize(function(t) {
+  # Unique time steps where failures occur
+  df.lambda <- aggregate(lambda, list(time_steps), sum)
+  names(df.lambda) <- c("time","lambda")
+  df.Lambda <- data.frame(time=df.lambda$time, Lambda=cumsum(df.lambda$lambda))
+  df.Lambda <- df.Lambda[duplicated(df.Lambda$Lambda)==FALSE,]
+  
+  fun.Lambda <- Vectorize(function(t) {
     if (t <= 0) {
       return(0);
     }
-    Lambda[sum(t >= Lambda.time)]
+    df.Lambda$Lambda[sum(t >= df.Lambda$time)]
   })
   
   list(beta=hat.beta,
        theta=setNames(hat.theta, paste("theta.", 1:length(hat.theta), sep="")),
-       Lambdafn=Lambdafn,
-       Lambda=data.frame(time=Lambda.time, Lambda=Lambdafn(Lambda.time)),
+       fun.Lambda=fun.Lambda,
+       Lambda=df.Lambda,
        frailty=frailty,
        frailty.variance=vfrailty[[frailty]](hat.theta),
        loglik=loglik,
        iter=iter,
-       time_steps=time_steps,
-       Lambda.time=Lambda.time,
        fitter=fitter,
        fitmethod=control$fitmethod,
        n.clusters=n.clusters,
