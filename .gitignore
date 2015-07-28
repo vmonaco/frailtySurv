@@ -3,6 +3,11 @@
 \#*#
 *~
 
+# binaries
+*.o
+*.so
+*.a
+
 ### R 
 .Rhistory
 .Rapp.history
