@@ -1,7 +1,7 @@
 #' Repeatedly simulate survival data and fit a model
 #' 
 #' Generate data and fit a model many times. 
-#' Reproduceable results can be obtained by simply setting the seed before calling simfrail.
+#' Reproduceable sim can be obtained by simply setting the seed before calling simfrail.
 #' 
 #' @param reps number of times to repeat the simulation
 #' @param genfrail.args 
@@ -126,16 +126,19 @@ simfrail <- function(reps,
 # Perform simfrail for multiple param values to passed genfrail
 simfrail.multigen <- function(reps, seed, genfrail.args, fitfrail.args, Lambda.time,
                               param.name, param.values, ...) {
-  results <- lapply(param.values, function(pvalue) {
+  sim <- lapply(param.values, function(pvalue) {
     genfrail.args[[param.name]] <- pvalue
     set.seed(seed) # seed before each run
-    partial.results <- simfrail(reps, genfrail.args, fitfrail.args, Lambda.time, ...)
+    partial.sim <- simfrail(reps, genfrail.args, fitfrail.args, Lambda.time, ...)
     # Name the first column as the parameter name
-    setNames(cbind(param.name=toString(pvalue), partial.results), 
-             c(param.name, names(partial.results)))
+    setNames(cbind(param.name=toString(pvalue), partial.sim), 
+             c(param.name, names(partial.sim)))
   })
   
-  do.call("rbind", results)
+  do.call("rbind", sim)
+  class(sim) <- c("simfrail", "data.frame")
+  
+  sim
 }
 
 # A wrapper for coxph, gathers the coeffs, theta, censoring, runtime
@@ -144,7 +147,7 @@ simfrailcoxph <- function(reps, genfrail.args, coxph.args, seed=2015)
   # Seed the beginning of each simulation so that each run is independent
   set.seed(seed)
   
-  results <- replicate(reps, (function(){
+  sim <- replicate(reps, (function(){
     # Generate new random data, give this to coxph
     data <- do.call("genfrail", as.list(genfrail.args))
     coxph.args[["data"]] = data
@@ -162,9 +165,9 @@ simfrailcoxph <- function(reps, genfrail.args, coxph.args, seed=2015)
   })())
   
   # Summarize everything
-  results <- apply(results, 1, function(x) c(mean=mean(x), sd=sd(x)))
+  sim <- apply(sim, 1, function(x) c(mean=mean(x), sd=sd(x)))
   
-  results
+  sim
 }
 
 # A wrapper for coxph, gathers the coeffs, theta, censoring, runtime
@@ -245,17 +248,17 @@ simcoxph <- function(reps,
     if (mc.cores <= 0) {
       mc.cores <- parallel::detectCores() + mc.cores
     }
-    results <- parallel::mclapply(seeds, fn, mc.preschedule=FALSE, 
+    sim <- parallel::mclapply(seeds, fn, mc.preschedule=FALSE, 
                                   mc.set.seed=TRUE, mc.cores=mc.cores, mc.silent=FALSE)
   } else if (use.parallel && !have.parallel) {
     # Run in serial with a warning
     warning('Cannot run simfrail in parallel: requires the "parallel" package.')
-    results <- lapply(seeds, fn)
+    sim <- lapply(seeds, fn)
   } else {
     # Run in serial
-    results <- lapply(seeds, fn)
+    sim <- lapply(seeds, fn)
   }
   
-  results <- t(simplify2array(results))
-  data.frame(results)
+  sim <- t(simplify2array(sim))
+  data.frame(sim)
 }
