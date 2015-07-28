@@ -1,6 +1,4 @@
-fitfrail <- function(formula, dat, control, weights=NULL,
-                     frailty=c("gamma","pvf","lognormal","invgauss"), ...) {
-  
+fitfrail <- function(formula, dat, control, frailty, weights=NULL, ...) {
   Call <- match.call()
   
   # create a call to model.frame() that contains the formula (required)
