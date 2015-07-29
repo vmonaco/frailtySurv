@@ -54,7 +54,7 @@ plot.simfrail.residuals <- function(sim, n.Lambda=3, ...) {
   legend("topright", legend=value.cols, fill=1:n.vars, ncol=n.vars)
 }
 
-plot.simfrail.hazard <- function(sim, title=NULL, CI=0.95, ...) {
+plot.simfrail.hazard <- function(sim, CI=0.95, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE) || 
       !requireNamespace("reshape2", quietly = TRUE)) {
     stop("Plotting requires the ggplot2, reshape2 packages")
@@ -81,7 +81,7 @@ plot.simfrail.hazard <- function(sim, title=NULL, CI=0.95, ...) {
   se <- data.frame(x=Lambda.time, lower=values$y-Z.score*mean.se, upper=values$y+Z.score*mean.se)
   se$type <- "Estimated 95% CI"
   
-  ggplot(melthats, aes(x=Time,y=value,color=type)) +
+  p <- ggplot(melthats, aes(x=Time,y=value,color=type)) +
     stat_summary(fun.data="mean_cl_boot", geom="smooth") +
     geom_line(aes(x=x, y=y, color=type), values) +
     geom_line(aes(x=x, y=lower, color=type), se) +
@@ -91,4 +91,6 @@ plot.simfrail.hazard <- function(sim, title=NULL, CI=0.95, ...) {
           legend.justification=c(0,1)) +
     ylab("Cumulative baseline hazard") + 
     ggtitle(attr(sim, "description"))
+  
+  p
 }
