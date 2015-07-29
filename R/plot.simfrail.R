@@ -81,7 +81,7 @@ plot.simfrail.hazard <- function(sim, title=NULL, CI=0.95, ...) {
   se <- data.frame(x=Lambda.time, lower=values$y-Z.score*mean.se, upper=values$y+Z.score*mean.se)
   se$type <- "Estimated 95% CI"
   
-  p <- ggplot(melthats, aes(x=Time,y=value,color=type)) +
+  ggplot(melthats, aes(x=Time,y=value,color=type)) +
     stat_summary(fun.data="mean_cl_boot", geom="smooth") +
     geom_line(aes(x=x, y=y, color=type), values) +
     geom_line(aes(x=x, y=lower, color=type), se) +
@@ -91,6 +91,4 @@ plot.simfrail.hazard <- function(sim, title=NULL, CI=0.95, ...) {
           legend.justification=c(0,1)) +
     ylab("Cumulative baseline hazard") + 
     ggtitle(attr(sim, "description"))
-  
-  p
 }
