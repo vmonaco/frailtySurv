@@ -43,9 +43,9 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
     cluster.sizes <- K
   } else if (K == "poisson") {
     cluster.sizes <- rtpois(N, K.params[1], K.params[2])
-  } else if (K == "tzeta") {
+  } else if (K == "pareto") {
     cluster.sizes <- rtzeta(N, K.params[1], K.params[2], K.params[3])
-  } else if (K == "duniform") {
+  } else if (K == "uniform") {
     cluster.sizes <- round(runif(N, K.params[1], K.params[2]))
   } else {
     stop("Wrong value for K. Must be int, string, or numeric vector")

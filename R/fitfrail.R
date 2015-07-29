@@ -87,7 +87,7 @@ fitfrail <- function(formula, dat, control, frailty, weights=NULL, ...) {
   
   attr(fit, "description") <- paste("fitfrail: ", 
                                     fit$VARS$n.clusters, " clusters (avg. size ", 
-                                    mean(fit$VARS$cluster_sizes), "), ",
+                                    format(mean(fit$VARS$cluster_sizes), nsmall=2), "), ",
                                     toString(frailty), " frailty", sep="")
   
   fit
