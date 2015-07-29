@@ -54,7 +54,7 @@ plot.simfrail.residuals <- function(sim, n.Lambda=3, ...) {
   legend("topright", legend=value.cols, fill=1:n.vars, ncol=n.vars)
 }
 
-plot.simfrail.hazard <- function(sim, CI=0.95, ...) {
+plot.simfrail.hazard <- function(sim, CI=0.95, skip.SE=FALSE, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE) || 
       !requireNamespace("reshape2", quietly = TRUE)) {
     stop("Plotting requires the ggplot2, reshape2 packages")
@@ -84,13 +84,19 @@ plot.simfrail.hazard <- function(sim, CI=0.95, ...) {
   p <- ggplot(melthats, aes(x=Time,y=value,color=type)) +
     stat_summary(fun.data="mean_cl_boot", geom="smooth") +
     geom_line(aes(x=x, y=y, color=type), values) +
-    geom_line(aes(x=x, y=lower, color=type), se) +
-    geom_line(aes(x=x, y=upper, color=type), se) +
-    scale_colour_manual("Legend", values=c("black","blue","brown")) +
     theme(legend.position=c(0,1),
           legend.justification=c(0,1)) +
     ylab("Cumulative baseline hazard") + 
     ggtitle(attr(sim, "description"))
+  
+  if (skip.SE) {
+    p <- p + scale_colour_manual("Legend", values=c("black","blue"))
+  } else {
+    p <- p + 
+          geom_line(aes(x=x, y=upper, color=type), se) +
+          geom_line(aes(x=x, y=lower, color=type), se) +
+          scale_colour_manual("Legend", values=c("black","blue","brown"))
+  }
   
   p
 }
