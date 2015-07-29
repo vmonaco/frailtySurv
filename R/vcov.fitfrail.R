@@ -30,6 +30,11 @@ vcov.fitfrail <- function(fit, boot=FALSE, B=100,
     Lambda.time <- fit$Lambda$time
   }
   
+  # CBH variance not supportted in the estimator yet
+  if (!boot) {
+    Lambda.time = NULL
+  }
+  
   # If V has already been computed the same way and matches the size we expect
 #   if (!is.null(fit[["COV"]])
 #       && !is.null(fit[["COV.boot"]])
@@ -140,6 +145,15 @@ vcov.fitfrail <- function(fit, boot=FALSE, B=100,
   } else {
     COV <- vcov.estimator()
   }
+  
+  param.names <- c(names(fit$beta), names(fit$theta))
+  
+  if (length(Lambda.time) > 0) {
+    param.names <- c(param.names, paste("Lambda.", format(Lambda.time, nsmall=2), sep=""))
+  }
+  
+  rownames(COV) <- param.names
+  colnames(COV) <- param.names
   
   # Cache the value for quick access later
 #   eval.parent(substitute(fit[["COV"]] <- COV))

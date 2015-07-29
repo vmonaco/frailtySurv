@@ -2,7 +2,7 @@
 % Please edit documentation in R/vcov.fitfrail.R
 \name{vcov.fitfrail}
 \alias{vcov.fitfrail}
-\title{Compute covariance matrix for fitfrail model}
+\title{Compute variance/covariance matrix for fitfrail model}
 \usage{
 vcov.fitfrail <- function(fit, boot=TRUE)
 }

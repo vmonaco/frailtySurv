@@ -1,7 +1,20 @@
-\docType{data}
 \name{drs}
 \alias{drs}
+\docType{data}
 \title{Diabetic Retinopathy Study (DRS)}
+\description{
+The Diabetic Retinopathy Study (DRS) was performed to determine whether the
+onset of blindness in 197 high-risk diabetic patients could be delayed by
+laser treatment. The treatment was administered to one
+randomly-selected eye in each patient, leaving the other eye untreated. Thus,
+there are 394 observations, which are clustered by patient since the level of
+risk will tend to vary between patients. A failure occurred when visual
+acuity dropped to below 5/200. All patients had a visual acuity of at least
+20/100 at the beginning of the study.
+}
+\usage{
+data("drs")
+}
 \format{A data frame with 394 rows and 8 columns. There are two rows for each
 subject, one row for each eye:
 \describe{
@@ -14,23 +27,12 @@ subject, one row for each eye:
   \item{age_at_onset}{age (in years) at the onset of diabetes}
   \item{laser_type}{type of laser used for treatment, where 1=xenon, 2=argon}
   \item{diabetes_type}{type of diabetes, where 1=juvenile (age at dx < 20) and 2=adult}
-
 }}
 \source{
 \url{http://www.mayo.edu/research/documents/diabeteshtml/doc-10027460}
 }
-\usage{
-drs
-}
-\description{
-The Diabetic Retinopathy Study (DRS) was performed to determine whether the
-onset of blindness in 197 high-risk diabetic patients could be delayed by
-laser treatment. The treatment was administered to one
-randomly-selected eye in each patient, leaving the other eye untreated. Thus,
-there are 394 observations, which are clustered by patient since the level of
-risk will tend to vary between patients. A failure occurred when visual
-acuity dropped to below 5/200. All patients had a visual acuity of at least
-20/100 at the beginning of the study.
+\examples{
+data(drs)
 }
 \keyword{datasets}
 

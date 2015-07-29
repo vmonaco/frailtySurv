@@ -19,14 +19,14 @@ plot.fitfrail.fitter <- function(fit, show.loglik=TRUE, ...) {
   trace$loglik <- NULL
   
   melttrace <- reshape2::melt(trace, "Iteration", variable.name="Parameter")
-  breaks <- seq(1, nrow(trace), by=round(nrow(trace)/10))
+  breaks <- seq(1, nrow(trace), by=max(1, round(nrow(trace)/10)))
   
   p <- ggplot(melttrace, aes(x=Iteration, y=value, color=Parameter)) +
     geom_line() +
     xlab("Iteration") + 
     ylab("Estimate") + 
     scale_x_continuous(breaks = breaks) +
-    theme(legend.justification = c(0, 1), legend.position = c(0, 1)) +
+    theme(legend.justification = c(0, 0.5), legend.position = c(0, 0.5)) +
     ggtitle("Parameter estimate trace")
   
   if (show.loglik) {
@@ -37,9 +37,9 @@ plot.fitfrail.fitter <- function(fit, show.loglik=TRUE, ...) {
     p2 <- ggplot(loglik, aes(x=Iteration, y=loglik)) +
       geom_line() + 
       xlab("Iteration") + 
-      ylab("Logliklihood") + 
+      ylab("Log-liklihood") + 
       scale_x_continuous(breaks = breaks) +
-      ggtitle("Loglikelihood trace")
+      ggtitle("Log-likelihood trace")
     
     gridExtra::grid.arrange(p, p2, ncol=2)
   } else {
