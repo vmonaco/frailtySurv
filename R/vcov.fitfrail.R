@@ -69,7 +69,7 @@ vcov.fitfrail <- function(fit, boot=FALSE, B=100,
                  paste("Lambda.", format(Lambda.time, nsmall=2), sep="")))
     }
     
-    hats <- t(simplify2array(plapply(B, fn)))
+    hats <- t(simplify2array(plapply(B, fn, cores=cores)))
     cov(hats)
   }
   
