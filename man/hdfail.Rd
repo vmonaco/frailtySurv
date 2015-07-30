@@ -2,10 +2,13 @@
 \alias{hdfail}
 \docType{data}
 \title{
-%%   ~~ data name/kind ... ~~
+Hard drive failure dataset
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of the dataset. ~~
+This dataset contains the observed follow-up times and SMART statistics of 52k unique hard drives.
+
+Daily snapshots of a large backup storage provider over 2 years were made publicly available. On each day, the Self-Monitoring, Analysis, and Reporting Technology (SMART) statistics of operational drives are recorded. When a hard drive is no longer operational, it is marked as a failure and removed from the subsequent daily snapshots. New hard drives are also continuously added to the population. In total, there are over 52k unique hard drives over approximately 2 years and 2885 (5.5\%) failures.
+
 }
 \usage{data("hdfail")}
 \format{
@@ -21,14 +24,8 @@
     \item{\code{psc}}{a numeric vector}
   }
 }
-\details{
-%%  ~~ If necessary, more details than the __description__ above ~~
-}
 \source{
-%%  ~~ reference to a publication or URL from which the data were obtained ~~
-}
-\references{
-%%  ~~ possibly secondary sources and usages ~~
+\url{https://www.backblaze.com/hard-drive-test-data.html}
 }
 \examples{
 data(hdfail)
