@@ -24,6 +24,7 @@
 vcov.fitfrail <- function(fit, boot=FALSE, B=100,
                           Lambda.time=NULL, # The time points of the CBH to use
                           cores=0) {
+  Call <- match.call()
   
   # Use the time points where CBH increases
   if (is.null(Lambda.time)) {
@@ -36,11 +37,19 @@ vcov.fitfrail <- function(fit, boot=FALSE, B=100,
   }
   
   # If V has already been computed the same way and matches the size we expect
-#   if (!is.null(fit[["COV"]])
-#       && !is.null(fit[["COV.boot"]])
-#       && (fit[["COV.boot"]] == boot)
-#       && (nrow(fit[["COV"]]) == (length(c(fit$beta,fit$theta,Lambda.time)))))
-#     return(fit[["COV"]])
+  if (!is.null(fit$VARS[["COV"]]) && !is.null(fit$VARS[["COV.call"]])) {
+    new.Call <- fit$VARS[["COV.call"]]
+    cache.Call <- Call
+    
+    # Ignore the fit object and number of cores used
+    new.Call$fit <- NULL
+    new.Call$cores <- NULL
+    cache.Call$fit <- NULL
+    cache.Call$cores <- NULL
+    
+    if(identical(new.Call, cache.Call))
+      return(fit$VARS[["COV"]])
+  }
   
   # Weighted bootstrap covariance
   vcov.boot <- function() {
@@ -156,8 +165,8 @@ vcov.fitfrail <- function(fit, boot=FALSE, B=100,
   colnames(COV) <- param.names
   
   # Cache the value for quick access later
-#   eval.parent(substitute(fit[["COV"]] <- COV))
-#   eval.parent(substitute(fit[["COV.boot"]] <- boot))
+  fit$VARS[["COV"]] <- COV
+  fit$VARS[["COV.call"]] <- Call
   
   COV
 }

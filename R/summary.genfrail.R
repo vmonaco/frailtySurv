@@ -2,8 +2,8 @@ summary.genfrail <- function(dat, ...) {
   
   s <- append(attributes(dat), list(
       n.obs=length(dat$time),
-      n.clusters=length(unique(dat$cluster)),
-      mean.cluster=mean(table(dat$cluster)),
+      n.clusters=length(unique(dat$family)),
+      mean.cluster=mean(table(dat$family)),
       censor.rate=1 - sum(dat$status)/length(dat$time)
   ))
   

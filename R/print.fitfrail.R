@@ -4,7 +4,7 @@ print.fitfrail <- function(fit, digits=max(options()$digits - 4, 3), ...) {
   on.exit(options(savedig))
   
   cat("Call: ")
-  dput(fit$call)
+  print(fit$call)
   
   cat("\n")
   tmp <- data.frame(Covariate=names(fit$beta), Coefficient=fit$beta)

@@ -48,43 +48,48 @@ plot.fitfrail.fitter <- function(fit, show.loglik=TRUE, ...) {
   
 }
 
-plot.fitfrail.hazard <- function(fit, boot=TRUE, CI=0.95, ...) {
+plot.fitfrail.hazard <- function(fit, boot=TRUE, CI=0.95, end=NULL, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Plotting requires the ggplot2 package")
   }
   require(ggplot2)
   
   Lambda <- fit$Lambda
-  end <- Lambda$time[nrow(Lambda)] + mean(diff(fit$Lambda$time))
-  Lambda[nrow(Lambda)+1,] <- c(end, fit$fun.Lambda(end))
+  
+  if (is.null(end)) {
+    end <- Lambda$time[nrow(Lambda)] + mean(diff(fit$Lambda$time))
+  }
+  
+  rownames(Lambda) <- 1:nrow(Lambda)
+  ymax <- max(Lambda$Lambda[Lambda$time <= end])
+  Lambda <- Lambda[Lambda$Lambda<=ymax,]
   
   p <- qplot(time, Lambda, data = Lambda, geom="step") +
+    scale_x_continuous(breaks=seq(0, round(end), by=max(10, round(end/10)))) +
     geom_rug(sides="b", size=0.5) +
     xlab("Time") + 
     ylab("Cumulative baseline hazard") + 
     theme(legend.position="none") +
-    scale_x_continuous(breaks=seq(0, round(end), by=10))
     ggtitle(attr(fit, "description"))
   
   if (boot) {
     COV <- vcov(fit, boot=TRUE, ...)
     se.Lambda <- sqrt(diag(COV))[(fit$VARS$n.gamma+1):nrow(COV)]
+    se.Lambda <- se.Lambda[1:nrow(Lambda)]
     
-    Z.score <- qnorm((1-CI)/2)
-    LB <- fit$Lambda$Lambda - Z.score*se.Lambda
-    UB <- fit$Lambda$Lambda + Z.score*se.Lambda
+    Z.score <- qnorm(1-(1-CI)/2)
+    UB <- Lambda$Lambda + Z.score*se.Lambda
+    LB <- Lambda$Lambda - Z.score*se.Lambda
+    LB <- vapply(LB, function(x) max(0, x), 0)
     
-    time <- c(fit$Lambda$time[2:length(fit$Lambda$time)], 
-              fit$Lambda$time[length(fit$Lambda$time)] + mean(diff(fit$Lambda$time)))
+    time <- rep(Lambda$time, rep(2, nrow(Lambda)))
+    time <- c(time[1:(length(time)-1)], rev(time[1:(length(time)-1)]))
     
-    LB <- data.frame(time=rep(time, rep(2, length(time)))[1:(2*length(time)-1)],
-                     Lambda=rep(LB, rep(2, length(LB)))[2:(2*length(LB))])
+    LB <- rep(LB, rep(2, nrow(Lambda)))[2:(2*nrow(Lambda))]
+    UB <- rep(UB, rep(2, nrow(Lambda)))[2:(2*nrow(Lambda))]
     
-    UB <- data.frame(time=rep(time, rep(2, length(time)))[1:(2*length(time)-1)],
-                     Lambda=rep(UB, rep(2, length(UB)))[2:(2*length(UB))])
-    
-    df <- data.frame(px=c(LB$time, rev(UB$time)),
-                     py=c(LB$Lambda, rev(UB$Lambda)))
+    df <- data.frame(px=time,
+                     py=c(UB, rev(LB)))
     
     p <- p + geom_polygon(aes(x=px, y=py), data=df, fill="black", alpha=0.1)
   }

@@ -5,7 +5,7 @@
 \title{Repeatedly simulate survival data and fit a model}
 \usage{
 simfrail(reps, genfrail.args, fitfrail.args, Lambda.time, vcov.args = list(),
-  cores = 0, verbose = FALSE, skip.SE = FALSE)
+  cores = 0, skip.SE = FALSE)
 }
 \arguments{
 \item{reps}{number of times to repeat the simulation}
