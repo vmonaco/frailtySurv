@@ -41,17 +41,18 @@ plot.simfrail.residuals <- function(sim, n.Lambda=3, ...) {
   # Select N and residuals columns, start with res
   n.vars <- length(value.cols)
   
-  residuals.melt <- reshape2::melt(residuals, id = c("N"))
-  cases <- c(t(unique(residuals.melt["N"])))
+  res.melt <- reshape2::melt(residuals, id = c("N"))
+  cases <- c(t(unique(res.melt["N"])))
   
-  # bp_ylim <- 3 #0.25*mean_res
-  boxplot(value ~ N + variable, data=residuals.melt, notch=TRUE, 
-          col=rep(1:n.vars, each=length(cases)), 
-          names=rep(cases, n.vars), 
-          xlab="N", ylab="Residual",
-          main=attr(summary(sim), "description"))
-  abline(h=0)
-  legend("topright", legend=value.cols, fill=1:n.vars, ncol=n.vars)
+  showx <- length(unique(sim$N)) > 1
+  
+  p <- ggplot(res.melt, aes(x=factor(round_any(N,0.5)), y=value, fill=variable)) + 
+    geom_boxplot(notch=TRUE) +
+    facet_grid(.~variable) +
+    labs(x="N",y="Residual") + 
+    theme(legend.position="none",axis.text.x=element_text(angle=-90, vjust=0.4,hjust=1))
+  
+  p
 }
 
 plot.simfrail.hazard <- function(sim, CI=0.95, skip.SE=FALSE, ...) {
@@ -86,8 +87,11 @@ plot.simfrail.hazard <- function(sim, CI=0.95, skip.SE=FALSE, ...) {
     geom_line(aes(x=x, y=y, color=type), values) +
     theme(legend.position=c(0,1),
           legend.justification=c(0,1)) +
-    ylab("Cumulative baseline hazard") + 
-    ggtitle(attr(sim, "description"))
+    ylab("Cumulative baseline hazard")
+  
+  if (all(is.na(mean.se))) {
+    skip.SE <- TRUE
+  }
   
   if (skip.SE) {
     p <- p + scale_colour_manual("Legend", values=c("black","blue"))
