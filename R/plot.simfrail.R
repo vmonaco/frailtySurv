@@ -7,12 +7,14 @@ plot.simfrail <- function(sim, type=c("residuals","hazard"), ...) {
 }
 
 plot.simfrail.residuals <- function(sim, n.Lambda=3, ...) {
-  if (!requireNamespace("ggplot2", quietly = TRUE) || 
+  if (!requireNamespace("plyr", quietly = TRUE) || 
+      !requireNamespace("ggplot2", quietly = TRUE) || 
       !requireNamespace("reshape2", quietly = TRUE)) {
-    stop("Plotting requires the ggplot2, and reshape2 packages")
+    stop("Plotting requires the plyr, ggplot2, and reshape2 packages")
   }
+  require(plyr)
+  require(ggplot2)
   require(reshape2)
-  
   Lambda.cols <- names(sim)[grepl("^Lambda", names(sim))]
   
   # All BUT n.Lambda
@@ -72,7 +74,7 @@ plot.simfrail.hazard <- function(sim, CI=0.95, skip.SE=FALSE, ...) {
   names(hats) <- Lambda.time
   melthats <- reshape2::melt(t(hats))
   names(melthats) <- c("Time","instance", "value")
-  melthats$type <- "Empirical 95% CI"
+  melthats$type <- sprintf("Empirical (%.2f CI)", CI)
   
   values <- data.frame(x=Lambda.time, y=values)
   values$type <- "Actual"
@@ -80,7 +82,7 @@ plot.simfrail.hazard <- function(sim, CI=0.95, skip.SE=FALSE, ...) {
   Z.score <- qnorm((1-CI)/2)
   mean.se <- colMeans(se)
   se <- data.frame(x=Lambda.time, lower=values$y-Z.score*mean.se, upper=values$y+Z.score*mean.se)
-  se$type <- "Estimated 95% CI"
+  se$type <- sprintf("Estimated %.2f CI", CI)
   
   p <- ggplot(melthats, aes(x=Time,y=value,color=type)) +
     stat_summary(fun.data="mean_cl_boot", geom="smooth") +
