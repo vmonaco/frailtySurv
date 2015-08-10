@@ -69,8 +69,7 @@ plot.fitfrail.hazard <- function(fit, boot=TRUE, CI=0.95, end=NULL, ...) {
     geom_rug(sides="b", size=0.5) +
     xlab("Time") + 
     ylab("Cumulative baseline hazard") + 
-    theme(legend.position="none") +
-    ggtitle(attr(fit, "description"))
+    theme(legend.position="none")
   
   if (boot) {
     COV <- vcov(fit, boot=TRUE, ...)
