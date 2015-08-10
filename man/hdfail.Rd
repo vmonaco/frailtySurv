@@ -14,7 +14,7 @@ Daily snapshots of a large backup storage provider over 2 years were made public
 \format{
   A data frame with 52422 observations on the following 8 variables.
   \describe{
-    \item{\code{serial}}{a factor with levels}
+    \item{\code{serial}}{Unique serial number of the hard drive}
     \item{\code{model}}{a factor with levels}
     \item{\code{time}}{a numeric vector}
     \item{\code{status}}{a numeric vector}
