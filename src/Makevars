@@ -1,4 +1,8 @@
 
+# CC=ccache clang -Qunused-arguments
+# CXX=ccache clang++ -Qunused-arguments
+# CCACHE_CPP2=yes
+ 
 GSL_CFLAGS = -I/usr/include
 GSL_LIBS   = -L/usr/lib -lgsl -lgslcblas -lm
 RCPP_LDFLAGS = 

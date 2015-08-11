@@ -1,132 +1,74 @@
-// [[depends(RcppGSL)]]
+#include <Rcpp.h>
 #include <cmath>
-#include <RcppGSL.h>
-#include <gsl/gsl_integration.h>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_sf_psi.h>
+#include "cubature.h"
 #include "distributions.h"
 
 using namespace Rcpp;
 
-// Args to the adaptive quadrature integration
-// integrate from (INT_LOWER, infty), which is mapped to (0, 1] by  x = a + (1-t)/t
-#define INT_LOWER 0 
-
-// Convergence of integration reached when either the absolute or relative error 
-// is within these tolerances
-#define EPSABS 0
-#define EPSREL 1e-8
-
-// Size of the work space and max number of subintervals
-#define LIMIT 1e8
-
-// The integration wrapper
-double integrate(double (*f)(double,void*), void* data) {
-  gsl_integration_workspace *work = gsl_integration_workspace_alloc(LIMIT);
-  double result, error;
-  
-  gsl_function F;
-  F.function = f;
-  F.params = data;
-  
-  int ret = gsl_integration_qagiu(&F, INT_LOWER, EPSABS, EPSREL, LIMIT, work, &result, &error);
-  gsl_integration_workspace_free(work);
-  return result;
-}
-
-// derivative of phi_ki(gamma, lambda, t), used for numerical integration
-double phi_deriv(double w, void* data) {
-  struct phi_params *params = (struct phi_params *)data;
-  return pow(w, params->N_dot + params->k - 1) * exp(-w * params->H_dot) * 
-    params->density(w, params->theta);
-}
-
-// derivative of phi_ki(gamma, lambda, t), where f' is used
-double phi_prime_deriv(double w, void* data) {
-  struct phi_prime_params *params = (struct phi_prime_params *)data;
-  return pow(w, params->N_dot + params->k - 1) * exp(-w * params->H_dot) * 
-    params->deriv_density(w, params->theta, params->deriv_idx);
-}
-
-// derivative of phi_ki(gamma, lambda, t), where f' is used
-double phi_prime_prime_deriv(double w, void* data) {
-  struct phi_prime_prime_params *params = (struct phi_prime_prime_params *)data;
-  return pow(w, params->N_dot + params->k - 1) * exp(-w * params->H_dot) * 
-    params->deriv_deriv_density(w, params->theta, params->deriv_idx_1, params->deriv_idx_2);
-}
-
 // The following phi functions are the only places that branch based on the
 // frailty distribution. If a new distribution is implemented, it needs to go
-// here, with the respective density and deriv density functions (or LT)
+// here, with the Laplace transform functions
 
 double phi(int k, int N_dot, double H_dot, double *theta, String frailty) {
-  // Laplace transform integrals
   if (frailty == "gamma") {
     return lt_dgamma(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
   } else if (frailty == "pvf") {
     return lt_dpvf(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
-  }
-  // Numerical integration
-  phi_params phi_p;
-//   if (frailty == "gamma") {
-//     phi_p = (struct phi_params){k, N_dot, H_dot, theta, dgamma};
-//   } else 
-  if (frailty == "lognormal") {
-    phi_p = (struct phi_params){k, N_dot, H_dot, theta, dlognormal};
+  } else if (frailty == "lognormal") {
+    return lt_dlognormal(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
   } else if (frailty == "invgauss") {
-    phi_p = (struct phi_params){k, N_dot, H_dot, theta, dinvgauss};
+    return lt_dinvgauss(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
   } else {
     throw std::range_error("Unsupported frailty distribution");
   }
-  
-  return integrate(&phi_deriv, &phi_p);
 }
 
-// phi using the derivative of the density wrt. parameter p[derive_idx]
+// phi using the derivative of the density wrt. parameter p[deriv_idx]
 double phi_prime(int k, int N_dot, double H_dot, double *theta, String frailty, int deriv_idx) {
-  // Laplace transform integrals
   if (frailty == "gamma") {
     return deriv_lt_dgamma(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
   } else if (frailty == "pvf") {
     return deriv_lt_dpvf(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
-  }
-  
-  // Numerical integration
-  phi_prime_params phi_p;
-//   if (frailty == "gamma") {
-//     phi_p = (struct phi_prime_params){k, N_dot, H_dot, theta, deriv_dgamma, deriv_idx};
-//   } else 
-  if (frailty == "lognormal") {
-    phi_p = (struct phi_prime_params){k, N_dot, H_dot, theta, deriv_dlognormal, deriv_idx};
+  } else if (frailty == "lognormal") {
+    return deriv_lt_dlognormal(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
   } else if (frailty == "invgauss") {
-    phi_p = (struct phi_prime_params){k, N_dot, H_dot, theta, deriv_dinvgauss, deriv_idx};
+    return deriv_lt_dinvgauss(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
   } else {
     throw std::range_error("Unsupported frailty distribution");
   }
-  
-  return integrate(&phi_prime_deriv, &phi_p);
 }
 
-// phi using the derivative of the density wrt. parameter p[derive_idx]
+// phi using the derivative of the density wrt. parameter p[deriv_idx_1]
 double phi_prime_prime(int k, int N_dot, double H_dot, double *theta, String frailty, int deriv_idx_1, int deriv_idx_2) {
-  // Laplace transform integrals
   if (frailty == "gamma") {
     return deriv_deriv_lt_dgamma(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2) * pow(-1, N_dot + k - 1);
   } else if (frailty == "pvf") {
     return deriv_deriv_lt_dpvf(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2) * pow(-1, N_dot + k - 1);
-  }
-  
-  // Numerical integration
-  phi_prime_prime_params phi_p;
-  if (frailty == "lognormal") {
-    phi_p = (struct phi_prime_prime_params){k, N_dot, H_dot, theta, deriv_deriv_dlognormal, deriv_idx_1, deriv_idx_2};
+  } else if (frailty == "lognormal") {
+    return deriv_deriv_lt_dlognormal(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2) * pow(-1, N_dot + k - 1);
   } else if (frailty == "invgauss") {
-    phi_p = (struct phi_prime_prime_params){k, N_dot, H_dot, theta, deriv_deriv_dinvgauss, deriv_idx_1, deriv_idx_2};
+    return deriv_deriv_lt_dinvgauss(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2) * pow(-1, N_dot + k - 1);
   } else {
     throw std::range_error("Unsupported frailty distribution");
   }
-  
-  return integrate(&phi_prime_prime_deriv, &phi_p);
+}
+
+// Mainly for testing, compare to the corresponding *_r functions
+// [[Rcpp::export]]
+double phi_c(int k, int N_dot, double H_dot, double theta, String frailty) {
+  return phi(k, N_dot, H_dot, &theta, frailty);
+}
+
+// [[Rcpp::export]]
+double phi_prime_c(int k, int N_dot, double H_dot, double theta, 
+                   String frailty, int deriv_idx) {
+  return phi_prime(k, N_dot, H_dot, &theta, frailty, deriv_idx);
+}
+
+// [[Rcpp::export]]
+double phi_prime_prime_c(int k, int N_dot, double H_dot, double theta, 
+                         String frailty, int deriv_idx_1, int deriv_idx_2) {
+  return phi_prime_prime(k, N_dot, H_dot, &theta, frailty, deriv_idx_1, deriv_idx_2);
 }
 
 double psi(int N_dot, double H_dot, double* theta, String frailty) {
@@ -135,16 +77,6 @@ double psi(int N_dot, double H_dot, double* theta, String frailty) {
 //     return (N_dot + 1/theta[0])/(H_dot + 1/theta[0]);
 //   }
   return phi(2, N_dot, H_dot, theta, frailty)/phi(1, N_dot, H_dot, theta, frailty);
-}
-
-// [[Rcpp::export]]
-double phi_c(int k, int N_dot, double H_dot, double theta, String frailty) {
-  return phi(k, N_dot, H_dot, &theta, frailty);
-}
-
-// [[Rcpp::export]]
-double phi_prime_c(int k, int N_dot, double H_dot, double theta, String frailty, int deriv_idx) {
-  return phi_prime(k, N_dot, H_dot, &theta, frailty, deriv_idx);
 }
 
 // Baseline hazard estimator, returns some other useful vars

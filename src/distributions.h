@@ -44,15 +44,19 @@ double dgamma(double, double*);
 double deriv_dgamma(double, double*, int);
 
 double lt_dgamma(int, double, double*);
-double lt_dposstab(int, double, double*);
 double lt_dpvf(int, double, double*);
+double lt_dlognormal(int, double, double*);
+double lt_dinvgauss(int, double, double*);
 
 double deriv_lt_dgamma(int, double, double*, int);
-double deriv_lt_dposstab(int, double, double*, int);
 double deriv_lt_dpvf(int, double, double*, int);
+double deriv_lt_dlognormal(int, double, double*, int);
+double deriv_lt_dinvgauss(int, double, double*, int);
 
 double deriv_deriv_lt_dgamma(int, double, double*, int, int);
 double deriv_deriv_lt_dpvf(int, double, double*, int, int);
+double deriv_deriv_lt_dlognormal(int, double, double*, int, int);
+double deriv_deriv_lt_dinvgauss(int, double, double*, int, int);
 
 double dlognormal(double, double*);
 double deriv_dlognormal(double, double*, int);

@@ -21,6 +21,10 @@ deriv_deriv_lt_dgamma_c <- function(p, s, theta) {
     .Call('frailtyr_deriv_deriv_lt_dgamma_c', PACKAGE = 'frailtyr', p, s, theta)
 }
 
+lt_dlognormal_c <- function(m, s, theta) {
+    .Call('frailtyr_lt_dlognormal_c', PACKAGE = 'frailtyr', m, s, theta)
+}
+
 dlognormal_c <- function(x, theta) {
     .Call('frailtyr_dlognormal_c', PACKAGE = 'frailtyr', x, theta)
 }
@@ -49,12 +53,12 @@ lt_dpvf_coef <- function(p, j, alpha) {
     .Call('frailtyr_lt_dpvf_coef', PACKAGE = 'frailtyr', p, j, alpha)
 }
 
-lt_deriv_dpvf_coef <- function(p, j, alpha) {
-    .Call('frailtyr_lt_deriv_dpvf_coef', PACKAGE = 'frailtyr', p, j, alpha)
+deriv_lt_dpvf_coef <- function(p, j, alpha) {
+    .Call('frailtyr_deriv_lt_dpvf_coef', PACKAGE = 'frailtyr', p, j, alpha)
 }
 
-lt_deriv_deriv_dpvf_coef <- function(m, j, alpha) {
-    .Call('frailtyr_lt_deriv_deriv_dpvf_coef', PACKAGE = 'frailtyr', m, j, alpha)
+deriv_deriv_lt_dpvf_coef <- function(m, j, alpha) {
+    .Call('frailtyr_deriv_deriv_lt_dpvf_coef', PACKAGE = 'frailtyr', m, j, alpha)
 }
 
 dpvf_c <- function(x, alpha) {
@@ -81,10 +85,6 @@ lt_dposstab_c <- function(p, s, alpha) {
     .Call('frailtyr_lt_dposstab_c', PACKAGE = 'frailtyr', p, s, alpha)
 }
 
-deriv_lt_dposstab_c <- function(p, s, alpha) {
-    .Call('frailtyr_deriv_lt_dposstab_c', PACKAGE = 'frailtyr', p, s, alpha)
-}
-
 zeta <- function(s) {
     .Call('frailtyr_zeta', PACKAGE = 'frailtyr', s)
 }
@@ -95,6 +95,10 @@ phi_c <- function(k, N_dot, H_dot, theta, frailty) {
 
 phi_prime_c <- function(k, N_dot, H_dot, theta, frailty, deriv_idx) {
     .Call('frailtyr_phi_prime_c', PACKAGE = 'frailtyr', k, N_dot, H_dot, theta, frailty, deriv_idx)
+}
+
+phi_prime_prime_c <- function(k, N_dot, H_dot, theta, frailty, deriv_idx_1, deriv_idx_2) {
+    .Call('frailtyr_phi_prime_prime_c', PACKAGE = 'frailtyr', k, N_dot, H_dot, theta, frailty, deriv_idx_1, deriv_idx_2)
 }
 
 bh <- function(d_, R_star, K_, Y_, N_, N_dot, beta, theta, frailty, weights) {

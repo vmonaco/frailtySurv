@@ -1,7 +1,8 @@
 # This file contains R implementations of frailty distribution functions
 # The corresponding C++ functions are much faster and should be used instead
 # Any function ending with _r has a corresponding c function ending with _c
-# The function here are provided for mainly for testing purposes
+# The function here are provided for mainly for testing purposes. Most functions
+# have a _numeric counterpart, where results are obtained numerically.
 
 ################################################################################
 
@@ -20,6 +21,15 @@ phi_numerical <- function(k, N_dot, H_dot, density_params, density_fn) {
 #' 
 phi_laplace <- function(k, N_dot, H_dot, density_params, density_LT) {
   density_LT(N_dot + k - 1, H_dot, density_params)*(-1)^(N_dot + k - 1)
+}
+
+#'
+#' Laplace transform, evaluated numerically
+#' 
+lt_numeric <- function(m, s, theta, density_fn) {
+  integrate(function(t) {
+    (-t)^m * exp(-s * t) * density_fn(t, theta)
+  }, 0, Inf)$value
 }
 
 ################################################################################
@@ -702,6 +712,19 @@ find_theta <- function(tau, fun.bv, Lambda_0) {
   
   fun.tau
 }
+
+#' 
+#' Empirically determine theta for a given Kendall's tau
+theta.given.tau <- function(tau, init.theta, lb.theta, ub.theta, frailty, N=1000, seed=2015) {
+  uniroot(function(theta) {
+    set.seed(seed)
+    dat <- genfrail(N=N, K=2, theta=theta, frailty=frailty, 
+                    censor.distr="none", covar.distr="none",
+                    Lambda_0_inv=function(t, tau=4.6, C=0.01) (t^(1/tau))/C)
+    xy <- matrix(dat$time, ncol=2, byrow=TRUE)
+    tau - cor(xy[,1], xy[,2], method="kendall")
+  }, c(lb.theta, ub.theta))
+} 
 
 ################################################################################
 # frailty distribution functions can be accessed from these lists
