@@ -18,7 +18,7 @@ using namespace Rcpp;
 #define DPOSSTAB_K 100
 
 // Numerical integration parameters
-#define MAX_EVAL 100
+#define MAX_EVAL 0
 #define EPSABS 0
 #define EPSREL 1e-8
 

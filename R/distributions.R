@@ -719,8 +719,8 @@ init.frailty <- list(
 lb.frailty <- list(
   gamma=1e-2,
   pvf=1e-5,
-  invgauss=1e-5,
-  lognormal=1e-5
+  invgauss=1e-2,
+  lognormal=1e-2
 )
 
 ub.frailty <- list(

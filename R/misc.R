@@ -26,5 +26,5 @@ tau.numerical <- function(theta, frailty) {
 theta.given.tau <- function(tau, frailty) {
   uniroot(function(theta) {
     tau.numerical(theta, frailty) - tau
-  }, c(lb.frailty[[frailty]], lb.frailty[[frailty]] + 0.1), extendInt = "up")$root
+  }, c(lb.frailty[[frailty]], min(ub.frailty[[frailty]], 100)))$root
 } 

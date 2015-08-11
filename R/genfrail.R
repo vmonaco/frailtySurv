@@ -1,6 +1,7 @@
 genfrail <- function(beta = c(log(2)), # Covariate coefficients
                      covar.distr = "uniform", #c("normal", "uniform", "zero"),
                      covar.param = c(0,1),
+                     covar = NULL,
                      
                      # Frailty distribution and parameter vector
                      frailty = "gamma", #c("gamma", "lognormal", "invgauss", "posstab", "pvf", "none"), 
@@ -57,7 +58,9 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
   p <- length(beta)
   Z <- matrix(0, nrow=NK, ncol=p)
   for (j in 1:p) {
-    if (covar.distr == "normal") {
+    if (!is.null(covar)) {
+      Z <- covar
+    } else if (covar.distr == "normal") {
       Z[, j] <- rnorm(NK, covar.param[1], covar.param[2])
     } else if (covar.distr == "uniform") {
       Z[, j] <- runif(NK, covar.param[1], covar.param[2])
