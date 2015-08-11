@@ -3,10 +3,10 @@
 # CXX=ccache clang++ -Qunused-arguments
 # CCACHE_CPP2=yes
  
-GSL_CFLAGS = -I/usr/include
-GSL_LIBS   = -L/usr/lib -lgsl -lgslcblas -lm
-RCPP_LDFLAGS = 
+# GSL_CFLAGS = -I/usr/include
+# GSL_LIBS   = -L/usr/lib -lgsl -lgslcblas -lm
+# RCPP_LDFLAGS = 
 
 # combine with standard arguments for R
-PKG_CPPFLAGS = -W $(GSL_CFLAGS) -I../inst/include -I/usr/include
-PKG_LIBS += $(GSL_LIBS) $(RCPP_LDFLAGS)
+# PKG_CPPFLAGS = -W $(GSL_CFLAGS) -I../inst/include -I/usr/include
+# PKG_LIBS += $(GSL_LIBS) $(RCPP_LDFLAGS)

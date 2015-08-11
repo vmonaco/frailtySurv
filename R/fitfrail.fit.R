@@ -2,7 +2,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
                          control, rownames, weights) {
   
   # TODO: error check for number of frailty distr params
-  if (missing(init.theta)) # || length(init.theta) != n_frailty_params(frailty))
+  if (missing(init.theta) || length(init.theta) != length(init.frailty[[frailty]]))
     stop("Wrong length for frailty distribution inital values")
     
   if (!missing(init.beta) && length(init.beta) != ncol(x))

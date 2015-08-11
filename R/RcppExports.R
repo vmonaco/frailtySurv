@@ -9,16 +9,16 @@ deriv_dgamma_c <- function(x, theta) {
     .Call('frailtyr_deriv_dgamma_c', PACKAGE = 'frailtyr', x, theta)
 }
 
-lt_dgamma_c <- function(p, s, theta) {
-    .Call('frailtyr_lt_dgamma_c', PACKAGE = 'frailtyr', p, s, theta)
+lt_dgamma_c <- function(m, s, theta) {
+    .Call('frailtyr_lt_dgamma_c', PACKAGE = 'frailtyr', m, s, theta)
 }
 
-deriv_lt_dgamma_c <- function(p, s, theta) {
-    .Call('frailtyr_deriv_lt_dgamma_c', PACKAGE = 'frailtyr', p, s, theta)
+deriv_lt_dgamma_c <- function(m, s, theta) {
+    .Call('frailtyr_deriv_lt_dgamma_c', PACKAGE = 'frailtyr', m, s, theta)
 }
 
-deriv_deriv_lt_dgamma_c <- function(p, s, theta) {
-    .Call('frailtyr_deriv_deriv_lt_dgamma_c', PACKAGE = 'frailtyr', p, s, theta)
+deriv_deriv_lt_dgamma_c <- function(m, s, theta) {
+    .Call('frailtyr_deriv_deriv_lt_dgamma_c', PACKAGE = 'frailtyr', m, s, theta)
 }
 
 lt_dlognormal_c <- function(m, s, theta) {
@@ -35,6 +35,10 @@ deriv_dlognormal_c <- function(x, theta) {
 
 deriv_deriv_dlognormal_c <- function(x, theta) {
     .Call('frailtyr_deriv_deriv_dlognormal_c', PACKAGE = 'frailtyr', x, theta)
+}
+
+lt_dinvgauss_c <- function(m, s, theta) {
+    .Call('frailtyr_lt_dinvgauss_c', PACKAGE = 'frailtyr', m, s, theta)
 }
 
 dinvgauss_c <- function(x, theta) {

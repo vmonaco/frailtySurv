@@ -538,7 +538,7 @@ deriv_deriv_dlognormal_r_numeric <- function(x, theta) {
 }
 
 ################################################################################
-# TODO: Inverse Gaussian
+# Inverse Gaussian
 
 dinvgauss_r <- function(x, theta) {
   exp(-((x - 1)^2)/(2*theta*x))/sqrt(2*pi*theta*(x^3))
@@ -674,59 +674,6 @@ etzeta <- function(alpha, xmin=0, xmax=1e4) {
 }
 
 ################################################################################
-# Bivariate survivor functions
-
-bv_gamma <- function(t1, t2, theta, Lambda_0) {
-  lt_dgamma_c(0, -log(Lambda_0(t1)) -log(Lambda_0(t2)), theta)
-}
-
-bv_pvf <- function(t1, t2, theta, Lambda_0) {
-  lt_dpvf_c(0, Lambda_0(t1) + Lambda_0(t2), theta)
-}
-
-bv_lognormal <- function(t1, t2, theta, Lambda_0) {
-  integrate(function(theta) exp(-theta * (Lambda_0(t1) + Lambda_0(t2))) * dlognormal_c())
-}
-
-lt_tau <- function(theta, lt) {
-  4 * integrate(Vectorize(function(s) {
-    s * lt(0, s, theta) * lt(2, s, theta)
-  }), 0, Inf)$value - 1
-}
-
-density_tau <- function(theta) {
-  require(cubature)
-  4 * adaptIntegrate(function(t) {
-    dgamma(t[1], 1/theta, 1/theta) * dgamma(t[2], 1/theta, 1/theta)
-  }, c(0,0), c(Inf,Inf))$value - 1
-}
-
-find_theta <- function(tau, fun.bv, Lambda_0) {
-  require(cubature)
-  
-  fun.tau <- function(theta) {
-      adaptIntegrate(Vectorize(function(t) {
-        fun.bv(t[1], t[2], theta, Lambda_0)
-    }), c(0,0), c(1e6,1e6))
-  }
-  
-  fun.tau
-}
-
-#' 
-#' Empirically determine theta for a given Kendall's tau
-theta.given.tau <- function(tau, init.theta, lb.theta, ub.theta, frailty, N=1000, seed=2015) {
-  uniroot(function(theta) {
-    set.seed(seed)
-    dat <- genfrail(N=N, K=2, theta=theta, frailty=frailty, 
-                    censor.distr="none", covar.distr="none",
-                    Lambda_0_inv=function(t, tau=4.6, C=0.01) (t^(1/tau))/C)
-    xy <- matrix(dat$time, ncol=2, byrow=TRUE)
-    tau - cor(xy[,1], xy[,2], method="kendall")
-  }, c(lb.theta, ub.theta))
-} 
-
-################################################################################
 # frailty distribution functions can be accessed from these lists
 
 # densities
@@ -735,6 +682,14 @@ dfrailty <- list(
   pvf=dpvf_r,
   invgauss=dinvgauss_r,
   lognormal=dlognormal_r
+)
+
+# densities
+ltfrailty <- list(
+  gamma=lt_dgamma_c,
+  pvf=lt_dpvf_c,
+  invgauss=lt_dinvgauss_c,
+  lognormal=lt_dlognormal_c
 )
 
 # simulation

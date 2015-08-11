@@ -1,9 +1,8 @@
 \name{fitfrail}
 \alias{fitfrail}
-\title{Fit a Shared Frailty model}
+\title{Fit Shared Frailty model}
 \usage{
-fitfrail(formula, data, control, 
-         frailty = c("gamma", "lognormal", "posstab"), ...)
+fitfrail(formula, dat, control)
 }
 \arguments{
 \item{formula}{a \code{formula} object, where the lhs is the response as a

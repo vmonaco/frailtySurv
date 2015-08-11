@@ -30,41 +30,41 @@ BEGIN_RCPP
 END_RCPP
 }
 // lt_dgamma_c
-double lt_dgamma_c(int p, double s, double theta);
-RcppExport SEXP frailtyr_lt_dgamma_c(SEXP pSEXP, SEXP sSEXP, SEXP thetaSEXP) {
+double lt_dgamma_c(int m, double s, double theta);
+RcppExport SEXP frailtyr_lt_dgamma_c(SEXP mSEXP, SEXP sSEXP, SEXP thetaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type m(mSEXP);
     Rcpp::traits::input_parameter< double >::type s(sSEXP);
     Rcpp::traits::input_parameter< double >::type theta(thetaSEXP);
-    __result = Rcpp::wrap(lt_dgamma_c(p, s, theta));
+    __result = Rcpp::wrap(lt_dgamma_c(m, s, theta));
     return __result;
 END_RCPP
 }
 // deriv_lt_dgamma_c
-double deriv_lt_dgamma_c(int p, double s, double theta);
-RcppExport SEXP frailtyr_deriv_lt_dgamma_c(SEXP pSEXP, SEXP sSEXP, SEXP thetaSEXP) {
+double deriv_lt_dgamma_c(int m, double s, double theta);
+RcppExport SEXP frailtyr_deriv_lt_dgamma_c(SEXP mSEXP, SEXP sSEXP, SEXP thetaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type m(mSEXP);
     Rcpp::traits::input_parameter< double >::type s(sSEXP);
     Rcpp::traits::input_parameter< double >::type theta(thetaSEXP);
-    __result = Rcpp::wrap(deriv_lt_dgamma_c(p, s, theta));
+    __result = Rcpp::wrap(deriv_lt_dgamma_c(m, s, theta));
     return __result;
 END_RCPP
 }
 // deriv_deriv_lt_dgamma_c
-double deriv_deriv_lt_dgamma_c(int p, double s, double theta);
-RcppExport SEXP frailtyr_deriv_deriv_lt_dgamma_c(SEXP pSEXP, SEXP sSEXP, SEXP thetaSEXP) {
+double deriv_deriv_lt_dgamma_c(int m, double s, double theta);
+RcppExport SEXP frailtyr_deriv_deriv_lt_dgamma_c(SEXP mSEXP, SEXP sSEXP, SEXP thetaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type m(mSEXP);
     Rcpp::traits::input_parameter< double >::type s(sSEXP);
     Rcpp::traits::input_parameter< double >::type theta(thetaSEXP);
-    __result = Rcpp::wrap(deriv_deriv_lt_dgamma_c(p, s, theta));
+    __result = Rcpp::wrap(deriv_deriv_lt_dgamma_c(m, s, theta));
     return __result;
 END_RCPP
 }
@@ -114,6 +114,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type theta(thetaSEXP);
     __result = Rcpp::wrap(deriv_deriv_dlognormal_c(x, theta));
+    return __result;
+END_RCPP
+}
+// lt_dinvgauss_c
+double lt_dinvgauss_c(int m, double s, double theta);
+RcppExport SEXP frailtyr_lt_dinvgauss_c(SEXP mSEXP, SEXP sSEXP, SEXP thetaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< int >::type m(mSEXP);
+    Rcpp::traits::input_parameter< double >::type s(sSEXP);
+    Rcpp::traits::input_parameter< double >::type theta(thetaSEXP);
+    __result = Rcpp::wrap(lt_dinvgauss_c(m, s, theta));
     return __result;
 END_RCPP
 }

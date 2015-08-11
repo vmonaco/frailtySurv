@@ -1,18 +1,3 @@
-#include <Rcpp.h>
-#include <Rmath.h>
-#include "cubature.h"
-#include "distributions.h"
-
-using namespace Rcpp;
-
-#define DPOSSTAB_K 100
-
-// Numerical integration
-#define MAX_EVAL 100
-#define EPSABS 0
-#define EPSREL 1e-8
-
-
 // This contains all distribution-related functions.
 // Including, gamma, log-normal, inverse gaussian, positive stable, PVF
 // Closed-form Laplace transforms are included when they exist
@@ -21,6 +6,21 @@ using namespace Rcpp;
 // is the parameter vector for the distribution
 // Exported functions are of the form (NumericVector x, NumericVector p), where
 // p is again a parameter vector
+
+#include <Rcpp.h>
+#include <Rmath.h>
+#include "cubature.h"
+#include "distributions.h"
+
+using namespace Rcpp;
+
+// Number of iterations for posstab and pvf densities
+#define DPOSSTAB_K 100
+
+// Numerical integration parameters
+#define MAX_EVAL 100
+#define EPSABS 0
+#define EPSREL 1e-8
 
 NumericVector vectorized_density(NumericVector *x, NumericVector *p, density_fn density) {
   int n = x->size();
@@ -54,8 +54,8 @@ NumericVector vectorized_deriv_deriv_density(NumericVector *x, NumericVector *p,
 
 ///////////////////////////////////////////////////////////////////////////////
 // Gamma (Γ)
-double dgamma(double x, double *p) {
-  double theta = p[0];
+double dgamma(double x, double *params) {
+  double theta = params[0];
   
   double numer = pow(x, 1/theta - 1) * exp(-x/theta);
   double denom = pow(theta, 1/theta) * tgamma(1/theta);
@@ -63,8 +63,8 @@ double dgamma(double x, double *p) {
   return numer/denom;
 }
 
-double deriv_dgamma(double x, double *p, int deriv_idx) {
-  double theta = p[0];
+double deriv_dgamma(double x, double *params, int deriv_idx) {
+  double theta = params[0];
   double term1, term2, term3;
   term1 = pow((x/theta),(1/theta - 1));
   term2 = exp(-x/theta);
@@ -105,32 +105,32 @@ double deriv_lt_dgamma(int m, double s, double* params, int deriv_idx) {
   return (term1 + term2 - term3 + term4)/tgamma(1/theta);
 }
 
-double deriv_deriv_lt_dgamma(int p, double s, double* params, int deriv_idx_1, int deriv_idx_2) {
+double deriv_deriv_lt_dgamma(int m, double s, double* params, int deriv_idx_1, int deriv_idx_2) {
   // deriv_idx is ignored since there's only one parameter, theta
   double theta = params[0];
   
   return
-    ((pow((-1),p) * pow((1/theta),(1/theta)) * ((pow(((1/theta) + s),(-((1/theta) + 
-      p))) * (log(((1/theta) + s)) * (1/pow(theta,2))) - pow(((1/theta) + 
-      s),((-((1/theta) + p)) - 1)) * ((-((1/theta) + p)) * (1/pow(theta,2)))) * 
+    ((pow((-1),m) * pow((1/theta),(1/theta)) * ((pow(((1/theta) + s),(-((1/theta) + 
+      m))) * (log(((1/theta) + s)) * (1/pow(theta,2))) - pow(((1/theta) + 
+      s),((-((1/theta) + m)) - 1)) * ((-((1/theta) + m)) * (1/pow(theta,2)))) * 
       (log(((1/theta) + s)) * (1/pow(theta,2))) - pow(((1/theta) + s),(-((1/theta) + 
-      p))) * (log(((1/theta) + s)) * (2 * theta/pow((pow(theta,2)),2)) + 1/pow(theta,2)/((1/theta) + 
-      s) * (1/pow(theta,2))) - ((pow(((1/theta) + s),((-((1/theta) + p)) - 
+      m))) * (log(((1/theta) + s)) * (2 * theta/pow((pow(theta,2)),2)) + 1/pow(theta,2)/((1/theta) + 
+      s) * (1/pow(theta,2))) - ((pow(((1/theta) + s),((-((1/theta) + m)) - 
       1)) * (log(((1/theta) + s)) * (1/pow(theta,2))) - pow(((1/theta) + 
-      s),(((-((1/theta) + p)) - 1) - 1)) * (((-((1/theta) + p)) - 
-      1) * (1/pow(theta,2)))) * ((-((1/theta) + p)) * (1/pow(theta,2))) + 
-      pow(((1/theta) + s),((-((1/theta) + p)) - 1)) * (1/pow(theta,2) * (1/pow(theta,2)) - 
-      (-((1/theta) + p)) * (2 * theta/pow((pow(theta,2)),2))))) - pow((-1),p) * 
+      s),(((-((1/theta) + m)) - 1) - 1)) * (((-((1/theta) + m)) - 
+      1) * (1/pow(theta,2)))) * ((-((1/theta) + m)) * (1/pow(theta,2))) + 
+      pow(((1/theta) + s),((-((1/theta) + m)) - 1)) * (1/pow(theta,2) * (1/pow(theta,2)) - 
+      (-((1/theta) + m)) * (2 * theta/pow((pow(theta,2)),2))))) - pow((-1),m) * 
       (pow((1/theta),(1/theta)) * (log((1/theta)) * (1/pow(theta,2))) + pow((1/theta),((1/theta) - 
       1)) * ((1/theta) * (1/pow(theta,2)))) * (pow(((1/theta) + s),(-((1/theta) + 
-      p))) * (log(((1/theta) + s)) * (1/pow(theta,2))) - pow(((1/theta) + 
-      s),((-((1/theta) + p)) - 1)) * ((-((1/theta) + p)) * (1/pow(theta,2)))) - 
-      (pow((-1),p) * (pow((1/theta),(1/theta)) * (log((1/theta)) * (1/pow(theta,2))) + 
+      m))) * (log(((1/theta) + s)) * (1/pow(theta,2))) - pow(((1/theta) + 
+      s),((-((1/theta) + m)) - 1)) * ((-((1/theta) + m)) * (1/pow(theta,2)))) - 
+      (pow((-1),m) * (pow((1/theta),(1/theta)) * (log((1/theta)) * (1/pow(theta,2))) + 
       pow((1/theta),((1/theta) - 1)) * ((1/theta) * (1/pow(theta,2)))) * 
-      (pow(((1/theta) + s),(-((1/theta) + p))) * (log(((1/theta) + 
+      (pow(((1/theta) + s),(-((1/theta) + m))) * (log(((1/theta) + 
       s)) * (1/pow(theta,2))) - pow(((1/theta) + s),((-((1/theta) + 
-      p)) - 1)) * ((-((1/theta) + p)) * (1/pow(theta,2)))) - 
-      pow((-1),p) * (pow((1/theta),((1/theta) - 1)) * ((1/theta) * (2 * 
+      m)) - 1)) * ((-((1/theta) + m)) * (1/pow(theta,2)))) - 
+      pow((-1),m) * (pow((1/theta),((1/theta) - 1)) * ((1/theta) * (2 * 
       theta/pow((pow(theta,2)),2)) + 1/pow(theta,2) * (1/pow(theta,2))) + (pow((1/theta),((1/theta) - 
       1)) * (log((1/theta)) * (1/pow(theta,2))) + pow((1/theta),(((1/theta) - 
       1) - 1)) * (((1/theta) - 1) * (1/pow(theta,2)))) * ((1/theta) * 
@@ -139,49 +139,49 @@ double deriv_deriv_lt_dgamma(int p, double s, double* params, int deriv_idx_1, i
       (pow((1/theta),(1/theta)) * (log((1/theta)) * (1/pow(theta,2))) + 
       pow((1/theta),((1/theta) - 1)) * ((1/theta) * (1/pow(theta,2)))) * 
       (log((1/theta)) * (1/pow(theta,2))))) * pow(((1/theta) + 
-      s),(-((1/theta) + p))))) * tgamma((1/theta) + p) - 
-      (pow((-1),p) * pow((1/theta),(1/theta)) * (pow(((1/theta) + s),(-((1/theta) + 
-      p))) * (log(((1/theta) + s)) * (1/pow(theta,2))) - pow(((1/theta) + 
-      s),((-((1/theta) + p)) - 1)) * ((-((1/theta) + p)) * (1/pow(theta,2)))) - 
-      pow((-1),p) * (pow((1/theta),(1/theta)) * (log((1/theta)) * (1/pow(theta,2))) + 
+      s),(-((1/theta) + m))))) * tgamma((1/theta) + m) - 
+      (pow((-1),m) * pow((1/theta),(1/theta)) * (pow(((1/theta) + s),(-((1/theta) + 
+      m))) * (log(((1/theta) + s)) * (1/pow(theta,2))) - pow(((1/theta) + 
+      s),((-((1/theta) + m)) - 1)) * ((-((1/theta) + m)) * (1/pow(theta,2)))) - 
+      pow((-1),m) * (pow((1/theta),(1/theta)) * (log((1/theta)) * (1/pow(theta,2))) + 
       pow((1/theta),((1/theta) - 1)) * ((1/theta) * (1/pow(theta,2)))) * 
-      pow(((1/theta) + s),(-((1/theta) + p)))) * (1/pow(theta,2) * 
-      (tgamma((1/theta) + p) * Rf_digamma((1/theta) + p))) - ((pow((-1),p) * 
-      pow((1/theta),(1/theta)) * (pow(((1/theta) + s),(-((1/theta) + p))) * 
+      pow(((1/theta) + s),(-((1/theta) + m)))) * (1/pow(theta,2) * 
+      (tgamma((1/theta) + m) * Rf_digamma((1/theta) + m))) - ((pow((-1),m) * 
+      pow((1/theta),(1/theta)) * (pow(((1/theta) + s),(-((1/theta) + m))) * 
       (log(((1/theta) + s)) * (1/pow(theta,2))) - pow(((1/theta) + s),((-((1/theta) + 
-      p)) - 1)) * ((-((1/theta) + p)) * (1/pow(theta,2)))) - pow((-1),p) * 
+      m)) - 1)) * ((-((1/theta) + m)) * (1/pow(theta,2)))) - pow((-1),m) * 
       (pow((1/theta),(1/theta)) * (log((1/theta)) * (1/pow(theta,2))) + pow((1/theta),((1/theta) - 
       1)) * ((1/theta) * (1/pow(theta,2)))) * pow(((1/theta) + s),(-((1/theta) + 
-      p)))) * (1/pow(theta,2) * (tgamma((1/theta) + p) * Rf_digamma((1/theta) + 
-      p))) - pow((-1),p) * pow((1/theta),(1/theta)) * pow(((1/theta) + s),(-((1/theta) + 
-      p))) * (1/pow(theta,2) * (tgamma((1/theta) + p) * (1/pow(theta,2) * Rf_trigamma((1/theta) + 
-      p)) + 1/pow(theta,2) * (tgamma((1/theta) + p) * Rf_digamma((1/theta) + 
-      p)) * Rf_digamma((1/theta) + p)) + 2 * theta/pow((pow(theta,2)),2) * (tgamma((1/theta) + 
-      p) * Rf_digamma((1/theta) + p)))))/tgamma((1/theta)) + ((pow((-1),p) * 
-      pow((1/theta),(1/theta)) * (pow(((1/theta) + s),(-((1/theta) + p))) * 
+      m)))) * (1/pow(theta,2) * (tgamma((1/theta) + m) * Rf_digamma((1/theta) + 
+      m))) - pow((-1),m) * pow((1/theta),(1/theta)) * pow(((1/theta) + s),(-((1/theta) + 
+      m))) * (1/pow(theta,2) * (tgamma((1/theta) + m) * (1/pow(theta,2) * Rf_trigamma((1/theta) + 
+      m)) + 1/pow(theta,2) * (tgamma((1/theta) + m) * Rf_digamma((1/theta) + 
+      m)) * Rf_digamma((1/theta) + m)) + 2 * theta/pow((pow(theta,2)),2) * (tgamma((1/theta) + 
+      m) * Rf_digamma((1/theta) + m)))))/tgamma((1/theta)) + ((pow((-1),m) * 
+      pow((1/theta),(1/theta)) * (pow(((1/theta) + s),(-((1/theta) + m))) * 
       (log(((1/theta) + s)) * (1/pow(theta,2))) - pow(((1/theta) + s),((-((1/theta) + 
-      p)) - 1)) * ((-((1/theta) + p)) * (1/pow(theta,2)))) - pow((-1),p) * 
+      m)) - 1)) * ((-((1/theta) + m)) * (1/pow(theta,2)))) - pow((-1),m) * 
       (pow((1/theta),(1/theta)) * (log((1/theta)) * (1/pow(theta,2))) + pow((1/theta),((1/theta) - 
       1)) * ((1/theta) * (1/pow(theta,2)))) * pow(((1/theta) + s),(-((1/theta) + 
-      p)))) * tgamma((1/theta) + p) - pow((-1),p) * pow((1/theta),(1/theta)) * 
-      pow(((1/theta) + s),(-((1/theta) + p))) * (1/pow(theta,2) * (tgamma((1/theta) + 
-      p) * Rf_digamma((1/theta) + p)))) * (1/pow(theta,2) * (tgamma((1/theta)) * 
-      Rf_digamma((1/theta))))/pow(tgamma((1/theta)),2) + ((((pow((-1),p) * pow((1/theta),(1/theta)) * 
-      (pow(((1/theta) + s),(-((1/theta) + p))) * (log(((1/theta) + s)) * 
-      (1/pow(theta,2))) - pow(((1/theta) + s),((-((1/theta) + p)) - 
-      1)) * ((-((1/theta) + p)) * (1/pow(theta,2)))) - pow((-1),p) * (pow((1/theta),(1/theta)) * 
+      m)))) * tgamma((1/theta) + m) - pow((-1),m) * pow((1/theta),(1/theta)) * 
+      pow(((1/theta) + s),(-((1/theta) + m))) * (1/pow(theta,2) * (tgamma((1/theta) + 
+      m) * Rf_digamma((1/theta) + m)))) * (1/pow(theta,2) * (tgamma((1/theta)) * 
+      Rf_digamma((1/theta))))/pow(tgamma((1/theta)),2) + ((((pow((-1),m) * pow((1/theta),(1/theta)) * 
+      (pow(((1/theta) + s),(-((1/theta) + m))) * (log(((1/theta) + s)) * 
+      (1/pow(theta,2))) - pow(((1/theta) + s),((-((1/theta) + m)) - 
+      1)) * ((-((1/theta) + m)) * (1/pow(theta,2)))) - pow((-1),m) * (pow((1/theta),(1/theta)) * 
       (log((1/theta)) * (1/pow(theta,2))) + pow((1/theta),((1/theta) - 1)) * 
       ((1/theta) * (1/pow(theta,2)))) * pow(((1/theta) + s),(-((1/theta) + 
-      p)))) * tgamma((1/theta) + p) - pow((-1),p) * pow((1/theta),(1/theta)) * 
-      pow(((1/theta) + s),(-((1/theta) + p))) * (1/pow(theta,2) * (tgamma((1/theta) + 
-      p) * Rf_digamma((1/theta) + p)))) * (1/pow(theta,2) * (tgamma((1/theta)) * 
-      Rf_digamma((1/theta)))) - pow((-1),p) * pow((1/theta),(1/theta)) * pow(((1/theta) + 
-      s),(-((1/theta) + p))) * tgamma((1/theta) + p) * (1/pow(theta,2) * 
+      m)))) * tgamma((1/theta) + m) - pow((-1),m) * pow((1/theta),(1/theta)) * 
+      pow(((1/theta) + s),(-((1/theta) + m))) * (1/pow(theta,2) * (tgamma((1/theta) + 
+      m) * Rf_digamma((1/theta) + m)))) * (1/pow(theta,2) * (tgamma((1/theta)) * 
+      Rf_digamma((1/theta)))) - pow((-1),m) * pow((1/theta),(1/theta)) * pow(((1/theta) + 
+      s),(-((1/theta) + m))) * tgamma((1/theta) + m) * (1/pow(theta,2) * 
       (tgamma((1/theta)) * (1/pow(theta,2) * Rf_trigamma((1/theta))) + 1/pow(theta,2) * 
       (tgamma((1/theta)) * Rf_digamma((1/theta))) * Rf_digamma((1/theta))) + 
       2 * theta/pow((pow(theta,2)),2) * (tgamma((1/theta)) * Rf_digamma((1/theta)))))/pow(tgamma((1/theta)),2) + 
-      pow((-1),p) * pow((1/theta),(1/theta)) * pow(((1/theta) + s),(-((1/theta) + 
-      p))) * tgamma((1/theta) + p) * (1/pow(theta,2) * (tgamma((1/theta)) * 
+      pow((-1),m) * pow((1/theta),(1/theta)) * pow(((1/theta) + s),(-((1/theta) + 
+      m))) * tgamma((1/theta) + m) * (1/pow(theta,2) * (tgamma((1/theta)) * 
       Rf_digamma((1/theta)))) * (2 * (1/pow(theta,2) * (tgamma((1/theta)) * 
       Rf_digamma((1/theta))) * tgamma((1/theta))))/pow((pow(tgamma((1/theta)),2)),2));
 }
@@ -197,18 +197,18 @@ NumericVector deriv_dgamma_c(NumericVector x, NumericVector theta) {
 }
 
 // [[Rcpp::export]]
-double lt_dgamma_c(int p, double s, double theta) {
-  return lt_dgamma(p, s, &theta);
+double lt_dgamma_c(int m, double s, double theta) {
+  return lt_dgamma(m, s, &theta);
 }
 
 // [[Rcpp::export]]
-double deriv_lt_dgamma_c(int p, double s, double theta) {
-  return deriv_lt_dgamma(p, s, &theta, 0);
+double deriv_lt_dgamma_c(int m, double s, double theta) {
+  return deriv_lt_dgamma(m, s, &theta, 0);
 }
 
 // [[Rcpp::export]]
-double deriv_deriv_lt_dgamma_c(int p, double s, double theta) {
-  return deriv_deriv_lt_dgamma(p, s, &theta, 0, 0);
+double deriv_deriv_lt_dgamma_c(int m, double s, double theta) {
+  return deriv_deriv_lt_dgamma(m, s, &theta, 0, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -327,15 +327,15 @@ NumericVector deriv_deriv_dlognormal_c(NumericVector x, NumericVector theta) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Inverse Gaussian (IG)
-double dinvgauss(double x, double *p) {
-  double theta = p[0];
+double dinvgauss(double x, double *params) {
+  double theta = params[0];
   double numer = exp(-pow(x - 1, 2)/(2*theta*x));
   double denom = sqrt(2*PI*theta*pow(x,3));
   return numer/denom;
 }
 
-double deriv_dinvgauss(double x, double *p, int deriv_idx) {
-  double theta = p[0];
+double deriv_dinvgauss(double x, double *params, int deriv_idx) {
+  double theta = params[0];
   double term1_numer = pow(x - 1, 2) * exp(-pow(x - 1, 2)/(2*theta*x));
   double term1_denom = 2 * sqrt(2*PI) * pow(theta, 2) * x * sqrt(theta * pow(x, 3));
   double term2_numer = pow(x, 3) * exp(-pow(x - 1, 2)/(2*theta*x));
@@ -343,8 +343,8 @@ double deriv_dinvgauss(double x, double *p, int deriv_idx) {
   return term1_numer/term1_denom - term2_numer/term2_denom;
 }
 
-double deriv_deriv_dinvgauss(double x, double *p, int deriv_idx_1, int deriv_idx_2) {
-  double theta = p[0];
+double deriv_deriv_dinvgauss(double x, double *params, int deriv_idx_1, int deriv_idx_2) {
+  double theta = params[0];
   return (exp(-(pow((x - 1),2))/(2 * theta * x)) * ((pow((x - 1),2)) * (2 * x)/pow(2 * 
           theta * x,2)) * ((pow((x - 1),2)) * (2 * x)/pow(2 * theta * x,2)) - 
           exp(-(pow((x - 1),2))/(2 * theta * x)) * ((pow((x - 1),2)) * (2 * x) * 
@@ -425,6 +425,11 @@ double deriv_deriv_lt_dinvgauss(int m, double s, double* theta, int deriv_idx_1,
   hcubature(1, deriv_deriv_lt_dinvgauss_deriv, params, 1, xmin, xmax, MAX_EVAL, 
             EPSABS, EPSREL, ERROR_INDIVIDUAL, &val, &err);
   return val;
+}
+
+// [[Rcpp::export]]
+double lt_dinvgauss_c(int m, double s, double theta) {
+  return lt_dinvgauss(m, s, &theta);
 }
 
 // [[Rcpp::export]]
