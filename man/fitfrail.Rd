@@ -2,56 +2,66 @@
 \alias{fitfrail}
 \title{Fit Shared Frailty Model}
 \description{
-\code{fitfrail} fits a Cox proportional hazards model with hidden shared frailty.
+Fit a Cox proportional hazards model with hidden shared frailty and unspecified baseline hazard. See Gorfine (2006) for details.
 }
 \usage{
-fitfrail(formula, dat, control)
+fitfrail(formula, dat, control, frailty, weights, ...)
 }
 \arguments{
-\item{formula}{a \code{formula} object, where the lhs is the response as a
-\code{\link[survival]{Surv}} object and the terms are on the right.}
 
-\item{dat}{a data.frame that provides context for the formula}
+\item{formula}{a \code{formula} object, where the lhs is the response as a \code{\link[survival]{Surv}} object and rhs contain the terms, including a \code{cluster} term for the cluster identifier}
+
+\item{dat}{data.frame that provides context for the formula}
 
 \item{control}{control parameters in the form of a \code{\link{fitfrail.control}} object}
 
-\item{frailty}{name of the shared frailty distribution}
+\item{frailty}{string name of the shared frailty distribution}
 
-\item{...}{additional arguments will be passed to fitfrail.control}
+\item{weights}{vector of cluster weights}
+
+\item{...}{additional arguments will be passed to \code{\link[frailtyr]{fitfrail.control}}}
 }
 \value{
-a fitfrail object representing the shared frailty model
+A fitfrail object representing the shared frailty model.
+
+  \item{beta}{the estimated regression coefficients}
+  \item{theta}{the estimated frailty distribution parameters}
+  \item{Lambda}{a \code{data.frame} with the estimated baseline hazard at each failure time}
+  \item{fun.Lambda}{a function of time that returns the estimated baseline}
+  \item{loglik}{the log-likelihood}
+  \item{iter}{the number of iterations to convergence}
 }
 \references{
-  Chambers, J. M. (1992)
-  \emph{Linear models.}
-  Chapter 4 of \emph{Statistical Models in S}
-  eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
-
-  Wilkinson, G. N. and Rogers, C. E. (1973)
-  Symbolic descriptions of factorial models for analysis of variance.
-  \emph{Applied Statistics}, \bold{22}, 392--9.
+  Gorfine M, Zucker DM, Hsu L (2006)
+  Prospective survival analysis with a general semiparametric shared frailty model: A pseudo full likelihood approach.
+  \emph{Biometrika}, \bold{93}(3), 735-741.
 }
 \author{
-  The design was inspired by the S function of the same name described
-  in Chambers (1992).  The implementation of model formula by Ross Ihaka
-  was based on Wilkinson & Rogers (1973).
+  The estimation method was developed by Malka Gorfine, Li Hsu, and David Zucker. The implementation was done by John V. Monaco.
 }
 
 \examples{
-% \dontrun{
 # 
 # Generate synthetic survival data with regression coefficients 
 # beta = c(log(2),log(3)) and theta = 2, where the shared frailty 
 # values from a gamma distribution with expectation 1 and variance theta.
 # 
-simdata <- genfrail(beta=c(log(2),log(3)), N=30, K=2, 
-                    theta=2, frailty="gamma", 
-                    censor.mu=130, covariates="uniform")
+dat <- genfrail(N=300, K=2, beta=c(log(2),log(3)), 
+                frailty="gamma", theta=2,
+                censor.rate=0.35,
+                Lambda_0=function(t, tau=4.6, C=0.01) (C*t)^tau)
 
 # Fit a shared frailty model
-fit.frailtyr <- fitfrail(Surv(time, status) ~ Z1 + cluster(family), 
-                         data=simdata, frailty="gamma")
-                         
-% } % dontrun
-} % examples
+fit <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family), 
+                data=dat, frailty="gamma")
+fit
+
+# Fit the DRS data, clustered on patient
+data(drs)
+fit.drs <- fitfrail(Surv(time, status) ~ treated + cluster(subject_id), 
+                    drs, frailty="gamma")
+fit.drs
+
+# Variance estimates
+vcov(fit.drs)
+}

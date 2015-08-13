@@ -18,7 +18,7 @@ genfrail <- function(N = 300, K = 2,
                      beta = c(log(2),log(3)),
                      frailty = "gamma", theta = 2, 
                      covar.distr = "normal", 
-                     censor.rate = 0.30,
+                     censor.rate = 0.35,
                      Lambda_0 = function(t, tau=4.6, C=0.01) (C*t)^tau)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -63,7 +63,7 @@ A \code{data.frame} with row-observations is returned.
 }
 
 \seealso{
-\code{\link{fitfrail}}
+\code{\link[frailtyr]{fitfrail}}
 }
 
 \examples{
