@@ -1,6 +1,9 @@
 \name{fitfrail}
 \alias{fitfrail}
-\title{Fit Shared Frailty model}
+\title{Fit Shared Frailty Model}
+\description{
+\code{fitfrail} fits a Cox proportional hazards model with hidden shared frailty.
+}
 \usage{
 fitfrail(formula, dat, control)
 }
@@ -19,12 +22,22 @@ fitfrail(formula, dat, control)
 \value{
 a fitfrail object representing the shared frailty model
 }
-\description{
-\code{fitfrail} fits a Cox proportional hazards model with hidden shared frailty.
+\references{
+  Chambers, J. M. (1992)
+  \emph{Linear models.}
+  Chapter 4 of \emph{Statistical Models in S}
+  eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/Cole.
+
+  Wilkinson, G. N. and Rogers, C. E. (1973)
+  Symbolic descriptions of factorial models for analysis of variance.
+  \emph{Applied Statistics}, \bold{22}, 392--9.
 }
-\details{
-This function ...
+\author{
+  The design was inspired by the S function of the same name described
+  in Chambers (1992).  The implementation of model formula by Ross Ihaka
+  was based on Wilkinson & Rogers (1973).
 }
+
 \examples{
 % \dontrun{
 # 

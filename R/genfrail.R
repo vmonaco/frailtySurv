@@ -1,37 +1,45 @@
-genfrail <- function(beta = c(log(2)), # Covariate coefficients
-                     covar.distr = "uniform", #c("normal", "uniform", "zero"),
-                     covar.param = c(0,1),
-                     covar = NULL,
-                     
-                     # Frailty distribution and parameter vector
-                     frailty = "gamma", #c("gamma", "lognormal", "invgauss", "posstab", "pvf", "none"), 
-                     theta = c(2), # Frailty distribution parameter vector
-                     
-                     # Censoring distribution and parameters vector
-                     censor.distr = "normal", #c("normal", "lognormal", "none"),
-                     censor.rate = NULL, # If specified, overrides mu
-                     censor.mu = 130, # 5
-                     censor.sigma = 15, # 0.5
-                     
-                     # Number of clusters and cluster sizes
-                     N = 300, # N must be provided
+genfrail <- function(# Number of clusters and cluster sizes
+                     N = 300,
                      # If K is int, then fixed cluster sizes
                      # If K is numeric vector, then sizes provided
                      # Otherwise draw random
-                     K = 2, #c(2, "poisson", "tzeta", "duniform"), 
+                     # can be one of: "poisson", "pareto", "uniform"
+                     K = 2, 
                      # cluster size distributian params:
                      # K-truncated Poisson: c(lambda, truncated value)
                      # Discrete Pareto: c(alpha, max value inclusive)
                      # Uniform: c(lower, upper) inclusive
-                     K.params = c(2, 0), 
+                     K.param = c(2, 0), 
+                     
+                     # Covariate coefficients
+                     beta = c(log(2)),
+                     
+                     # Frailty distribution and parameter vector
+                     # Can be one of: "gamma", "pvf", "lognormal", "invgauss", "posstab", "none"
+                     frailty = "gamma",
+                     # Frailty distribution parameter vector
+                     theta = c(2), 
+                     
+                     # Covariate distribution and params
+                     # covar.distr can be one of: "normal", "uniform", "zero"
+                     covar.distr = "normal", 
+                     covar.param = c(0,1),
+                     covar.matrix = NULL,
+                     
+                     # Censoring distribution and parameters vector
+                     # censor.distr can be one of: "normal", "lognormal", "none"
+                     censor.distr = "normal",
+                     censor.mu = 130,
+                     censor.sigma = 15,
+                     censor.rate = NULL, # If specified, overrides censor.mu
                      
                      # Only one of these needs to be specified
                      # Order of preference is: Lambda_0_inv, Lambda_0, lambda_0
-                     lambda_0 = NULL, #function(t, tau=4.6, C=0.01) (tau*(C*t)^tau)/t,
-                     Lambda_0 = NULL, #function(t, tau=4.6, C=0.01) (C*t)^tau,
-                     Lambda_0_inv = NULL, #function(t, tau=4.6, C=0.01) (t^(1/tau))/C,
+                     lambda_0 = NULL, #i.e. function(t, tau=4.6, C=0.01) (tau*(C*t)^tau)/t,
+                     Lambda_0 = NULL, #i.e. function(t, tau=4.6, C=0.01) (C*t)^tau,
+                     Lambda_0_inv = NULL, #i.e. function(t, tau=4.6, C=0.01) (t^(1/tau))/C,
                      
-                     # Round time to nearest 
+                     # Round time to nearest round.base
                      round.base = NULL
 ) {
   
@@ -43,11 +51,11 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
       stop("length(K) must equal N when providing cluster sizes")
     cluster.sizes <- K
   } else if (K == "poisson") {
-    cluster.sizes <- rtpois(N, K.params[1], K.params[2])
+    cluster.sizes <- rtpois(N, K.param[1], K.param[2])
   } else if (K == "pareto") {
-    cluster.sizes <- rtzeta(N, K.params[1], K.params[2], K.params[3])
+    cluster.sizes <- rtzeta(N, K.param[1], K.param[2], K.param[3])
   } else if (K == "uniform") {
-    cluster.sizes <- round(runif(N, K.params[1], K.params[2]))
+    cluster.sizes <- round(runif(N, K.param[1], K.param[2]))
   } else {
     stop("Wrong value for K. Must be int, string, or numeric vector")
   }
@@ -58,8 +66,8 @@ genfrail <- function(beta = c(log(2)), # Covariate coefficients
   p <- length(beta)
   Z <- matrix(0, nrow=NK, ncol=p)
   for (j in 1:p) {
-    if (!is.null(covar)) {
-      Z <- covar
+    if (!is.null(covar.matrix)) {
+      Z <- covar.matrix
     } else if (covar.distr == "normal") {
       Z[, j] <- rnorm(NK, covar.param[1], covar.param[2])
     } else if (covar.distr == "uniform") {
