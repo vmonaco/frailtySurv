@@ -1,6 +1,4 @@
-#' Run functions in parallel with reproducible results
-#' 
-#' 
+# Run functions in parallel (if possible) with reproducible results
 plapply <- function(reps, FUN, cores=0) {
   # To make the result reproducable when parallelized, seed each run 
   seeds <- sample(1:1e7, reps, replace=FALSE)

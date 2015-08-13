@@ -14,21 +14,33 @@ Daily snapshots of a large backup storage provider over 2 years were made public
 \format{
   A data frame with 52422 observations on the following 8 variables.
   \describe{
-    \item{\code{serial}}{Unique serial number of the hard drive}
-    \item{\code{model}}{a factor with levels}
-    \item{\code{time}}{a numeric vector}
-    \item{\code{status}}{a numeric vector}
-    \item{\code{temp}}{a numeric vector}
-    \item{\code{rsc}}{a numeric vector}
-    \item{\code{rer}}{a numeric vector}
-    \item{\code{psc}}{a numeric vector}
+    \item{\code{serial}}{unique serial number of the hard drive}
+    \item{\code{model}}{hard drive model}
+    \item{\code{time}}{the observed followup time}
+    \item{\code{status}}{failure indicator}
+    \item{\code{temp}}{temperature in Celsius}
+    \item{\code{rsc}}{binary covariate, where 1 indicates sectors that encountered read, write, or verification errors}
+    \item{\code{rer}}{binary covariate, where 1 indicates a non-zero rate of errors that occur in hardware when reading from data from disk.}
+    \item{\code{psc}}{binary covariate, where 1 indicates there were sectors waiting to be remapped due to an unrecoverable error.}
   }
 }
+
 \source{
 \url{https://www.backblaze.com/hard-drive-test-data.html}
 }
+
 \examples{
+\dontrun{
 data(hdfail)
-## maybe str(hdfail) ; plot(hdfail) ...
+
+# Select only Western Digital hard drives
+dat <- subset(hdfail, grepl("WDC", model))
+
+fit.hd <- fitfrail(Surv(time, status) ~ temp + rer + rsc 
+                                      + psc + cluster(model), 
+                   dat, frailty="gamma", fitmethod="score")
+
+fit.hd
+}
 }
 \keyword{datasets}

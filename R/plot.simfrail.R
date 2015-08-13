@@ -1,4 +1,5 @@
-plot.simfrail <- function(sim, type=c("residuals","hazard"), ...) {
+plot.simfrail <- function(x, type=c("residuals","hazard"), ...) {
+  sim <- x
   if (type == "residuals") {
     plot.simfrail.residuals(sim, ...)
   } else if (type == "hazard") {
@@ -7,14 +8,10 @@ plot.simfrail <- function(sim, type=c("residuals","hazard"), ...) {
 }
 
 plot.simfrail.residuals <- function(sim, n.Lambda=3, ...) {
-  if (!requireNamespace("plyr", quietly = TRUE) || 
-      !requireNamespace("ggplot2", quietly = TRUE) || 
+  if (!requireNamespace("ggplot2", quietly = TRUE) || 
       !requireNamespace("reshape2", quietly = TRUE)) {
-    stop("Plotting requires the plyr, ggplot2, and reshape2 packages")
+    stop("Plotting requires the ggplot2, and reshape2 packages")
   }
-  require(plyr)
-  require(ggplot2)
-  require(reshape2)
   Lambda.cols <- names(sim)[grepl("^Lambda", names(sim))]
   
   # All BUT n.Lambda
@@ -43,12 +40,11 @@ plot.simfrail.residuals <- function(sim, n.Lambda=3, ...) {
   # Select N and residuals columns, start with res
   n.vars <- length(value.cols)
   
-  res.melt <- reshape2::melt(residuals, id = c("N"))
+  res.melt <- melt(residuals, id = c("N"))
   cases <- c(t(unique(res.melt["N"])))
+  res.melt$x <- factor(0.5*floor(res.melt$N))
   
-  showx <- length(unique(sim$N)) > 1
-  
-  p <- ggplot(res.melt, aes(x=factor(round_any(N,0.5)), y=value, fill=variable)) + 
+  p <- ggplot(res.melt, aes_string(x='x', y='value', fill='variable')) + 
     geom_boxplot(notch=TRUE) +
     facet_grid(.~variable) +
     labs(x="N",y="Residual") + 
@@ -62,8 +58,6 @@ plot.simfrail.hazard <- function(sim, CI=0.95, skip.SE=FALSE, ...) {
       !requireNamespace("reshape2", quietly = TRUE)) {
     stop("Plotting requires the ggplot2, reshape2 packages")
   }
-  require(ggplot2)
-  require(reshape2)
   
   hats <- sim[,grepl("^hat.Lambda", names(sim))]
   se <- sim[,grepl("^se.Lambda", names(sim))]
@@ -72,7 +66,7 @@ plot.simfrail.hazard <- function(sim, CI=0.95, skip.SE=FALSE, ...) {
   Lambda.time <- sapply(names(values), function(w) gsub(".+\\.", "", w), USE.NAMES=FALSE)
   Lambda.time <- as.numeric(Lambda.time)
   names(hats) <- Lambda.time
-  melthats <- reshape2::melt(t(hats))
+  melthats <- melt(t(hats))
   names(melthats) <- c("Time","instance", "value")
   melthats$type <- sprintf("Empirical (%.2f CI)", CI)
   
@@ -84,9 +78,9 @@ plot.simfrail.hazard <- function(sim, CI=0.95, skip.SE=FALSE, ...) {
   se <- data.frame(x=Lambda.time, lower=values$y-Z.score*mean.se, upper=values$y+Z.score*mean.se)
   se$type <- sprintf("Estimated %.2f CI", CI)
   
-  p <- ggplot(melthats, aes(x=Time,y=value,color=type)) +
-    stat_summary(fun.data="mean_cl_boot", geom="smooth") +
-    geom_line(aes(x=x, y=y, color=type), values) +
+  p <- ggplot(melthats, aes_string(x='Time',y='value',color='type')) +
+    stat_summary(fun.data=mean_cl_boot, geom="smooth") +
+    geom_line(aes_string(x='x', y='y', color='type'), values) +
     theme(legend.position=c(0,1),
           legend.justification=c(0,1)) +
     ylab("Cumulative baseline hazard")
@@ -99,8 +93,8 @@ plot.simfrail.hazard <- function(sim, CI=0.95, skip.SE=FALSE, ...) {
     p <- p + scale_colour_manual("Legend", values=c("black","blue"))
   } else {
     p <- p + 
-          geom_line(aes(x=x, y=upper, color=type), se) +
-          geom_line(aes(x=x, y=lower, color=type), se) +
+          geom_line(aes_string(x='x', y='upper', color='type'), se) +
+          geom_line(aes_string(x='x', y='lower', color='type'), se) +
           scale_colour_manual("Legend", values=c("black","blue","brown"))
   }
   

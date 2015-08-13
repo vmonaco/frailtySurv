@@ -20,9 +20,7 @@ tau.numerical <- function(theta, frailty) {
   }), 0, Inf)$value - 1
 }
 
-#' 
-#' Numericcaly determine theta given Kendall's tau
-#' 
+# Numericcaly determine theta given Kendall's tau
 theta.given.tau <- function(tau, frailty) {
   uniroot(function(theta) {
     tau.numerical(theta, frailty) - tau

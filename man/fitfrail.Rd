@@ -1,14 +1,16 @@
 \name{fitfrail}
 \alias{fitfrail}
-\title{Fit Shared Frailty Model}
+\title{Fit a shared frailty model}
+
 \description{
-Fit a Cox proportional hazards model with hidden shared frailty and unspecified baseline hazard. See Gorfine (2006) for details.
+Fit a Cox proportional hazards model with hidden shared frailty and unspecified baseline hazard using a general semiparametric noniterative estimation technique. See Gorfine (2006) and Zucker (2008) for details.
 }
+
 \usage{
 fitfrail(formula, dat, control, frailty, weights, ...)
 }
-\arguments{
 
+\arguments{
 \item{formula}{a \code{formula} object, where the lhs is the response as a \code{\link[survival]{Surv}} object and rhs contain the terms, including a \code{cluster} term for the cluster identifier}
 
 \item{dat}{data.frame that provides context for the formula}
@@ -21,6 +23,7 @@ fitfrail(formula, dat, control, frailty, weights, ...)
 
 \item{...}{additional arguments will be passed to \code{\link[frailtyr]{fitfrail.control}}}
 }
+
 \value{
 A fitfrail object representing the shared frailty model.
 
@@ -29,18 +32,47 @@ A fitfrail object representing the shared frailty model.
   \item{Lambda}{a \code{data.frame} with the estimated baseline hazard at each failure time}
   \item{fun.Lambda}{a function of time that returns the estimated baseline}
   \item{loglik}{the log-likelihood}
-  \item{iter}{the number of iterations to convergence}
+  \item{iter}{the number of iterations performed}
+  \item{trace}{the parameter trace during estimation}
 }
+
+\section{Assumptions}{
+Some technical conditions apply in order for the valid estimates to be obtained.
+\enumerate{
+  \item{Within each cluster, the data are independent and identically distribution.}
+  \item{Censorship is non-informative.}
+  \item{The frailty distribution has finite moments up to 2 plus the largest cluster size.}
+  \item{There is a positive probability of failure for at least two members in each cluster.}
+}
+
+This list is not exhaustive, but highlists some important conditions. See Zucker (2008) for the complete technical conditions. 
+}
+
+\section{Convergence}{
+The initial values of the regression coefficients are provided by \code{coxph}. Convergence is reached when either the relative reduction or absolute reduction in loglikelihood or score equations (depending on the fitmethod used) are below a threshold. If the maxit iterations are performed before convergence, then the algorithm terminates with a warning.
+}
+
+\author{
+  The estimation method was developed by Malka Gorfine, Li Hsu, and David Zucker; implemented by John V. Monaco.
+}
+
 \references{
   Gorfine M, Zucker DM, Hsu L (2006)
   Prospective survival analysis with a general semiparametric shared frailty model: A pseudo full likelihood approach.
   \emph{Biometrika}, \bold{93}(3), 735-741.
+  
+  Zucker DM, Gorfine M, Hsu L (2008)
+  Pseudo-full likelihood estimation for prospective survival analysis with a general semiparametric shared frailty model: Asymptotic theory.
+  \emph{Journal of Statistical Planning and Inference}, \bold{138}(7), 1998-2016.
 }
-\author{
-  The estimation method was developed by Malka Gorfine, Li Hsu, and David Zucker. The implementation was done by John V. Monaco.
+
+\seealso{
+\code{\link{vcov.fitfrail}}, \code{\link{genfrail}}, \code{\link{simfrail}},
+\code{\link[survival]{survfit}}, \code{\link[survival]{coxph}}
 }
 
 \examples{
+\dontrun{
 # 
 # Generate synthetic survival data with regression coefficients 
 # beta = c(log(2),log(3)) and theta = 2, where the shared frailty 
@@ -53,15 +85,17 @@ dat <- genfrail(N=300, K=2, beta=c(log(2),log(3)),
 
 # Fit a shared frailty model
 fit <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family), 
-                data=dat, frailty="gamma")
+                dat, frailty="gamma")
 fit
+
+# The fun.Lambda function can give the estimated cumulative baseline hazard at
+# any time
+fit$fun.Lambda(seq(0, 100, by=10))
 
 # Fit the DRS data, clustered on patient
 data(drs)
 fit.drs <- fitfrail(Surv(time, status) ~ treated + cluster(subject_id), 
                     drs, frailty="gamma")
 fit.drs
-
-# Variance estimates
-vcov(fit.drs)
+}
 }

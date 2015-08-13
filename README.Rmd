@@ -12,11 +12,11 @@ output:
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "figures"
+  fig.path = "figures/"
 )
 ```
 
-frailtyr is a library for fitting shared frailty models with support for general frailty distributions. **This is currently a work in progress**, part of Google Summer of Code 2015.
+frailtyr is an R package for simulating and fitting semiparametric shared frailty models.
 
 ## Installation
 
@@ -25,6 +25,41 @@ To get started, you can install the package from github using `devtools`.
 ```{r eval = F}
 library(devtools)
 install_github("vmonaco/frailtyr")
+```
+
+## Example
+The following code shows how to generate data and fit the model.
+```{r, echo=TRUE, cache=TRUE}
+set.seed(1234)
+library(frailtyr)
+dat <- genfrail(N=200, K=2, beta=c(log(2),log(3)), 
+                frailty="gamma", theta=2,
+                censor.rate=0.35,
+                Lambda_0=function(t, tau=4.6, C=0.01) (C*t)^tau)
+
+fit <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family), 
+                dat, frailty="gamma")
+fit
+```
+
+Parameter traces are given by
+```{r, message=FALSE, echo=TRUE, fig.height=3, fig.width=8, cache=TRUE}
+plot(fit, "trace")
+```
+
+The estimated cumulative baseline hazard is given by
+```{r, message=FALSE, echo=TRUE, fig.height=3, fig.width=8, cache=TRUE}
+plot(fit, "hazard")
+```
+
+Note that this takes some time to compute since the cumulative baseline hazard variance is estimated by a weighted bootstrap procedure. These results can be compared to other estimation techniques.
+```{r, message=FALSE, echo=TRUE}
+library(survival)
+library(frailtypack)
+```
+```{r, echo=TRUE}
+coxph(Surv(time, status) ~ Z1 + Z2 + frailty.gamma(family), data=dat)
+frailtyPenal(Surv(time, status) ~ Z1 + Z2 + cluster(family), data=dat, n.knots=10, kappa=2)
 ```
 
 ## Clone and build
@@ -73,25 +108,3 @@ frailtyr uses the `testthat` library for tests. Test files are all located in `t
 ### git pull
 
 Use RStudio to pull the latest code if you've already cloned the repository. In the "git" pane, look for the Pull button. You can also view the commit history from there and see the diff between modified files, if any.
-
-## Example
-The following code shows how to generate data and fit the model. For now, the baseline hazard estimator is very slow. Estimating parameters for 60 data points takes about 90 seconds, as shown in the example.
-```{r, echo=TRUE}
-set.seed(1234)
-library(frailtyr)
-data <- genfrail(beta=c(log(2)), theta=2, N=30, K=2, frailty="gamma", covariates="normal")
-ptm <- proc.time()
-fitfrail(Surv(time, status) ~ Z1 + cluster(family), data, frailty="gamma")
-proc.time() - ptm
-```
-
-These results can be compared to existing shared frailty models.
-
-```{r, message=FALSE, echo=TRUE}
-library(survival)
-library(frailtypack)
-```
-```{r, echo=TRUE}
-coxph(Surv(time, status) ~ Z1 + frailty.gamma(family), data=data)
-frailtyPenal(Surv(time, status) ~ Z1 + cluster(family), data=data, n.knots=10, kappa=2)
-```

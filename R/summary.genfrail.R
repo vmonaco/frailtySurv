@@ -1,5 +1,5 @@
-summary.genfrail <- function(dat, ...) {
-  
+summary.genfrail <- function(object, ...) {
+  dat <- object  
   s <- append(attributes(dat), list(
       n.obs=length(dat$time),
       n.clusters=length(unique(dat$family)),

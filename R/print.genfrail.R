@@ -1,3 +1,3 @@
-print.genfrail <- function(gen, ...) {
-  print(as.data.frame(gen), ...)
+print.genfrail <- function(x, ...) {
+  print(as.data.frame(x), ...)
 }

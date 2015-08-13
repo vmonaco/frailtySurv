@@ -1,20 +1,3 @@
-#' Repeatedly simulate survival data and fit a model
-#' 
-#' Generate data and fit a model many times. 
-#' Reproduceable sim can be obtained by simply setting the seed before calling simfrail.
-#' 
-#' @param reps number of times to repeat the simulation
-#' @param genfrail.args 
-#' @param fitfrail.args
-#' @param Lambda.time
-#' @param cores
-#' 
-#' @return sim
-#' 
-#' @examples 
-#' TODO
-#' 
-#' @export
 simfrail <- function(reps, 
                      genfrail.args, 
                      fitfrail.args,
@@ -57,7 +40,7 @@ simfrail <- function(reps,
     
     if (!skip.SE) {
       # Gather the estimated standard errors
-      V <- do.call(vcov, c(list(fit=fit, Lambda.time=Lambda.time, cores=1), vcov.args))
+      V <- do.call(vcov, c(list(object=fit, Lambda.time=Lambda.time, cores=1), vcov.args))
       
       SE <- sqrt(diag(V))
       
@@ -114,35 +97,6 @@ simfrail.enum <- function(reps, seed, genfrail.args, fitfrail.args, Lambda.time,
   
   sim <- do.call("rbind", sim)
   class(sim) <- c("simfrail", "data.frame")
-  
-  sim
-}
-
-# A wrapper for coxph, gathers the coeffs, theta, censoring, runtime
-simfrailcoxph <- function(reps, genfrail.args, coxph.args, seed=2015) 
-{ 
-  # Seed the beginning of each simulation so that each run is independent
-  set.seed(seed)
-  
-  sim <- replicate(reps, (function(){
-    # Generate new random data, give this to coxph
-    data <- do.call("genfrail", as.list(genfrail.args))
-    coxph.args[["data"]] = data
-    coxph.args[["method"]] = "breslow"
-    
-    # Only interested in total elapsed time
-    runtime <- system.time(m <- do.call("coxph", as.list(coxph.args)))["elapsed"]
-    names(runtime) <- "runtime"
-    
-    # Output is: beta1, beta2, ..., [theta], censoring, runtime
-    c(m$coefficients,
-      theta=m$history[[1]]$theta,
-      censoring=1-sum(data$status)/length(data$status),
-      runtime)
-  })())
-  
-  # Summarize everything
-  sim <- apply(sim, 1, function(x) c(mean=mean(x), sd=sd(x)))
   
   sim
 }

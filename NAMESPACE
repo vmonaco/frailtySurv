@@ -1,7 +1,22 @@
 useDynLib(frailtyr)
-exportPattern("^[[:alpha:]]+")
-export(fitfrail)
-export(fitfrail.control)
-export(genfrail)
-export(dgamma_r)
-export(dlognormal_r)
+
+import(ggplot2)
+importFrom(survival, coxph, Surv, untangle.specials, 
+           strata, coxph.fit, coxph.control, basehaz)
+importFrom(stats, optim, vcov)
+importFrom(nleqslv, nleqslv)
+importFrom(reshape2, melt)
+importFrom(numDeriv, grad)
+
+export("genfrail", "fitfrail", "fitfrail.control", "simfrail")
+
+S3method(plot, fitfrail)
+S3method(plot, simfrail)
+S3method(print, fitfrail)
+S3method(print, genfrail)
+S3method(print, simfrail)
+S3method(print, summary.genfrail)
+S3method(print, summary.simfrail)
+S3method(summary, genfrail)
+S3method(summary, simfrail)
+S3method(vcov, fitfrail)

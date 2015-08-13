@@ -1,5 +1,5 @@
-print.summary.genfrail <- function(sum.dat, digits=4) {
-  
+print.summary.genfrail <- function(x, digits=4, ...) {
+  sum.dat <- x
   cat(
             "genfrail created  : ", strftime(sum.dat$created), "\n",
     sprintf("Observations      : %d", sum.dat$n.obs), "\n",

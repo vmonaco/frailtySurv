@@ -1,29 +1,7 @@
-#' Compute variance/covariance matrix for fitfrail model
-#' 
-#' Compute the variance/covariance matrix for fitfrail estimated parameters
-#' 
-#' @usage 
-#' vcov.fitfrail <- function(fit, boot=TRUE)
-#' 
-#' @param fit a fitfrail object
-#' @param boot whether to use a weighted bootstrap. If boot == FALSE, a consistent
-#'             estimator is used
-#' @param B number of repetitions in the weighted bootstrap. Defaults to 100.
-#' @param Lambda.time time points where the variance/covariance should be 
-#'                    evaluated. If Lambda.time == NULL, then the points where 
-#'                    the cumulative baseline hazard increases (where failures 
-#'                    occur) are used.
-#' @param cores number of cores to use when computing the covariance matrix in parallel
-#' 
-#' @return variance/covariance matrix for the fitfrail model parameters
-#' 
-#' @examples 
-#' TODO
-#' 
-#' @export
-vcov.fitfrail <- function(fit, boot=FALSE, B=100,
+vcov.fitfrail <- function(object, boot=FALSE, B=100,
                           Lambda.time=NULL, # The time points of the CBH to use
-                          cores=0) {
+                          cores=0, ...) {
+  fit <- object
   Call <- match.call()
   
   # Use the time points where CBH increases
@@ -42,9 +20,9 @@ vcov.fitfrail <- function(fit, boot=FALSE, B=100,
     cache.Call <- Call
     
     # Ignore the fit object and number of cores used
-    new.Call$fit <- NULL
+    new.Call$object <- NULL
     new.Call$cores <- NULL
-    cache.Call$fit <- NULL
+    cache.Call$object <- NULL
     cache.Call$cores <- NULL
     
     if(identical(new.Call, cache.Call))

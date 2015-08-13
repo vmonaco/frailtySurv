@@ -1,5 +1,5 @@
-print.fitfrail <- function(fit, digits=max(options()$digits - 4, 3), ...) {
-  
+print.fitfrail <- function(x, digits=max(options()$digits - 4, 3), ...) {
+  fit <- x
   savedig <- options(digits = digits)
   on.exit(options(savedig))
   

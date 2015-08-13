@@ -1,20 +1,27 @@
-Title: A General Semiparametric Shared Frailty Model
+Title: General Semiparametric Shared Frailty Model
 Priority: optional
 Type: Package
 Package: frailtyr
-Version: 0.0.0.9000
-Date: 2015-04-28
-Authors@R: as.person(c(
-    "Vinnie Monaco <contact@vmonaco.com> [aut, cre]", 
-    "Malka Gorfine <gorfinem@post.tau.ac.il> [exp]",
-    "Li Hsu <lih@fredhutch.org> [exp]"
-  ))
-Description: TODO
+Version: 1.0.0
+Date: 2015-08-14
+Authors@R: c(person("John V. Monaco", role = c("aut", "cre"),
+		          email = "vincent@vmonaco.com"),
+	           person("Malka Gorfine", role = "aut",
+	            email = "gorfinem@post.tau.ac.il"),
+	           person("Li Hsu", role = "aut",
+		          email = "lih@fredhutch.org"))
+Description: The R package frailtyr is for simulating and fitting semiparametric 
+        shared frailty models. It implements a relatively simple estimator with 
+        desirable asymptotic properties under several permissible technical conditions.
 License: LGPL-2
 URL: https://github.com/vmonaco/frailtyr/
 BugReports: https://github.com/vmonaco/frailtyr/issues
-Suggests: knitr, testthat, plot3D, parallel, reshape2, ggplot2
-Depends: R (>= 3.0.0), survival, nleqslv, Rcpp (>= 0.11.6)
+Depends: R (>= 3.0.0), survival
+Imports: stats, nleqslv, reshape2, ggplot2, numDeriv
+Suggests: knitr, testthat, parallel, gridExtra
+NeedsCompilation: yes
 LinkingTo: Rcpp
 LazyData: Yes
 LazyLoad: Yes
+ByteCompile: Yes
+Repository: CRAN

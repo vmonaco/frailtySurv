@@ -6,9 +6,7 @@
 
 ################################################################################
 
-#'
-#' Example of calculating phi_ with numerical integrals
-#' 
+# Example of calculating phi_ with numerical integrals
 phi_numerical <- function(k, N_dot, H_dot, density_params, density_fn) {
   f <- function(w) {
     w^(N_dot + k - 1) * exp(-w*H_dot) * density_fn(w, density_params)
@@ -16,16 +14,12 @@ phi_numerical <- function(k, N_dot, H_dot, density_params, density_fn) {
   integrate(f, 0, Inf)
 }
 
-#' 
-#' Example of calculating phi_ with the LT
-#' 
+# Example of calculating phi_ with the LT
 phi_laplace <- function(k, N_dot, H_dot, density_params, density_LT) {
   density_LT(N_dot + k - 1, H_dot, density_params)*(-1)^(N_dot + k - 1)
 }
 
-#'
-#' Laplace transform, evaluated numerically
-#' 
+# Laplace transform, evaluated numerically
 lt_numeric <- function(m, s, theta, density_fn) {
   integrate(function(t) {
     (-t)^m * exp(-s * t) * density_fn(t, theta)
@@ -35,18 +29,17 @@ lt_numeric <- function(m, s, theta, density_fn) {
 ################################################################################
 # Gamma distribution
 
-#' 
-#' Gamma density
-#' 
+# 
+# Gamma density
+# 
 dgamma_r <- function(x, theta) {
   dgamma(x, 1/theta, 1/theta)
 }
 
-#'
-#' Gamma random variable generation
-#'
-#' By LT: rlaptrans(n, lt_dgamma_r, p=0, theta=theta)
-#' 
+# 
+# Gamma random variable generation
+# By LT: rlaptrans(n, lt_dgamma_r, p=0, theta=theta)
+# 
 rgamma_r <- function(n, theta) {
   if (theta == 0)
     rep(1, n)
@@ -54,16 +47,16 @@ rgamma_r <- function(n, theta) {
     rgamma(n, 1/theta, 1/theta)
 }
 
-#'
-#' Gamma variance
-#'
+#
+# Gamma variance
+#
 vgamma_r <- function(theta) {
   theta
 }
 
-#' 
-#' Deriv of gamma density wrt. theta
-#' 
+# 
+# Deriv of gamma density wrt. theta
+# 
 deriv_dgamma_r <- function(x, theta) {
   # deriv_idx ignored here since there is only one parameter
   ( (x/theta)^(1/theta - 1) * 
@@ -72,16 +65,16 @@ deriv_dgamma_r <- function(x, theta) {
     (gamma(1/theta)*theta^3)
 }
 
-#' 
-#' Deriv of gamma density wrt. theta, evaluated numerically
-#' 
+# 
+# Deriv of gamma density wrt. theta, evaluated numerically
+# 
 deriv_dgamma_r_numeric <- function(x, theta) {
   grad(function(theta) dgamma_r(x, theta), theta)
 }
 
-#' 
-#' 2nd Deriv of gamma density wrt. theta, evaluated numerically
-#' 
+# 
+# 2nd Deriv of gamma density wrt. theta, evaluated numerically
+# 
 deriv_deriv_dgamma_r <- function(x, theta) {
   (((x/theta)^(1/theta - 1) * (exp(-x/theta) * (x/theta^2)) - ((x/theta)^(1/theta - 
   1) * (log((x/theta)) * (1/theta^2)) + (x/theta)^((1/theta - 
@@ -94,9 +87,9 @@ deriv_deriv_dgamma_r <- function(x, theta) {
   theta^3)^2
 }
 
-#'
-#' Laplace transform of the gamma density, as defined above
-#' 
+#
+# Laplace transform of the gamma density, as defined above
+# 
 lt_dgamma_r <- function(m, s, theta) {
   (-1)^m * 
     (1/theta)^(1/theta) * 
@@ -104,11 +97,11 @@ lt_dgamma_r <- function(m, s, theta) {
     gamma((1/theta) + m)/gamma((1/theta))
 }
 
-#'
-#' Derivative of the Laplace transform of the gamma density, wrt theta,
-#' pth derivative wrt. s
-#' 
-deriv_lt_dgamma_r <- function(p, s, theta) {
+#
+# Derivative of the Laplace transform of the gamma density, wrt theta,
+# pth derivative wrt. s
+# 
+deriv_lt_dgamma_r <- function(m, s, theta) {
   (((-1)^m * (1/theta)^(1/theta) * (((1/theta) + s)^(-((1/theta) + 
   m)) * (log(((1/theta) + s)) * (1/theta^2)) - ((1/theta) + 
   s)^((-((1/theta) + m)) - 1) * ((-((1/theta) + m)) * (1/theta^2))) - 
@@ -122,10 +115,10 @@ deriv_lt_dgamma_r <- function(p, s, theta) {
   (gamma((1/theta)) * digamma((1/theta))))/gamma((1/theta))^2
 }
 
-#' 
-#' Gamma LT 2nd derivative wrt. theta. This obviously was not solved by hand.
-#' 
-deriv_deriv_lt_dgamma_r <- function(p, s, theta) {
+# 
+# Gamma LT 2nd derivative wrt. theta. This obviously was not solved by hand.
+# 
+deriv_deriv_lt_dgamma_r <- function(m, s, theta) {
   (((-1)^m * (1/theta)^(1/theta) * ((((1/theta) + s)^(-((1/theta) + 
   m)) * (log(((1/theta) + s)) * (1/theta^2)) - ((1/theta) + 
   s)^((-((1/theta) + m)) - 1) * ((-((1/theta) + m)) * (1/theta^2))) * 
@@ -202,23 +195,23 @@ deriv_deriv_lt_dgamma_r <- function(p, s, theta) {
    digamma((1/theta))) * gamma((1/theta))))/(gamma((1/theta))^2)^2)
 }
 
-#' 
-#' Gamma LT derivative wrt. theta, evaluated numerically
-#' 
+# 
+# Gamma LT derivative wrt. theta, evaluated numerically
+# 
 deriv_lt_dgamma_r_numeric <- function(m, s, theta) {
   grad(function(theta) lt_dgamma_r(m, s, theta), theta)
 }
 
-#' 
-#' Gamma LT 2nd derivative wrt. theta, evaluated numerically
-#' 
+# 
+# Gamma LT 2nd derivative wrt. theta, evaluated numerically
+# 
 deriv_deriv_lt_dgamma_r_numeric <- function(m, s, theta) {
   grad(function(theta) deriv_lt_dgamma_r_numeric(m, s, theta), theta)
 }
 
-#' 
-#' pth moment of the gamma distribution, evaluated by the gamma density LT
-#' 
+# 
+# pth moment of the gamma distribution, evaluated by the gamma density LT
+# 
 lt_dgamma_moment_r <- function(p, theta) {
   (-1)^p * lt_dgamma_r(p, 0, theta)
 }
@@ -226,9 +219,9 @@ lt_dgamma_moment_r <- function(p, theta) {
 ################################################################################
 # Positive stable distribution. Density and random generation only
 
-#' 
-#' Positive stable density]
-#' 
+# 
+# Positive stable density]
+# 
 dposstab_r <- function(x, alpha, K=100) {
   
   f <- function(x) {
@@ -241,9 +234,9 @@ dposstab_r <- function(x, alpha, K=100) {
   Vectorize(f)(x)
 }
 
-#' 
-#' Random generation from a positive stable distribution
-#'
+# 
+# Random generation from a positive stable distribution
+#
 rposstab_r <- function(n, alpha) {
   if (alpha == 1)
     rep(1, n)
@@ -251,9 +244,9 @@ rposstab_r <- function(n, alpha) {
     rlaptrans(n, lt_dposstab_r, p=0, alpha=alpha)
 }
 
-#'
-#' Laplace transform of the positive stable distribution
-#' 
+#
+# Laplace transform of the positive stable distribution
+# 
 lt_dposstab_r <- function(p, s, alpha) {
   if (p == 0) {
     return(exp(-alpha*(s^alpha)/alpha))
@@ -267,18 +260,18 @@ lt_dposstab_r <- function(p, s, alpha) {
 ################################################################################
 # Power variance function distribution (PVF)
 
-#'
-#' PVF density
-#' 
+#
+# PVF density
+# 
 dpvf_r <- function(x, alpha, K=100) {
   Vectorize(function(x) {
     dposstab_r(x*alpha^(1/alpha), alpha, K)*alpha^(1/alpha)*exp(-x)*exp(1/alpha)
   })(x)
 }
 
-#' 
-#' Generate samples from a PVF using its LT
-#' 
+# 
+# Generate samples from a PVF using its LT
+# 
 rpvf_r <- function(n, alpha) {
   if (alpha == 1)
     rep(1, n)
@@ -286,16 +279,16 @@ rpvf_r <- function(n, alpha) {
     rlaptrans(n, lt_dpvf_r, p=0, alpha=alpha)
 }
 
-#' 
-#' PVF variance
-#' 
+# 
+# PVF variance
+# 
 vpvf_r <- function(alpha) {
   1 - alpha
 }
 
-#'
-#' Coefficients for the PVF LT derivatives
-#' 
+#
+# Coefficients for the PVF LT derivatives
+# 
 lt_dpvf_coef_r <- function(p, j, alpha) {
   if (p == j) return(1)
   if (j == 1) return(gamma(p - alpha)/gamma(1 - alpha))
@@ -304,9 +297,9 @@ lt_dpvf_coef_r <- function(p, j, alpha) {
            lt_dpvf_coef_r(p - 1, j, alpha)*((p - 1) - j*alpha))
 }
 
-#' 
-#' Coefficients for the PVF LT
-#' 
+# 
+# Coefficients for the PVF LT
+# 
 deriv_lt_dpvf_coef_r <- function(p, j, alpha) {
   
   if (p == j) return(0)
@@ -322,16 +315,16 @@ deriv_lt_dpvf_coef_r <- function(p, j, alpha) {
            j * lt_dpvf_coef_r(p - 1, j, alpha)) # last coef is not a deriv coef
 }
 
-#' 
-#' Coefficients for the PVF LT, numerical deriv wrt. alpha
-#' 
+# 
+# Coefficients for the PVF LT, numerical deriv wrt. alpha
+# 
 deriv_lt_dpvf_coef_r_numeric <- function(p, j, alpha) {
   return(grad(function(alpha) lt_dpvf_coef(p, j, alpha), alpha))
 }
 
-#' 
-#' Coefficients for the PVF LT
-#' 
+# 
+# Coefficients for the PVF LT
+# 
 deriv_deriv_lt_dpvf_coef_r <- function(m, j, alpha) {
 
   if (m == j) return(0)
@@ -356,16 +349,16 @@ deriv_deriv_lt_dpvf_coef_r <- function(m, j, alpha) {
   term1 + term2 + 2*term3
 }
 
-#' 
-#' Coefficients for the PVF LT, numerical deriv wrt. alpha
-#' 
+# 
+# Coefficients for the PVF LT, numerical deriv wrt. alpha
+# 
 deriv_deriv_lt_dpvf_coef_r_numeric <- function(p, j, alpha) {
   return(grad(function(alpha) deriv_lt_dpvf_coef_r(p, j, alpha), alpha))
 }
 
-#' 
-#' Laplace transform of the one-parameter PVF distribution defined above
-#' 
+# 
+# Laplace transform of the one-parameter PVF distribution defined above
+# 
 lt_dpvf_r <- function(p, s, alpha) {
   if (p == 0) {
     return(exp(-((1 + s)^alpha - 1)/alpha))
@@ -376,23 +369,23 @@ lt_dpvf_r <- function(p, s, alpha) {
   ))
 }
 
-#' 
-#' pth moment of the one-parameter PVF distribution, as defined above
-#' 
+# 
+# pth moment of the one-parameter PVF distribution, as defined above
+# 
 lt_dpvf_moment_r <- function(alpha, p) { 
   (-1)^p * lt_dpvf_r(p, 0, alpha)
 }
 
-#'
-#' Derivative wrt. alpha of the PVF LT, evaluated numerically
-#' 
+#
+# Derivative wrt. alpha of the PVF LT, evaluated numerically
+# 
 deriv_lt_dpvf_r_numeric <- function(p, s, alpha) {
   grad(function(alpha) lt_dpvf_r(p, s, alpha), alpha)
 }
 
-#' 
-#' PVF LT deriv wrt. alpha
-#' 
+# 
+# PVF LT deriv wrt. alpha
+# 
 deriv_lt_dpvf_r <- function(m, s, alpha) {
   if (m == 0) {
     term1 <- ((s + 1)^alpha - 1)/alpha^2
@@ -412,9 +405,9 @@ deriv_lt_dpvf_r <- function(m, s, alpha) {
   term1 + term2
 }
 
-#' 
-#' PVF LT 2nd deriv wrt. alpha
-#' 
+# 
+# PVF LT 2nd deriv wrt. alpha
+# 
 deriv_deriv_lt_dpvf_r <- function(m, s, alpha) {
   if (m == 0) {
     return(-(exp(-((1 + s)^alpha - 1)/alpha) * ((1 + s)^alpha * log((1 + 
@@ -464,9 +457,9 @@ deriv_deriv_lt_dpvf_r <- function(m, s, alpha) {
   term1 + term2 + term3 + term4 + term5 + term6
 }
 
-#'
-#' PVF LT 2nd deriv wrt. alpha, evaluated numerically
-#' 
+#
+# PVF LT 2nd deriv wrt. alpha, evaluated numerically
+# 
 deriv_deriv_lt_dpvf_r_numeric <- function(p, s, alpha) {
   grad(function(alpha) deriv_lt_dpvf_r(p, s, alpha), alpha)
 }
@@ -474,16 +467,16 @@ deriv_deriv_lt_dpvf_r_numeric <- function(p, s, alpha) {
 ################################################################################
 # Log-normal
 
-#' 
-#' Log-normal density
-#' 
+# 
+# Log-normal density
+# 
 dlognormal_r <- function(x, theta) {
   dlnorm(x, 0, sqrt(theta))
 }
 
-#' 
-#' Log-normal random generation
-#' 
+# 
+# Log-normal random generation
+# 
 rlognormal_r <- function(n, theta) {
   if (theta == 0)
     rep(1, n)
@@ -491,16 +484,16 @@ rlognormal_r <- function(n, theta) {
     rlnorm(n, 0, sqrt(theta))
 }
 
-#' 
-#' Log-normal variance
-#' 
+# 
+# Log-normal variance
+# 
 vlognormal_r <- function(theta) {
   exp(2*theta) - exp(theta)
 }
 
-#' 
-#' Deriv Log-normal
-#' 
+# 
+# Deriv Log-normal
+# 
 deriv_dlognormal_r <- function(x, theta) {
   term1_numer <- log(x)^2 * exp(-(log(x)^2)/(2*theta))
   term1_denom <- 2 * sqrt(2*pi) * theta^(5/2) * x
@@ -509,16 +502,16 @@ deriv_dlognormal_r <- function(x, theta) {
   term1_numer/term1_denom - term2_numer/term2_denom
 }
 
-#' 
-#' Deriv log-normal, numerical
-#' 
+# 
+# Deriv log-normal, numerical
+# 
 deriv_dlognormal_r_numeric <- function(x, theta) {
   grad(function(theta) dlognormal_r(x, theta), theta)
 }
 
-#' 
-#' 2nd deriv log-normal
-#' 
+# 
+# 2nd deriv log-normal
+# 
 deriv_deriv_dlognormal_r <- function(x, theta) {
   log(x)^2 * (exp(-(log(x)^2)/(2 * theta)) * ((log(x)^2) * 2/(2 * 
   theta)^2))/(2 * sqrt(2 * pi) * theta^(5/2) * x) - (log(x)^2 * 
@@ -530,9 +523,9 @@ deriv_deriv_dlognormal_r <- function(x, theta) {
   x)/(2 * sqrt(2 * pi) * theta^(3/2) * x)^2)
 }
 
-#' 
-#' 2nd deriv log-normal, numerical
-#' 
+# 
+# 2nd deriv log-normal, numerical
+# 
 deriv_deriv_dlognormal_r_numeric <- function(x, theta) {
   grad(function(theta) deriv_dlognormal_r(x, theta), theta)
 }
@@ -547,8 +540,39 @@ dinvgauss_r <- function(x, theta) {
 rinvgauss_r <- function(n, theta) {
   if (theta == 0)
     rep(1, n)
-  else
-    statmod::rinvgauss(n, mean=1, shape=1/theta)
+  else {
+    mean <- 1
+    shape <- 1/theta
+    dispersion <- 1 
+    # From statmod::rinvgauss
+    if (!is.null(shape)) 
+      dispersion <- 1/shape
+    if (length(n) > 1L) 
+      n <- length(n)
+    else n <- as.integer(n)
+    if (n < 0L) 
+      stop("n can't be negative")
+    if (n == 0L || length(mean) == 0L || length(dispersion) == 
+        0L) 
+      return(numeric(0L))
+    mu <- rep_len(mean, n)
+    phi <- rep_len(dispersion, n)
+    r <- rep_len(0, n)
+    i <- (mu > 0 & phi > 0)
+    i[is.na(i)] <- FALSE
+    if (!all(i)) {
+      r[!i] <- NA
+      n <- sum(i)
+    }
+    phi[i] <- phi[i] * mu[i]
+    Y <- rchisq(n, df = 1)
+    X1 <- 1 + phi[i]/2 * (Y - sqrt(4 * Y/phi[i] + Y^2))
+    firstroot <- as.logical(rbinom(n, size = 1L, prob = 1/(1 + 
+                                                             X1)))
+    r[i][firstroot] <- X1[firstroot]
+    r[i][!firstroot] <- 1/X1[!firstroot]
+    mu * r
+  }
 }
 
 vinvgauss_r <- function(theta) {
@@ -592,9 +616,9 @@ deriv_deriv_dinvgauss_r <- function(x, theta) {
 ################################################################################
 # Log-normal mixture
 
-#' 
-#' A bimodal log-normal mixture, given by the variance and distance between means
-#' 
+# 
+# A bimodal log-normal mixture, given by the variance and distance between means
+# 
 dlognormalmix_r <- function(x, theta) {
   V <- theta[1]/2
   M <- theta[2]
@@ -629,6 +653,7 @@ vlognormalmix <- function(theta) {
 ################################################################################
 # K-truncated Poisson
 
+# Truncated poisson distribution
 # Sample from a k-truncated Poisson, where support is strictly greater than k
 # modifed from: https://stat.ethz.ch/pipermail/r-help/2005-May/070680.html
 rtpois <- function(n, lambda, k=0) {
@@ -652,7 +677,8 @@ etpois <- function(lambda, k=0) {
 
 ################################################################################
 # Truncated Zeta distribution
-
+# Density, random generator, and expected value of a truncated discrete Pareto 
+# (or zeta) distrubition, where support is from xmin to xmax.
 # Density
 dtzeta <- function(x, alpha, xmin=0, xmax=1e4){
   out <- rep(0, length(x))

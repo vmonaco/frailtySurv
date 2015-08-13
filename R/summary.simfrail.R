@@ -1,5 +1,5 @@
-summary.simfrail <- function(sim) {
-  
+summary.simfrail <- function(object, ...) {
+  sim <- object
   # Function to gather the empirical SD, mean estimated SD, coverage, etc.
   fn <- function(name) {
     

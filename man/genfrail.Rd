@@ -1,50 +1,53 @@
 \name{genfrail}
 \alias{genfrail}
+
 \title{
-Generate Survival Data
+Generate survival data
 }
+
 \description{
 Generate survival data from a shared frailty model, with hazard function given by
 
-\deqn{S(t)=exp[-\Lambda_0(t) \omega_i exp(\betaZ_ij)]}
+\deqn{S(t)=\exp [-\Lambda_0(t) \omega_i \exp (\beta Z_{ij})]}
 
 where \eqn{\Lambda_0} is the cumulative baseline hazard, \eqn{\omega_i} is the frailty value for cluster \eqn{i}, \eqn{\beta} is the regression coefficient vector, and \eqn{Z_ij} is the covariate vector for individual \eqn{i} in cluster \eqn{j}.
 
 The baseline hazard can be specified by the inverse cumualative baseline hazard, cumulative baseline hazard, or simply the baseline hazard. Frailty values are sampled from 
 
 }
+
 \usage{
-genfrail <- function(N = 300, K = 2, 
-                     beta = c(log(2),log(3)),
-                     frailty = "gamma", theta = 2, 
-                     covar.distr = "normal", 
-                     censor.rate = 0.35,
-                     Lambda_0 = function(t, tau=4.6, C=0.01) (C*t)^tau)
+genfrail(N = 300, K = 2, K.param = c(2, 0), beta = c(log(2)),
+         frailty = "gamma", theta = c(2), 
+         covar.distr = "normal", covar.param = c(0, 1), covar.matrix = NULL,
+         censor.distr = "normal", censor.mu = 130, 
+         censor.sigma = 15, censor.rate = NULL, 
+         lambda_0 = NULL, Lambda_0 = NULL, Lambda_0_inv = NULL, round.base = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{N}{integer the number of clusters}
+  \item{N}{integer; number of clusters}
   
-  \item{K}{integer, string, or vector. If an integer, the number of members in each cluster. If a string, the name of the distribution to sample the cluster sizes from. This can be one of: "poisson", "pareto", or "uniform". The \code{K.param} argument specifies the distribution parameters. If a vector, must be of length N and contains the integer size of each cluster.}
+  \item{K}{integer, string, or vector; If an integer, the number of members in each cluster. If a string, the name of the distribution to sample the cluster sizes from. This can be one of: "poisson", "pareto", or "uniform". The \code{K.param} argument specifies the distribution parameters. If a vector, must be of length N and contains the integer size of each cluster.}
   \item{K.param}{vector of the cluster size distribution parameters if \code{K} is a string. If "possion", the vector should contain the rate and truncated value (see \code{rtpois}). If "pareto", the exponent, lower, and upper bounds (see \code{rtzeta}). If "uniform", the lower (noninclusive) and upper (inclusive) bounds.}
   
   \item{beta}{vector of regression coefficients.}
 
-  \item{frailty}{string the name of the frailty distribution. Can be one of: "gamma", "pvf", "lognormal", "invgauss", "posstab", or "none". See \code{dgamma_r},\code{dpvf_r}, \code{dlognormal_r}, \code{dinvgauss_r}, \code{posstab_r} for the respective density functions. (Also see the *_c for C implementations of the respective density functions.) }
+  \item{frailty}{string name of the frailty distribution. Can be one of: "gamma", "pvf", "lognormal", "invgauss", "posstab", or "none". See \code{dgamma_r},\code{dpvf_r}, \code{dlognormal_r}, \code{dinvgauss_r}, \code{posstab_r} for the respective density functions. (Also see the *_c for C implementations of the respective density functions.) }
   \item{theta}{vector the frailty distribution parameters}
 
-  \item{covar.distr}{string the distribution to sample covariates from. Can be one of: "normal", "uniform", "zero"}
-  \item{covar.param}{vector the covariate distribution parameters.}
+  \item{covar.distr}{string distribution to sample covariates from. Can be one of: "normal", "uniform", "zero"}
+  \item{covar.param}{vector covariate distribution parameters.}
   \item{covar.matrix}{matrix with dimensions \code{c(NK, length(beta))} that contains the desired covariates. If not NULL, this overrides \code{covar.distr} and \code{covar.param}.}
   
-  \item{censor.distr}{string the censoring distribution to use. Followup times are sampled from the censoring distribution to simulate non-informative right censorship. The censoring distribution can be one of: "normal", "lognormal", "none".}
-  \item{censor.mu}{integer the mean of the censoring distribution (log-mean if \code{censor.distr} is "lognormal")}
-  \item{censor.sigma}{integer the standard deviation of the censoring distribution (log-standard deviation if \code{censor.distr} is "lognormal"}
+  \item{censor.distr}{string censoring distribution to use. Followup times are sampled from the censoring distribution to simulate non-informative right censorship. The censoring distribution can be one of: "normal", "lognormal", "none".}
+  \item{censor.mu}{numeric mean of the censoring distribution (log-mean if \code{censor.distr} is "lognormal")}
+  \item{censor.sigma}{numeric standard deviation of the censoring distribution (log-standard deviation if \code{censor.distr} is "lognormal"}
   \item{censor.rate}{numeric value between 0 and 1 to specify the empirical censoring rate. The \code{censor.mu} parameter is adjusted to achieve a desired censoring rate if \code{censor.rate} is specified. This only overrides \code{censor.mu}, and \code{censor.sigma} must still be specified so that the problem is identifiable.}
 
-  \item{lambda_0}{function the baseline hazard function. Only one of \code{lambda_0}, \code{Lambda_0}, and \code{Lambda_0_inv} need to be specified. Passing the baseline hazard (\code{lambda_0}) is the most computationally expensive since this requires numeric integration inside a root-finding algorithm.}
-  \item{Lambda_0}{function the cumulative baseline hazard function. This overrides \code{lambda_0}.}
-  \item{lambda_0_inv}{function the inverse cumulative baseline hazard function. This overrides both \code{lambda_0} and \code{Lambda_0}.}
+  \item{lambda_0}{function baseline hazard. Only one of \code{lambda_0}, \code{Lambda_0}, and \code{Lambda_0_inv} need to be specified. Passing the baseline hazard (\code{lambda_0}) is the most computationally expensive since this requires numeric integration inside a root-finding algorithm.}
+  \item{Lambda_0}{function cumulative baseline hazard. This overrides \code{lambda_0}.}
+  \item{Lambda_0_inv}{function inverse cumulative baseline hazard. This overrides both \code{lambda_0} and \code{Lambda_0}.}
   
   \item{round.base}{numeric if specified, round the followup times to the nearest \code{round.base}}
 }
@@ -63,12 +66,49 @@ A \code{data.frame} with row-observations is returned.
 }
 
 \seealso{
-\code{\link[frailtyr]{fitfrail}}
+\code{\link{fitfrail}}
 }
 
 \examples{
+# Generate the same dataset 3 different ways
 
+# Using the baseline hazard (least efficient)
+set.seed(1234)
+dat.1 <- genfrail(N = 300, K = 2, 
+                  beta = c(log(2),log(3)),
+                  frailty = "gamma", theta = 2,
+                  lambda_0=function(t, tau=4.6, C=0.01) (tau*(C*t)^tau)/t)
+
+# Using the cumulative baseline hazard
+set.seed(1234)
+dat.2 <- genfrail(N = 300, K = 2, 
+                  beta = c(log(2),log(3)),
+                  frailty = "gamma", theta = 2, 
+                  Lambda_0 = function(t, tau=4.6, C=0.01) (C*t)^tau)
+
+# Using the inverse cumulative baseline hazard (most efficient)
+set.seed(1234)
+dat.3 <- genfrail(N = 300, K = 2, 
+                  beta = c(log(2),log(3)),
+                  frailty = "gamma", theta = 2, 
+                  Lambda_0_inv=function(t, tau=4.6, C=0.01) (t^(1/tau))/C)
+
+# Generate data with PVF frailty, truncated Poisson cluster sizes, normal
+# covariates, and 0.35 censorship
+set.seed(1234)
+dat.4 <- genfrail(N = 100, K = "poisson", K.param=c(5, 1), 
+                  beta = c(log(2),log(3)),
+                  frailty = "pvf", theta = 0.3, 
+                  covar.distr = "normal", 
+                  censor.rate = 0.35) # Use the default baseline hazard
+
+# Cluster sizes have size >= 2, summarized by
+summary(dat.4)
+
+# An oscillating baseline hazard
+dat.5 <- genfrail(lambda_0=function(t, tau=4.6, C=0.01, A=2, f=0.1) 
+                              A^sin(f*pi*t) * (tau*(C*t)^tau)/t)
 }
 
-\keyword{ survival }
+\keyword{ survival data }
 \keyword{ shared frailty }

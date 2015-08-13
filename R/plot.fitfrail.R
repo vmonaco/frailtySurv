@@ -1,4 +1,5 @@
-plot.fitfrail <- function(fit, type="hazard", ...) {
+plot.fitfrail <- function(x, type="hazard", ...) {
+  fit <- x
   if (type == "hazard") {
     plot.fitfrail.hazard(fit, ...)
   } else if (type == "trace") {
@@ -11,30 +12,27 @@ plot.fitfrail.fitter <- function(fit, show.loglik=TRUE, ...) {
       !requireNamespace("reshape2", quietly = TRUE)) {
     stop("Plotting requires the ggplot2, reshape2 packages")
   }
-  require(ggplot2)
-  require(reshape2)
   
   trace <- fit$VARS$trace
   loglik <- trace[,c("Iteration", "loglik")]
   trace$loglik <- NULL
   
-  melttrace <- reshape2::melt(trace, "Iteration", variable.name="Parameter")
+  melttrace <- melt(trace, "Iteration", variable.name="Parameter")
   breaks <- seq(1, nrow(trace), by=max(1, round(nrow(trace)/10)))
   
-  p <- ggplot(melttrace, aes(x=Iteration, y=value, color=Parameter)) +
+  p <- ggplot(melttrace, aes_string(x='Iteration', y='value', color='Parameter')) +
     geom_line() +
     xlab("Iteration") + 
     ylab("Estimate") + 
     scale_x_continuous(breaks = breaks) +
-    theme(legend.justification = c(0, 0.5), legend.position = c(0, 0.5)) +
+    theme(legend.justification = c(1, 1), legend.position = c(1, 1)) +
     ggtitle("Parameter estimate trace")
   
   if (show.loglik) {
     if (!requireNamespace("gridExtra", quietly = TRUE)) {
       stop("Plotting requires the gridExtra package")
     }
-    require(gridExtra)
-    p2 <- ggplot(loglik, aes(x=Iteration, y=loglik)) +
+    p2 <- ggplot(loglik, aes_string(x='Iteration', y='loglik')) +
       geom_line() + 
       xlab("Iteration") + 
       ylab("Log-liklihood") + 
@@ -48,11 +46,10 @@ plot.fitfrail.fitter <- function(fit, show.loglik=TRUE, ...) {
   
 }
 
-plot.fitfrail.hazard <- function(fit, boot=TRUE, CI=0.95, end=NULL, ...) {
+plot.fitfrail.hazard <- function(fit, CI=0, end=NULL, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Plotting requires the ggplot2 package")
   }
-  require(ggplot2)
   
   Lambda <- fit$Lambda
   
@@ -71,7 +68,7 @@ plot.fitfrail.hazard <- function(fit, boot=TRUE, CI=0.95, end=NULL, ...) {
     ylab("Cumulative baseline hazard") + 
     theme(legend.position="none")
   
-  if (boot) {
+  if (CI > 0) {
     COV <- vcov(fit, boot=TRUE, ...)
     se.Lambda <- sqrt(diag(COV))[(fit$VARS$n.gamma+1):nrow(COV)]
     se.Lambda <- se.Lambda[1:nrow(Lambda)]
@@ -90,7 +87,7 @@ plot.fitfrail.hazard <- function(fit, boot=TRUE, CI=0.95, end=NULL, ...) {
     df <- data.frame(px=time,
                      py=c(UB, rev(LB)))
     
-    p <- p + geom_polygon(aes(x=px, y=py), data=df, fill="black", alpha=0.1)
+    p <- p + geom_polygon(aes_string(x='px', y='py'), data=df, fill="black", alpha=0.1)
   }
   
   p

@@ -110,7 +110,15 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
     
     # Modify the execution environment of fitfrail.fit
     with(VARS, {
+      if (iter >= control$maxit) {
+        if (control$fitmethod == "loglik") {
+          return(loglik)
+        } else if (control$fitmethod == "score") {
+          return(U_)
+        }
+      }
       iter <- iter + 1
+      
       hat.beta <- hat.gamma[1:n.beta]
       hat.theta <- hat.gamma[(n.beta+1):(n.beta+n.theta)]
       
@@ -245,15 +253,14 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
                     upper=c(rep(Inf, VARS$n.beta),  ub.frailty[[frailty]]), 
                     method="L-BFGS-B",
                     control=list(factr=control$reltol/.Machine$double.eps, 
-                                 pgtol=0, fnscale=-1, maxit=control$maxit)
+                                 pgtol=0, fnscale=-1)
                     )
     hat.gamma <- fitter$par
   } else if (control$fitmethod == "score") {
     fitter <- nleqslv(init.gamma, fit_fn, 
-                      control=list(maxit=control$iter.max,
-                                   xtol=0, ftol=control$abstol, btol=1e-3,
-                                   allowSingular=TRUE, maxit=control$maxit),
-                      method='Newton',
+                      control=list(xtol=control$reltol, ftol=control$abstol, btol=1e-3,
+                                   allowSingular=TRUE),
+                      method="Newton",
                       jac=score_jacobian,
                       jacobian=TRUE
                       )
@@ -263,13 +270,17 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
   if (control$verbose)
     cat("Converged after", iter, "iterations\n")
   
+  if (iter >= control$maxit) {
+    warning("Maximum number of iterations reached before convergence.")
+  }
+  
   trace <- data.frame(trace)
   
   hat.beta <- hat.gamma[1:n.beta]
   hat.theta <- hat.gamma[(n.beta+1):(n.gamma)]
   
   # Unique time steps where failures occur
-  df.lambda <- aggregate(lambda, list(time_steps), sum)
+  df.lambda <- aggregate(VARS$lambda, list(time_steps), sum)
   names(df.lambda) <- c("time","lambda")
   df.Lambda <- data.frame(time=df.lambda$time, Lambda=cumsum(df.lambda$lambda))
   df.Lambda <- df.Lambda[duplicated(df.Lambda$Lambda)==FALSE,]
@@ -287,11 +298,12 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
        fun.Lambda=fun.Lambda,
        frailty=frailty,
        frailty.variance=vfrailty[[frailty]](hat.theta),
-       loglik=loglik,
+       loglik=VARS$loglik,
        iter=iter,
        fitter=fitter,
        fitmethod=control$fitmethod,
        n.clusters=n.clusters,
+       trace=trace,
        
        # Keep the execution environment, needed for vcov
        VARS=VARS

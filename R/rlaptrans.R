@@ -1,10 +1,10 @@
 ################################################################################
-#' 
-#' rlaptrans taken from Martin Ridout: 
-#' Ridout, M.S. (2009) Generating random numbers from a distribution specified 
-#' by its Laplace transform. Statistics and Computing, 19, 439-450.
-#' http://www.kent.ac.uk/smsas/personal/msr/rlaptrans.html
-#' 
+# 
+# rlaptrans taken from Martin Ridout: 
+# Ridout, M.S. (2009) Generating random numbers from a distribution specified 
+# by its Laplace transform. Statistics and Computing, 19, 439-450.
+# http://www.kent.ac.uk/smsas/personal/msr/rlaptrans.html
+# 
 #======================================================================================
 rlaptrans <- function(n, ltpdf, ..., tol=1e-7, x0=1, xinc=2, m=11, L=1, A=19, nburn=38)
 #======================================================================================

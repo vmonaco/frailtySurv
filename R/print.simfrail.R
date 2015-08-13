@@ -1,3 +1,3 @@
-print.simfrail <- function(sim, ...) {
-  print(as.data.frame(sim))
+print.simfrail <- function(x, ...) {
+  print(as.data.frame(x))
 }

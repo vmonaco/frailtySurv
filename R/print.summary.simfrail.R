@@ -1,9 +1,6 @@
-#' Print a summary of the simulation
-#' 
-#' 
-print.summary.simfrail <- function(sum.sim, n.Lambda=3, 
+print.summary.simfrail <- function(x, n.Lambda=3, 
                                    digits=max(options()$digits - 3, 3), ...) {
-  
+  sum.sim <- x
   savedig <- options(digits = digits)
   on.exit(options(savedig))
   

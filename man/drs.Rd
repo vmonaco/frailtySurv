@@ -32,7 +32,21 @@ subject, one row for each eye:
 \url{http://www.mayo.edu/research/documents/diabeteshtml/doc-10027460}
 }
 \examples{
+\dontrun{
 data(drs)
+
+# Clustered by subject
+fit.drs <- fitfrail(Surv(time, status) ~ treated + cluster(subject_id), 
+                    drs, frailty="gamma")
+
+fit.drs
+
+# Variance estimates
+vcov(fit.drs)
+
+# Plot the estimated cumulative baseline hazard
+plot(fit.drs, "hazard")
+}
 }
 \keyword{datasets}
 
