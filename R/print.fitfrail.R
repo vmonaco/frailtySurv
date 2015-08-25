@@ -25,8 +25,7 @@ print.fitfrail <- function(x, digits=max(options()$digits - 4, 3), ...) {
       fit$iter,
       " iterations, ",
       format(fit$fit.time, nsmall=digits),
-      " seconds ",
-      ifelse(fit$fitmethod == "score", "(solved score equations)", "(maximized log-likelihood)"),
+      ifelse(fit$fitmethod == "score", "( solved scores)", " (maximized loglik)"),
       "\n",
       sep="")
   
