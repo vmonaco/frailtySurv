@@ -245,6 +245,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
     outer(1:n.gamma, 1:n.gamma, Vectorize(function(l, s) jacobian_ls(l, s)))
   })
   
+  start.time <- Sys.time()
   # The actual optimization takes place here
   if (control$fitmethod == "loglik") {
     fitter <- optim(init.gamma, fit_fn,
@@ -266,6 +267,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
                       )
     hat.gamma <- fitter$x
   }
+  fit.time <- Sys.time() - start.time
   
   if (control$verbose)
     cat("Converged after", iter, "iterations\n")
@@ -280,22 +282,22 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
   hat.theta <- hat.gamma[(n.beta+1):(n.gamma)]
   
   # Unique time steps where failures occur
-  df.lambda <- aggregate(VARS$lambda, list(time_steps), sum)
-  names(df.lambda) <- c("time","lambda")
-  df.Lambda <- data.frame(time=df.lambda$time, Lambda=cumsum(df.lambda$lambda))
-  df.Lambda <- df.Lambda[duplicated(df.Lambda$Lambda)==FALSE,]
+  Lambda.df <- aggregate(VARS$lambda, list(time_steps), sum)
+  names(Lambda.df) <- c("time","lambda")
+  Lambda.df <- data.frame(time=Lambda.df$time, Lambda=cumsum(Lambda.df$lambda))
+  Lambda.df <- Lambda.df[duplicated(Lambda.df$Lambda)==FALSE,]
   
-  fun.Lambda <- Vectorize(function(t) {
+  Lambda.fun <- Vectorize(function(t) {
     if (t <= 0) {
       return(0);
     }
-    df.Lambda$Lambda[sum(t >= df.Lambda$time)]
+    Lambda.df$Lambda[sum(t >= Lambda.df$time)]
   })
   
   list(beta=hat.beta,
        theta=setNames(hat.theta, paste("theta.", 1:length(hat.theta), sep="")),
-       Lambda=df.Lambda,
-       fun.Lambda=fun.Lambda,
+       Lambda=Lambda.df,
+       Lambda.fun=Lambda.fun,
        frailty=frailty,
        frailty.variance=vfrailty[[frailty]](hat.theta),
        loglik=VARS$loglik,
@@ -304,7 +306,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
        fitmethod=control$fitmethod,
        n.clusters=n.clusters,
        trace=trace,
-       
+       fit.time=fit.time,
        # Keep the execution environment, needed for vcov
        VARS=VARS
       )

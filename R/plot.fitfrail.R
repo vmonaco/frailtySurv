@@ -25,7 +25,7 @@ plot.fitfrail.fitter <- function(fit, show.loglik=TRUE, ...) {
     xlab("Iteration") + 
     ylab("Estimate") + 
     scale_x_continuous(breaks = breaks) +
-    theme(legend.justification = c(1, 1), legend.position = c(1, 1)) +
+    theme(legend.justification = c(1, 0.5), legend.position = c(1, 0.5)) +
     ggtitle("Parameter estimate trace")
   
   if (show.loglik) {

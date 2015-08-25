@@ -23,7 +23,9 @@ print.fitfrail <- function(x, digits=max(options()$digits - 4, 3), ...) {
       sep="")
   cat("Converged (method)     ",
       fit$iter,
-      " iterations ",
+      " iterations, ",
+      format(fit$fit.time, nsmall=digits),
+      " seconds ",
       ifelse(fit$fitmethod == "score", "(solved score equations)", "(maximized log-likelihood)"),
       "\n",
       sep="")

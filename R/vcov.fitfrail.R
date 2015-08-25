@@ -43,7 +43,7 @@ vcov.fitfrail <- function(object, boot=FALSE, B=100,
       
       c(new.fit$beta,
         new.fit$theta,
-        setNames(new.fit$fun.Lambda(Lambda.time), 
+        setNames(new.fit$Lambda.fun(Lambda.time), 
                  paste("Lambda.", format(Lambda.time, nsmall=2), sep="")))
     }
     

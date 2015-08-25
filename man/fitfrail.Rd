@@ -30,7 +30,7 @@ A fitfrail object representing the shared frailty model.
   \item{beta}{the estimated regression coefficients}
   \item{theta}{the estimated frailty distribution parameters}
   \item{Lambda}{a \code{data.frame} with the estimated baseline hazard at each failure time}
-  \item{fun.Lambda}{a function of time that returns the estimated baseline}
+  \item{Lambda.fun}{a function of time that returns the estimated baseline}
   \item{loglik}{the log-likelihood}
   \item{iter}{the number of iterations performed}
   \item{trace}{the parameter trace during estimation}
@@ -88,9 +88,9 @@ fit <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family),
                 dat, frailty="gamma")
 fit
 
-# The fun.Lambda function can give the estimated cumulative baseline hazard at
+# The Lambda.fun function can give the estimated cumulative baseline hazard at
 # any time
-fit$fun.Lambda(seq(0, 100, by=10))
+fit$Lambda.fun(seq(0, 100, by=10))
 
 # Fit the DRS data, clustered on patient
 data(drs)

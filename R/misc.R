@@ -3,8 +3,7 @@
 ################################################################################
 # Measures of dependence
 
-tau.empirical <- function(theta, frailty, N=1000, seed=2015) {
-  set.seed(seed)
+tau.empirical <- function(theta, frailty, N=1000) {
   dat <- genfrail(N=N, K=2, theta=theta, frailty=frailty, 
                   censor.distr="none", covar.distr="none",
                   Lambda_0_inv=function(t, tau=4.6, C=0.01) (t^(1/tau))/C)
