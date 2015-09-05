@@ -9,8 +9,10 @@ frailtyr
 
 ## New features
   * Control parameters for numerical integration `(int.iter, int.reltol, int.abstol)`
-  * `summary.fitfrail` for summarizing the survival curve 
+  * Added `summary.fitfrail` for summarizing the survival curve 
+  * Added parameter to `fitfrail` to compute the SE estimates
 
 ## Bug fixes
   * Renamed `Lambda.time` to `Lambda.times`
+  * Improved print.fitfrail
   * Remove missing observations

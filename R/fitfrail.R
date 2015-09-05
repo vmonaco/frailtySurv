@@ -1,6 +1,14 @@
 fitfrail <- function(formula, dat, control, frailty, weights=NULL, ...) {
   Call <- match.call()
   
+  # Remove missing observations with a warning
+  if (any(is.na(dat))) {
+    prev.nrow <- nrow(dat)
+    dat <- dat[complete.cases(dat),]
+    new.nrow <- nrow(dat)
+    warning("Removed ", prev.nrow - new.nrow, " rows with missing observations")
+  }
+  
   # create a call to model.frame() that contains the formula (required)
   # and any other of the relevant optional arguments
   # then evaluate it in the proper frame
