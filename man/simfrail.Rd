@@ -8,7 +8,7 @@ Simulate survival data and fit models
 Run a survival simulation by repeatedly generating data and fitting models. Respective arguments are passed to genfrail and fitfrail, and the resulting parameter estimates are aggregated and summarized.
 }
 \usage{
-simfrail(reps, genfrail.args, fitfrail.args, Lambda.time, 
+simfrail(reps, genfrail.args, fitfrail.args, Lambda.times, 
          vcov.args = list(), cores = 0, skip.SE = FALSE)
 }
 
@@ -16,7 +16,7 @@ simfrail(reps, genfrail.args, fitfrail.args, Lambda.time,
   \item{reps}{number of times to repeat the simulation}
   \item{genfrail.args}{list of arguments to pass to \code{genfrail}}
   \item{fitfrail.args}{list of arguments to pass to \code{fitfrail}}
-  \item{Lambda.time}{vector of time points to obtain baseline hazard estimates at}
+  \item{Lambda.times}{vector of time points to obtain baseline hazard estimates at}
   \item{vcov.args}{list of arguments to pass to vcov.fitfrail for variance estimates. This is mainly used to specify whether bootstrap or estimated variances should be obtained.}
   \item{cores}{integer; if > 0, the number of cores to use; if < 0, the number of cores not to use; if 0, use all available cores}
   \item{skip.SE}{logical value, whether to skip the standard error estimates (saves time)}
@@ -40,9 +40,9 @@ A \code{simfrail} object that is essentially a \code{data.frame} of the resultin
   \item{hat.theta}{estimated frailty distribution parameters}
   \item{se.theta}{standard error of each frailty distribution parameter}
   
-  \item{Lambda}{true cumulative baseline hazard at each Lambda.time point}
-  \item{hat.Lambda}{estimated cumulative baseline hazard at each Lambda.time point}
-  \item{se.Lambda}{standard error at each Lambda.time point}
+  \item{Lambda}{true cumulative baseline hazard at each Lambda.times point}
+  \item{hat.Lambda}{estimated cumulative baseline hazard at each Lambda.times point}
+  \item{se.Lambda}{standard error at each Lambda.times point}
   
 }
 
@@ -65,7 +65,7 @@ sim <- simfrail(reps=100,
                 fitfrail.args=alist(
                   formula=Surv(time, status) ~ Z1 + Z2 + cluster(family), 
                   frailty="gamma"),
-                Lambda.time=1:120, cores = 0)
+                Lambda.times=1:120, cores = 0)
 
 # Summarize the results
 summary(sim)

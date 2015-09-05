@@ -14,7 +14,7 @@ print.fitfrail <- function(x, digits=max(options()$digits - 4, 3), ...) {
   cat("Frailty distribution   ", 
       fit$frailty, 
       "(", toString(format(fit$theta, nsmall=digits)), "), ",
-      "VAR = ", format(fit$frailty.variance, nsmall=digits), 
+      "VAR of frailty variates = ", format(fit$frailty.variance, nsmall=digits), 
       "\n",
       sep="")
   cat("Log-likelihood         ", 
@@ -25,7 +25,7 @@ print.fitfrail <- function(x, digits=max(options()$digits - 4, 3), ...) {
       fit$iter,
       " iterations, ",
       format(fit$fit.time, nsmall=digits),
-      ifelse(fit$fitmethod == "score", "( solved scores)", " (maximized loglik)"),
+      ifelse(fit$fitmethod == "score", " (solved score equations)", " (maximized log-likelihood)"),
       "\n",
       sep="")
   

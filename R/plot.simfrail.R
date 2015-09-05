@@ -63,19 +63,19 @@ plot.simfrail.hazard <- function(sim, CI=0.95, skip.SE=FALSE, ...) {
   se <- sim[,grepl("^se.Lambda", names(sim))]
   values <- colMeans(sim[,grepl("^Lambda", names(sim))])
   
-  Lambda.time <- sapply(names(values), function(w) gsub(".+\\.", "", w), USE.NAMES=FALSE)
-  Lambda.time <- as.numeric(Lambda.time)
-  names(hats) <- Lambda.time
+  Lambda.times <- sapply(names(values), function(w) gsub(".+\\.", "", w), USE.NAMES=FALSE)
+  Lambda.times <- as.numeric(Lambda.times)
+  names(hats) <- Lambda.times
   melthats <- melt(t(hats))
   names(melthats) <- c("Time","instance", "value")
   melthats$type <- sprintf("Empirical (%.2f CI)", CI)
   
-  values <- data.frame(x=Lambda.time, y=values)
+  values <- data.frame(x=Lambda.times, y=values)
   values$type <- "Actual"
   
   Z.score <- qnorm((1-CI)/2)
   mean.se <- colMeans(se)
-  se <- data.frame(x=Lambda.time, lower=values$y-Z.score*mean.se, upper=values$y+Z.score*mean.se)
+  se <- data.frame(x=Lambda.times, lower=values$y-Z.score*mean.se, upper=values$y+Z.score*mean.se)
   se$type <- sprintf("Estimated %.2f CI", CI)
   
   p <- ggplot(melthats, aes_string(x='Time',y='value',color='type')) +

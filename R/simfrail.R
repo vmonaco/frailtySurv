@@ -1,7 +1,7 @@
 simfrail <- function(reps, 
                      genfrail.args, 
                      fitfrail.args,
-                     Lambda.time, # where to evaluate the baseline hazard function
+                     Lambda.times, # where to evaluate the baseline hazard function
                      vcov.args=list(),
                      cores=0, # 0 to use all available cores, -1 to use all but 1, etc
                      skip.SE=FALSE
@@ -21,8 +21,8 @@ simfrail <- function(reps,
     # Obtain the true values for each parameter
     beta <- attr(dat, "beta")
     theta <- attr(dat, "theta")
-    Lambda <- setNames(attr(dat, "Lambda_0")(Lambda.time),
-                       paste("Lambda.", Lambda.time, sep=""))
+    Lambda <- setNames(attr(dat, "Lambda_0")(Lambda.times),
+                       paste("Lambda.", Lambda.times, sep=""))
     
     # Elapsed time of the fitter
     runtime <- system.time(fit <- do.call("fitfrail", as.list(fitfrail.args)))[["elapsed"]]
@@ -35,12 +35,12 @@ simfrail <- function(reps,
                          paste("hat.beta.", 1:length(beta), sep=""))
     hat.theta <- setNames(fit$theta, 
                           paste("hat.theta.", 1:length(theta), sep=""))
-    hat.Lambda <- setNames(fit$Lambda.fun(Lambda.time), 
-                           paste("hat.Lambda.", Lambda.time, sep=""))
+    hat.Lambda <- setNames(fit$Lambda.fun(Lambda.times), 
+                           paste("hat.Lambda.", Lambda.times, sep=""))
     
     if (!skip.SE) {
       # Gather the estimated standard errors
-      V <- do.call(vcov, c(list(object=fit, Lambda.time=Lambda.time, cores=1), vcov.args))
+      V <- do.call(vcov, c(list(object=fit, Lambda.times=Lambda.times, cores=1), vcov.args))
       
       SE <- sqrt(diag(V))
       
@@ -50,7 +50,7 @@ simfrail <- function(reps,
                            paste("se.theta.", 1:length(theta), sep=""))
       se.Lambda <- setNames(SE[(length(beta)+length(theta)+1):
                                  ((length(beta)+length(theta))+length(Lambda))],
-                           paste("se.Lambda.", Lambda.time, sep=""))
+                           paste("se.Lambda.", Lambda.times, sep=""))
     } else {
       se.beta <- NULL
       se.theta <- NULL
@@ -87,12 +87,12 @@ simfrail <- function(reps,
 }
 
 # Perform simfrail for multiple param values to passed genfrail
-simfrail.enum <- function(reps, seed, genfrail.args, fitfrail.args, Lambda.time,
+simfrail.enum <- function(reps, seed, genfrail.args, fitfrail.args, Lambda.times,
                               param.name, param.values, ...) {
   sim <- lapply(param.values, function(pvalue) {
     genfrail.args[[param.name]] <- pvalue
     set.seed(seed) # seed before each run
-    simfrail(reps, genfrail.args, fitfrail.args, Lambda.time, ...)
+    simfrail(reps, genfrail.args, fitfrail.args, Lambda.times, ...)
   })
   
   sim <- do.call("rbind", sim)
@@ -105,7 +105,7 @@ simfrail.enum <- function(reps, seed, genfrail.args, fitfrail.args, Lambda.time,
 simcoxph <- function(reps, 
                      genfrail.args, 
                      coxph.args,
-                     Lambda.time, # where to evaluate the baseline hazard function
+                     Lambda.times, # where to evaluate the baseline hazard function
                      vcov.args=list(),
                      cores=0 # 0 to use all available cores, -1 to use all but 1, etc
 ) { 
@@ -126,8 +126,8 @@ simcoxph <- function(reps,
     # Obtain the true values for each parameter
     beta <- attr(dat, "beta")
     theta <- attr(dat, "theta")
-    Lambda <- setNames(attr(dat, "Lambda_0")(Lambda.time),
-                       paste("Lambda.", Lambda.time, sep=""))
+    Lambda <- setNames(attr(dat, "Lambda_0")(Lambda.times),
+                       paste("Lambda.", Lambda.times, sep=""))
     
     # Elapsed time of the fitter
     runtime <- system.time(fit <- do.call("coxph", as.list(coxph.args)))[["elapsed"]]
@@ -149,8 +149,8 @@ simcoxph <- function(reps,
       Lambda_hat[sum(t > time_steps)]
     })
     
-    hat.Lambda <- setNames(Lambda.fun(Lambda.time),
-                           paste("hat.Lambda.", Lambda.time, sep=""))
+    hat.Lambda <- setNames(Lambda.fun(Lambda.times),
+                           paste("hat.Lambda.", Lambda.times, sep=""))
     
     SE <- sqrt(diag(vcov(fit)))
     se.beta <- setNames(SE[1:length(beta)],
@@ -159,8 +159,8 @@ simcoxph <- function(reps,
     se.theta <- setNames(rep(NA, length(hat.theta)),
                          paste("se.theta.", 1:length(hat.theta), sep=""))
     
-    se.Lambda <- setNames(rep(NA, length(Lambda.time)),
-                          paste("se.Lambda.", Lambda.time, sep=""))
+    se.Lambda <- setNames(rep(NA, length(Lambda.times)),
+                          paste("se.Lambda.", Lambda.times, sep=""))
     
     c(seed=s,
       runtime=runtime,

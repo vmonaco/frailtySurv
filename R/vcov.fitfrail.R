@@ -1,17 +1,17 @@
 vcov.fitfrail <- function(object, boot=FALSE, B=100,
-                          Lambda.time=NULL, # The time points of the CBH to use
+                          Lambda.times=NULL, # The time points of the CBH to use
                           cores=0, ...) {
   fit <- object
   Call <- match.call()
   
   # Use the time points where CBH increases
-  if (is.null(Lambda.time)) {
-    Lambda.time <- fit$Lambda$time
+  if (is.null(Lambda.times)) {
+    Lambda.times <- fit$Lambda$time
   }
   
   # CBH variance not supportted in the estimator yet
   if (!boot) {
-    Lambda.time = NULL
+    Lambda.times = NULL
   }
   
   # If V has already been computed the same way and matches the size we expect
@@ -43,8 +43,8 @@ vcov.fitfrail <- function(object, boot=FALSE, B=100,
       
       c(new.fit$beta,
         new.fit$theta,
-        setNames(new.fit$Lambda.fun(Lambda.time), 
-                 paste("Lambda.", format(Lambda.time, nsmall=2), sep="")))
+        setNames(new.fit$Lambda.fun(Lambda.times), 
+                 paste("Lambda.", format(Lambda.times, nsmall=2), sep="")))
     }
     
     hats <- t(simplify2array(plapply(B, fn, cores=cores)))
@@ -135,8 +135,8 @@ vcov.fitfrail <- function(object, boot=FALSE, B=100,
   
   param.names <- c(names(fit$beta), names(fit$theta))
   
-  if (length(Lambda.time) > 0) {
-    param.names <- c(param.names, paste("Lambda.", format(Lambda.time, nsmall=2), sep=""))
+  if (length(Lambda.times) > 0) {
+    param.names <- c(param.names, paste("Lambda.", format(Lambda.times, nsmall=2), sep=""))
   }
   
   rownames(COV) <- param.names

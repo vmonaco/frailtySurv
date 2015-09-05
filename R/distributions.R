@@ -742,6 +742,7 @@ init.frailty <- list(
   lognormal=1
 )
 
+# Soft lower and upper bounds (for estimation)
 lb.frailty <- list(
   gamma=1e-2,
   pvf=1e-5,
@@ -750,6 +751,21 @@ lb.frailty <- list(
 )
 
 ub.frailty <- list(
+  gamma=Inf,
+  pvf=1,
+  invgauss=Inf,
+  lognormal=Inf
+)
+
+# Hard lower and upper bounds (for generation)
+lb.hard.frailty <- list(
+  gamma=0,
+  pvf=0,
+  invgauss=0,
+  lognormal=0
+)
+
+ub.hard.frailty <- list(
   gamma=Inf,
   pvf=1,
   invgauss=Inf,

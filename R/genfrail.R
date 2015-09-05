@@ -42,6 +42,7 @@ genfrail <- function(# Number of clusters and cluster sizes
                      # Round time to nearest round.base
                      round.base = NULL
 ) {
+  Call <- match.call()
   
   # Determine cluster sizes
   if (is.numeric(K) && length(K) == 1) {
@@ -80,6 +81,9 @@ genfrail <- function(# Number of clusters and cluster sizes
   
   # Generate the frailty for each cluster
   if (frailty %in% names(rfrailty)) {
+    if (!all((theta > lb.hard.frailty[[frailty]])&(theta < ub.hard.frailty[[frailty]])))
+        stop(frailty, " frailty distribution parameters must be in the range (",
+             lb.hard.frailty[[frailty]], ",", ub.hard.frailty[[frailty]], ")")
     cluster.frailty <- rfrailty[[frailty]](N, theta)
   } else if (frailty == "none") {
     cluster.frailty <- rep(1, N)
@@ -208,7 +212,8 @@ genfrail <- function(# Number of clusters and cluster sizes
     covar.distr=covar.distr,
     covar.param=covar.param,
     Lambda_0=Lambda_0,
-    hazard=hazard
+    hazard=hazard,
+    call=Call
   ))
   
   dat

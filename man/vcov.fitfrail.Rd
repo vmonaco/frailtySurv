@@ -7,7 +7,7 @@ Compute the variance/covariance matrix for fitfrail estimated parameters. This c
 }
 
 \usage{
-\method{vcov}{fitfrail}(object, boot=FALSE, B=100, Lambda.time=NULL, cores=0, ...)
+\method{vcov}{fitfrail}(object, boot=FALSE, B=100, Lambda.times=NULL, cores=0, ...)
 }
 
 \arguments{
@@ -15,7 +15,7 @@ Compute the variance/covariance matrix for fitfrail estimated parameters. This c
 \item{boot}{logical value, whether to use a weighted bootstrap. If boot == FALSE, a consistent
 estimator is used and the cumulative baseline hazard variance will not be estimated.}
 \item{B}{number of repetitions in the weighted bootstrap.}
-\item{Lambda.time}{time points where the variance/covariance should be evaluated. If Lambda.time == NULL, then the points where the cumulative baseline hazard increases (where failures occur) are used.}
+\item{Lambda.times}{time points where the variance/covariance should be evaluated. If Lambda.times == NULL, then the points where the cumulative baseline hazard increases (where failures occur) are used.}
 \item{cores}{number of cores to use when computing the covariance matrix in parallel}
 \item{...}{extra arguments are not used}
 }
