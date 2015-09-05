@@ -131,7 +131,8 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
         exp(sum(hat.beta * X_[[i]][j,]))
       }, 0)
       
-      bh_ <- bh(d_, R_star, K_, Y_, N_, N_dot_, hat.beta, hat.theta, frailty, weights)
+      bh_ <- bh(d_, R_star, K_, Y_, N_, N_dot_, hat.beta, hat.theta, frailty, weights,
+                control$int.abstol, control$int.reltol, control$int.maxit)
       
       H_ <- bh_$H_
       H_dot_ <- bh_$H_dot
@@ -142,7 +143,8 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
       phi_2_ <- bh_$phi_2_
       
       phi_prime_1_ <- lapply(1:n.theta, function(theta_idx) 
-        phi_prime_k(1, theta_idx, N_dot_, H_dot_, hat.theta, frailty))
+        phi_prime_k(1, theta_idx, N_dot_, H_dot_, hat.theta, frailty,
+                    control$int.abstol, control$int.reltol, control$int.maxit))
       
       loglik_vec <- loglikelihood(X_, K_, I_, phi_1_, lambda, hat.beta)
       loglik <- sum(weights * loglik_vec)
@@ -187,15 +189,18 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
   })
   
   score_jacobian <- function(gamma=NULL) with(VARS, {
-    phi_3_ <- phi_k(3, N_dot_, H_dot_, hat.theta, frailty)
+    phi_3_ <- phi_k(3, N_dot_, H_dot_, hat.theta, frailty,
+                    control$int.abstol, control$int.reltol, control$int.maxit)
     
     phi_prime_2_ <- lapply(1:n.theta, function(theta_idx) 
-      phi_prime_k(2, theta_idx, N_dot_, H_dot_, hat.theta, frailty))
+      phi_prime_k(2, theta_idx, N_dot_, H_dot_, hat.theta, frailty,
+                  control$int.abstol, control$int.reltol, control$int.maxit))
     
     phi_prime_prime_1_ <- lapply(1:n.theta, function(theta_idx_1) {
       lapply(1:n.theta, function(theta_idx_2) {
         phi_prime_prime_k(1, theta_idx_1, theta_idx_2, 
-                          N_dot_, H_dot_, hat.theta, frailty, k_tau)})})
+                          N_dot_, H_dot_, hat.theta, frailty, k_tau,
+                          control$int.abstol, control$int.reltol, control$int.maxit)})})
     
     dH_dbeta_ <- lapply(1:n.beta, function(s) {
       dH_dbeta(s, d_, X_, K_, R_, R_dot_, R_star,

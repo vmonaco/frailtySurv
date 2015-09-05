@@ -93,20 +93,20 @@ zeta <- function(s) {
     .Call('frailtyr_zeta', PACKAGE = 'frailtyr', s)
 }
 
-phi_c <- function(k, N_dot, H_dot, theta, frailty) {
-    .Call('frailtyr_phi_c', PACKAGE = 'frailtyr', k, N_dot, H_dot, theta, frailty)
+phi_c <- function(k, N_dot, H_dot, theta, frailty, abstol, reltol, maxit) {
+    .Call('frailtyr_phi_c', PACKAGE = 'frailtyr', k, N_dot, H_dot, theta, frailty, abstol, reltol, maxit)
 }
 
-phi_prime_c <- function(k, N_dot, H_dot, theta, frailty, deriv_idx) {
-    .Call('frailtyr_phi_prime_c', PACKAGE = 'frailtyr', k, N_dot, H_dot, theta, frailty, deriv_idx)
+phi_prime_c <- function(k, N_dot, H_dot, theta, frailty, deriv_idx, abstol, reltol, maxit) {
+    .Call('frailtyr_phi_prime_c', PACKAGE = 'frailtyr', k, N_dot, H_dot, theta, frailty, deriv_idx, abstol, reltol, maxit)
 }
 
-phi_prime_prime_c <- function(k, N_dot, H_dot, theta, frailty, deriv_idx_1, deriv_idx_2) {
-    .Call('frailtyr_phi_prime_prime_c', PACKAGE = 'frailtyr', k, N_dot, H_dot, theta, frailty, deriv_idx_1, deriv_idx_2)
+phi_prime_prime_c <- function(k, N_dot, H_dot, theta, frailty, deriv_idx_1, deriv_idx_2, abstol, reltol, maxit) {
+    .Call('frailtyr_phi_prime_prime_c', PACKAGE = 'frailtyr', k, N_dot, H_dot, theta, frailty, deriv_idx_1, deriv_idx_2, abstol, reltol, maxit)
 }
 
-bh <- function(d_, R_star, K_, Y_, N_, N_dot, beta, theta, frailty, weights) {
-    .Call('frailtyr_bh', PACKAGE = 'frailtyr', d_, R_star, K_, Y_, N_, N_dot, beta, theta, frailty, weights)
+bh <- function(d_, R_star, K_, Y_, N_, N_dot, beta, theta, frailty, weights, abstol, reltol, maxit) {
+    .Call('frailtyr_bh', PACKAGE = 'frailtyr', d_, R_star, K_, Y_, N_, N_dot, beta, theta, frailty, weights, abstol, reltol, maxit)
 }
 
 loglikelihood <- function(X_, K_, I_, phi_1_, lambda, beta) {
@@ -121,16 +121,16 @@ xi_theta <- function(phi_1_, phi_prime_1_, r) {
     .Call('frailtyr_xi_theta', PACKAGE = 'frailtyr', phi_1_, phi_prime_1_, r)
 }
 
-phi_k <- function(s, N_dot_, H_dot_, theta, frailty) {
-    .Call('frailtyr_phi_k', PACKAGE = 'frailtyr', s, N_dot_, H_dot_, theta, frailty)
+phi_k <- function(s, N_dot_, H_dot_, theta, frailty, abstol, reltol, maxit) {
+    .Call('frailtyr_phi_k', PACKAGE = 'frailtyr', s, N_dot_, H_dot_, theta, frailty, abstol, reltol, maxit)
 }
 
-phi_prime_k <- function(s, theta_idx, N_dot_, H_dot_, theta, frailty) {
-    .Call('frailtyr_phi_prime_k', PACKAGE = 'frailtyr', s, theta_idx, N_dot_, H_dot_, theta, frailty)
+phi_prime_k <- function(s, theta_idx, N_dot_, H_dot_, theta, frailty, abstol, reltol, maxit) {
+    .Call('frailtyr_phi_prime_k', PACKAGE = 'frailtyr', s, theta_idx, N_dot_, H_dot_, theta, frailty, abstol, reltol, maxit)
 }
 
-phi_prime_prime_k <- function(s, theta_idx_1, theta_idx_2, N_dot_, H_dot_, theta, frailty, kstart) {
-    .Call('frailtyr_phi_prime_prime_k', PACKAGE = 'frailtyr', s, theta_idx_1, theta_idx_2, N_dot_, H_dot_, theta, frailty, kstart)
+phi_prime_prime_k <- function(s, theta_idx_1, theta_idx_2, N_dot_, H_dot_, theta, frailty, kstart, abstol, reltol, maxit) {
+    .Call('frailtyr_phi_prime_prime_k', PACKAGE = 'frailtyr', s, theta_idx_1, theta_idx_2, N_dot_, H_dot_, theta, frailty, kstart, abstol, reltol, maxit)
 }
 
 dH_dbeta <- function(s, d_, X_, K_, R_, R_dot_, R_star, phi_1_, phi_2_, phi_3_, Lambda, lambda, beta, theta, frailty) {

@@ -14,13 +14,12 @@
 
 using namespace Rcpp;
 
+#define INT_ABSTOL 0
+#define INT_RELTOL 1e-8
+#define INT_MAXIT 0
+
 // Number of iterations for posstab and pvf densities
 #define DPOSSTAB_K 100
-
-// Numerical integration parameters
-#define MAX_EVAL 0
-#define EPSABS 0
-#define EPSREL 1e-8
 
 NumericVector vectorized_density(NumericVector *x, NumericVector *p, density_fn density) {
   int n = x->size();
@@ -252,16 +251,17 @@ int lt_dlognormal_deriv(unsigned ndim, const double *x, void *fdata, unsigned fd
   return 0; // success
 }
 
-double lt_dlognormal(int m, double s, double* theta) {
+double lt_dlognormal(int m, double s, double* theta, double abstol, double reltol, int maxit) {
   double result, error;
   double xmin[1] = {0}, xmax[1] = {1}, val, err;
   double params[3] = {m, s, *theta};
-  hcubature(1, lt_dlognormal_deriv, params, 1, xmin, xmax, MAX_EVAL, 
-            EPSABS, EPSREL, ERROR_INDIVIDUAL, &val, &err);
+  hcubature(1, lt_dlognormal_deriv, params, 1, xmin, xmax, maxit, 
+            abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
   return val;
 }
 
-int deriv_lt_dlognormal_deriv(unsigned ndim, const double *x, void *fdata, unsigned fdim, double *fval) {
+int deriv_lt_dlognormal_deriv(unsigned ndim, const double *x, void *fdata, 
+                              unsigned fdim, double *fval) {
   double *params = ((double *) fdata); // we can pass σ via fdata argument
   double m = params[0];
   double s = params[1];
@@ -273,16 +273,18 @@ int deriv_lt_dlognormal_deriv(unsigned ndim, const double *x, void *fdata, unsig
   return 0; // success
 }
 
-double deriv_lt_dlognormal(int m, double s, double* theta, int deriv_idx) {
+double deriv_lt_dlognormal(int m, double s, double* theta, int deriv_idx,
+                           double abstol, double reltol, int maxit) {
   double result, error;
   double xmin[1] = {0}, xmax[1] = {1}, val, err;
   double params[4] = {m, s, *theta, deriv_idx};
-  hcubature(1, deriv_lt_dlognormal_deriv, params, 1, xmin, xmax, MAX_EVAL, 
-            EPSABS, EPSREL, ERROR_INDIVIDUAL, &val, &err);
+  hcubature(1, deriv_lt_dlognormal_deriv, params, 1, xmin, xmax, maxit, 
+            abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
   return val;
 }
 
-int deriv_deriv_lt_dlognormal_deriv(unsigned ndim, const double *x, void *fdata, unsigned fdim, double *fval) {
+int deriv_deriv_lt_dlognormal_deriv(unsigned ndim, const double *x, void *fdata, 
+                                    unsigned fdim, double *fval) {
   double *params = ((double *) fdata); // we can pass σ via fdata argument
   double m = params[0];
   double s = params[1];
@@ -296,18 +298,19 @@ int deriv_deriv_lt_dlognormal_deriv(unsigned ndim, const double *x, void *fdata,
   return 0; // success
 }
 
-double deriv_deriv_lt_dlognormal(int m, double s, double* theta, int deriv_idx_1, int deriv_idx_2) {
+double deriv_deriv_lt_dlognormal(int m, double s, double* theta, int deriv_idx_1, int deriv_idx_2,
+                                 double abstol, double reltol, int maxit) {
   double result, error;
   double xmin[1] = {0}, xmax[1] = {1}, val, err;
   double params[5] = {m, s, *theta, deriv_idx_1, deriv_idx_2};
-  hcubature(1, deriv_deriv_lt_dlognormal_deriv, params, 1, xmin, xmax, MAX_EVAL, 
-            EPSABS, EPSREL, ERROR_INDIVIDUAL, &val, &err);
+  hcubature(1, deriv_deriv_lt_dlognormal_deriv, params, 1, xmin, xmax, maxit, 
+            abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
   return val;
 }
 
 // [[Rcpp::export]]
 double lt_dlognormal_c(int m, double s, double theta) {
-  return lt_dlognormal(m, s, &theta);
+  return lt_dlognormal(m, s, &theta, INT_ABSTOL, INT_RELTOL, INT_MAXIT);
 }
 
 // [[Rcpp::export]]
@@ -374,16 +377,18 @@ int lt_dinvgauss_deriv(unsigned ndim, const double *x, void *fdata, unsigned fdi
   return 0; // success
 }
 
-double lt_dinvgauss(int m, double s, double* theta) {
+double lt_dinvgauss(int m, double s, double* theta,
+                    double abstol, double reltol, int maxit) {
   double result, error;
   double xmin[1] = {0}, xmax[1] = {1}, val, err;
   double params[3] = {m, s, *theta};
-  hcubature(1, lt_dinvgauss_deriv, params, 1, xmin, xmax, MAX_EVAL, 
-            EPSABS, EPSREL, ERROR_INDIVIDUAL, &val, &err);
+  hcubature(1, lt_dinvgauss_deriv, params, 1, xmin, xmax, maxit, 
+            abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
   return val;
 }
 
-int deriv_lt_dinvgauss_deriv(unsigned ndim, const double *x, void *fdata, unsigned fdim, double *fval) {
+int deriv_lt_dinvgauss_deriv(unsigned ndim, const double *x, void *fdata, 
+                             unsigned fdim, double *fval) {
   double *params = ((double *) fdata); // we can pass σ via fdata argument
   double m = params[0];
   double s = params[1];
@@ -395,16 +400,18 @@ int deriv_lt_dinvgauss_deriv(unsigned ndim, const double *x, void *fdata, unsign
   return 0; // success
 }
 
-double deriv_lt_dinvgauss(int m, double s, double* theta, int deriv_idx) {
+double deriv_lt_dinvgauss(int m, double s, double* theta, int deriv_idx,
+                          double abstol, double reltol, int maxit) {
   double result, error;
   double xmin[1] = {0}, xmax[1] = {1}, val, err;
   double params[4] = {m, s, *theta, deriv_idx};
-  hcubature(1, deriv_lt_dinvgauss_deriv, params, 1, xmin, xmax, MAX_EVAL, 
-            EPSABS, EPSREL, ERROR_INDIVIDUAL, &val, &err);
+  hcubature(1, deriv_lt_dinvgauss_deriv, params, 1, xmin, xmax, maxit, 
+            abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
   return val;
 }
 
-int deriv_deriv_lt_dinvgauss_deriv(unsigned ndim, const double *x, void *fdata, unsigned fdim, double *fval) {
+int deriv_deriv_lt_dinvgauss_deriv(unsigned ndim, const double *x, void *fdata, 
+                                   unsigned fdim, double *fval) {
   double *params = ((double *) fdata); // we can pass σ via fdata argument
   double m = params[0];
   double s = params[1];
@@ -418,18 +425,19 @@ int deriv_deriv_lt_dinvgauss_deriv(unsigned ndim, const double *x, void *fdata, 
   return 0; // success
 }
 
-double deriv_deriv_lt_dinvgauss(int m, double s, double* theta, int deriv_idx_1, int deriv_idx_2) {
+double deriv_deriv_lt_dinvgauss(int m, double s, double* theta, int deriv_idx_1, int deriv_idx_2,
+                                double abstol, double reltol, int maxit) {
   double result, error;
   double xmin[1] = {0}, xmax[1] = {1}, val, err;
   double params[5] = {m, s, *theta, deriv_idx_1, deriv_idx_2};
-  hcubature(1, deriv_deriv_lt_dinvgauss_deriv, params, 1, xmin, xmax, MAX_EVAL, 
-            EPSABS, EPSREL, ERROR_INDIVIDUAL, &val, &err);
+  hcubature(1, deriv_deriv_lt_dinvgauss_deriv, params, 1, xmin, xmax, maxit, 
+            abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
   return val;
 }
 
 // [[Rcpp::export]]
 double lt_dinvgauss_c(int m, double s, double theta) {
-  return lt_dinvgauss(m, s, &theta);
+  return lt_dinvgauss(m, s, &theta, INT_ABSTOL, INT_RELTOL, INT_MAXIT);
 }
 
 // [[Rcpp::export]]

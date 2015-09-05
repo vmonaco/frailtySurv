@@ -9,45 +9,48 @@ using namespace Rcpp;
 // frailty distribution. If a new distribution is implemented, it needs to go
 // here, with the Laplace transform functions
 
-double phi(int k, int N_dot, double H_dot, double *theta, String frailty) {
+double phi(int k, int N_dot, double H_dot, double *theta, String frailty, 
+           double abstol, double reltol, int maxit) {
   if (frailty == "gamma") {
     return lt_dgamma(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
   } else if (frailty == "pvf") {
     return lt_dpvf(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
   } else if (frailty == "lognormal") {
-    return lt_dlognormal(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
+    return lt_dlognormal(N_dot + k - 1, H_dot, theta, abstol, reltol, maxit) * pow(-1, N_dot + k - 1);
   } else if (frailty == "invgauss") {
-    return lt_dinvgauss(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
+    return lt_dinvgauss(N_dot + k - 1, H_dot, theta, abstol, reltol, maxit) * pow(-1, N_dot + k - 1);
   } else {
     throw std::range_error("Unsupported frailty distribution");
   }
 }
 
 // phi using the derivative of the density wrt. parameter p[deriv_idx]
-double phi_prime(int k, int N_dot, double H_dot, double *theta, String frailty, int deriv_idx) {
+double phi_prime(int k, int N_dot, double H_dot, double *theta, String frailty, 
+                 int deriv_idx, double abstol, double reltol, int maxit) {
   if (frailty == "gamma") {
     return deriv_lt_dgamma(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
   } else if (frailty == "pvf") {
     return deriv_lt_dpvf(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
   } else if (frailty == "lognormal") {
-    return deriv_lt_dlognormal(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
+    return deriv_lt_dlognormal(N_dot + k - 1, H_dot, theta, deriv_idx, abstol, reltol, maxit) * pow(-1, N_dot + k - 1);
   } else if (frailty == "invgauss") {
-    return deriv_lt_dinvgauss(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
+    return deriv_lt_dinvgauss(N_dot + k - 1, H_dot, theta, deriv_idx, abstol, reltol, maxit) * pow(-1, N_dot + k - 1);
   } else {
     throw std::range_error("Unsupported frailty distribution");
   }
 }
 
 // phi using the derivative of the density wrt. parameter p[deriv_idx_1]
-double phi_prime_prime(int k, int N_dot, double H_dot, double *theta, String frailty, int deriv_idx_1, int deriv_idx_2) {
+double phi_prime_prime(int k, int N_dot, double H_dot, double *theta, String frailty, 
+                       int deriv_idx_1, int deriv_idx_2, double abstol, double reltol, int maxit) {
   if (frailty == "gamma") {
     return deriv_deriv_lt_dgamma(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2) * pow(-1, N_dot + k - 1);
   } else if (frailty == "pvf") {
     return deriv_deriv_lt_dpvf(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2) * pow(-1, N_dot + k - 1);
   } else if (frailty == "lognormal") {
-    return deriv_deriv_lt_dlognormal(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2) * pow(-1, N_dot + k - 1);
+    return deriv_deriv_lt_dlognormal(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2, abstol, reltol, maxit) * pow(-1, N_dot + k - 1);
   } else if (frailty == "invgauss") {
-    return deriv_deriv_lt_dinvgauss(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2) * pow(-1, N_dot + k - 1);
+    return deriv_deriv_lt_dinvgauss(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2, abstol, reltol, maxit) * pow(-1, N_dot + k - 1);
   } else {
     throw std::range_error("Unsupported frailty distribution");
   }
@@ -55,28 +58,36 @@ double phi_prime_prime(int k, int N_dot, double H_dot, double *theta, String fra
 
 // Mainly for testing, compare to the corresponding *_r functions
 // [[Rcpp::export]]
-double phi_c(int k, int N_dot, double H_dot, double theta, String frailty) {
-  return phi(k, N_dot, H_dot, &theta, frailty);
+double phi_c(int k, int N_dot, double H_dot, double theta, String frailty, 
+             double abstol, double reltol, int maxit) {
+  return phi(k, N_dot, H_dot, &theta, frailty, abstol, reltol, maxit);
 }
 
 // [[Rcpp::export]]
 double phi_prime_c(int k, int N_dot, double H_dot, double theta, 
-                   String frailty, int deriv_idx) {
-  return phi_prime(k, N_dot, H_dot, &theta, frailty, deriv_idx);
+                   String frailty, int deriv_idx, 
+                   double abstol, double reltol, int maxit) {
+  return phi_prime(k, N_dot, H_dot, &theta, frailty, deriv_idx, 
+                   abstol, reltol, maxit);
 }
 
 // [[Rcpp::export]]
 double phi_prime_prime_c(int k, int N_dot, double H_dot, double theta, 
-                         String frailty, int deriv_idx_1, int deriv_idx_2) {
-  return phi_prime_prime(k, N_dot, H_dot, &theta, frailty, deriv_idx_1, deriv_idx_2);
+                         String frailty, int deriv_idx_1, int deriv_idx_2,
+                         double abstol, double reltol, int maxit) {
+  return phi_prime_prime(k, N_dot, H_dot, &theta, frailty, 
+                         deriv_idx_1, deriv_idx_2,
+                         abstol, reltol, maxit);
 }
 
-double psi(int N_dot, double H_dot, double* theta, String frailty) {
+double psi(int N_dot, double H_dot, double* theta, String frailty, 
+           double abstol, double reltol, int maxit) {
   // Shortcut for gamma frailty
 //   if (frailty == "gamma") {
 //     return (N_dot + 1/theta[0])/(H_dot + 1/theta[0]);
 //   }
-  return phi(2, N_dot, H_dot, theta, frailty)/phi(1, N_dot, H_dot, theta, frailty);
+  return phi(2, N_dot, H_dot, theta, frailty, abstol, reltol, maxit)/
+  phi(1, N_dot, H_dot, theta, frailty, abstol, reltol, maxit);
 }
 
 // Baseline hazard estimator, returns some other useful vars
@@ -90,7 +101,8 @@ List bh(NumericVector d_,
         NumericVector beta, 
         NumericVector theta, 
         String frailty,
-        NumericVector weights) {
+        NumericVector weights,
+        double abstol, double reltol, int maxit) {
   
   int n_timesteps = d_.size();
   int n_clusters = R_star.size();
@@ -121,8 +133,8 @@ List bh(NumericVector d_,
     }
     H_dot_i(0) = 0;
     
-    phi_1_i(0) = phi(1, 0, 0, theta.begin(), frailty);
-    phi_2_i(0) = phi(2, 0, 0, theta.begin(), frailty);
+    phi_1_i(0) = phi(1, 0, 0, theta.begin(), frailty, abstol, reltol, maxit);
+    phi_2_i(0) = phi(2, 0, 0, theta.begin(), frailty, abstol, reltol, maxit);
     psi_i(0) = phi_2_i(0)/phi_1_i(0);
   }
   
@@ -181,8 +193,8 @@ List bh(NumericVector d_,
         }
         
         H_dot_i(k) = sum(H_i( _ , k));
-        phi_1_i(k) = phi(1, N_dot_i(k), H_dot_i(k), theta.begin(), frailty);
-        phi_2_i(k) = phi(2, N_dot_i(k), H_dot_i(k), theta.begin(), frailty);
+        phi_1_i(k) = phi(1, N_dot_i(k), H_dot_i(k), theta.begin(), frailty, abstol, reltol, maxit);
+        phi_2_i(k) = phi(2, N_dot_i(k), H_dot_i(k), theta.begin(), frailty, abstol, reltol, maxit);
         psi_i(k) = phi_2_i(k)/phi_1_i(k);
       } else {
         H_i(_, k) = H_i(_, k - 1);
@@ -297,7 +309,8 @@ List phi_k(int s,
            List N_dot_,
            List H_dot_,
            NumericVector theta, 
-           String frailty) {
+           String frailty,
+           double abstol, double reltol, int maxit) {
   NumericVector tmp = N_dot_(0);
   int n_timesteps = tmp.size();
   int n_clusters = N_dot_.size();
@@ -311,7 +324,7 @@ List phi_k(int s,
     NumericVector H_dot_i = H_dot_(i);
     NumericVector phi_k_i = phi_k_(i);
     for (int k = 0; k < n_timesteps; ++k) {
-        phi_k_i(k) = phi(s, N_dot_i(k), H_dot_i(k), theta.begin(), frailty);
+        phi_k_i(k) = phi(s, N_dot_i(k), H_dot_i(k), theta.begin(), frailty, abstol, reltol, maxit);
     }
   }
   return phi_k_;
@@ -323,7 +336,8 @@ List phi_prime_k(int s,
                  List N_dot_,
                  List H_dot_,
                  NumericVector theta, 
-                 String frailty) {
+                 String frailty,
+                 double abstol, double reltol, int maxit) {
   theta_idx -= 1;
   NumericVector tmp = N_dot_(0);
   int n_timesteps = tmp.size();
@@ -338,7 +352,9 @@ List phi_prime_k(int s,
     NumericVector H_dot_i = H_dot_(i);
     NumericVector phi_prime_k_i = phi_prime_k_(i);
     for (int k = 0; k < n_timesteps; ++k) {
-      phi_prime_k_i(k) = phi_prime(s, N_dot_i(k), H_dot_i(k), theta.begin(), frailty, theta_idx);
+      phi_prime_k_i(k) = phi_prime(s, N_dot_i(k), H_dot_i(k),
+                    theta.begin(), frailty, theta_idx,
+                    abstol, reltol, maxit);
     }
   }
   return phi_prime_k_;
@@ -352,7 +368,8 @@ List phi_prime_prime_k(int s,
                        List H_dot_,
                        NumericVector theta, 
                        String frailty,
-                       int kstart) {
+                       int kstart,
+                       double abstol, double reltol, int maxit) {
   theta_idx_1 -= 1;
   theta_idx_2 -= 1;
   kstart -= 1;
@@ -363,14 +380,14 @@ List phi_prime_prime_k(int s,
   // N_dot is a list of numeric vectors
   List phi_prime_prime_k_ = clone(N_dot_);
   
-  // Zero everything out
   for (int i = 0; i < n_clusters; ++i) {
     NumericVector N_dot_i = N_dot_(i);
     NumericVector H_dot_i = H_dot_(i);
     NumericVector phi_prime_prime_k_i = phi_prime_prime_k_(i);
     for (int k = kstart; k < n_timesteps; ++k) {
       phi_prime_prime_k_i(k) = phi_prime_prime(s, N_dot_i(k), H_dot_i(k), 
-                          theta.begin(), frailty, theta_idx_1, theta_idx_2);
+                          theta.begin(), frailty, theta_idx_1, theta_idx_2,
+                          abstol, reltol, maxit);
     }
   }
   return phi_prime_prime_k_;
