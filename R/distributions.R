@@ -706,14 +706,16 @@ etzeta <- function(alpha, xmin=0, xmax=1e4) {
 dfrailty <- list(
   gamma=dgamma_r,
   pvf=dpvf_r,
+  posstab=dposstab_r,
   invgauss=dinvgauss_r,
   lognormal=dlognormal_r
 )
 
-# densities
+# Laplace transforms
 ltfrailty <- list(
   gamma=lt_dgamma_c,
   pvf=lt_dpvf_c,
+  posstab=lt_dposstab_c,
   invgauss=lt_dinvgauss_c,
   lognormal=lt_dlognormal_c
 )
@@ -722,9 +724,9 @@ ltfrailty <- list(
 rfrailty <- list(
   gamma=rgamma_r,
   pvf=rpvf_r,
+  posstab=rposstab_r,
   invgauss=rinvgauss_r,
-  lognormal=rlognormal_r,
-  posstab=rposstab_r
+  lognormal=rlognormal_r
 )
 
 # variance
@@ -735,6 +737,7 @@ vfrailty <- list(
   invgauss=vinvgauss_r
 )
 
+# initial params for estimation
 init.frailty <- list(
   gamma=1,
   pvf=0.5,
@@ -761,6 +764,7 @@ ub.frailty <- list(
 lb.hard.frailty <- list(
   gamma=0,
   pvf=0,
+  posstab=0,
   invgauss=0,
   lognormal=0
 )
@@ -768,6 +772,7 @@ lb.hard.frailty <- list(
 ub.hard.frailty <- list(
   gamma=Inf,
   pvf=1,
+  posstab=1,
   invgauss=Inf,
   lognormal=Inf
 )

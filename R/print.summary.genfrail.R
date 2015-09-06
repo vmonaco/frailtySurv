@@ -22,7 +22,8 @@ print.summary.genfrail <- function(x, digits=4, ...) {
             "Frailty              : ",
     ifelse(sum.dat$frailty != "none", 
            sprintf("%s(%s)", sum.dat$frailty, toString(sum.dat$theta)), "none"), "\n",
-            "Baseline hazard      : ", hazard.fn, " = ", gsub("\n", "", toString(sum.dat$hazard)), "\n",
+            "Baseline hazard      : ", hazard.fn, "\n", 
+            "                        = ", gsub("\n", "", toString(sum.dat$hazard)), "\n",
   sep="")
   
   invisible()

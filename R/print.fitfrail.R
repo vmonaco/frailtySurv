@@ -8,7 +8,12 @@ print.fitfrail <- function(x, digits=max(options()$digits - 4, 3), ...) {
   
   cat("\n")
   tmp <- data.frame(Covariate=names(fit$beta), Coefficient=fit$beta)
-  print(format(tmp, width=11, justify="left", nsmall=digits), print.gap=5, row.names=FALSE, right=FALSE)
+  
+  if (!is.null(fit$se)) {
+    tmp$SE <- fit$se.beta
+  }
+  
+  print(format(tmp, width=8, justify="right", nsmall=digits), print.gap=5, row.names=FALSE, right=TRUE)
   
   cat("\n")
   cat("Frailty distribution   ", 
@@ -17,6 +22,14 @@ print.fitfrail <- function(x, digits=max(options()$digits - 4, 3), ...) {
       "VAR of frailty variates = ", format(fit$frailty.variance, nsmall=digits), 
       "\n",
       sep="")
+  
+  if (!is.null(fit$se)) {
+    cat("Frailty parameter SE   ", 
+        toString(format(fit$se.theta, nsmall=digits)),
+        "\n",
+        sep="")
+  }
+  
   cat("Log-likelihood         ", 
       format(fit$loglik, nsmall=digits), 
       "\n", 

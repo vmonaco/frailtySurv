@@ -39,6 +39,8 @@ dat <- genfrail(N=200, K=2, beta=c(log(2),log(3)),
 
 fit <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family), 
                 dat, frailty="gamma")
+```
+```{r, echo=TRUE}
 fit
 ```
 

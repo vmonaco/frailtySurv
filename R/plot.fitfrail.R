@@ -46,7 +46,7 @@ plot.fitfrail.fitter <- function(fit, show.loglik=TRUE, ...) {
   
 }
 
-plot.fitfrail.hazard <- function(fit, CI=0, end=NULL, ...) {
+plot.fitfrail.hazard <- function(fit, se=FALSE, CI=0.95, end=NULL, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Plotting requires the ggplot2 package")
   }
@@ -68,7 +68,7 @@ plot.fitfrail.hazard <- function(fit, CI=0, end=NULL, ...) {
     ylab("Cumulative baseline hazard") + 
     theme(legend.position="none")
   
-  if (CI > 0) {
+  if (se & CI > 0) {
     COV <- vcov(fit, boot=TRUE, ...)
     se.Lambda <- sqrt(diag(COV))[(fit$VARS$n.gamma+1):nrow(COV)]
     se.Lambda <- se.Lambda[1:nrow(Lambda)]

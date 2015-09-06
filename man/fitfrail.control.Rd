@@ -11,7 +11,7 @@ This function creates a list of control parameters needed by fitfrail.
 \usage{
 fitfrail.control(fitmethod = "loglik", 
                  abstol = 1e-08, reltol = 1e-06, maxit = 100,
-                 int.abstol = 0, int.reltol = 1e-08, int.maxit = 0, 
+                 int.abstol = 0, int.reltol = 1e-08, int.maxit = 100, 
                  verbose = FALSE)
 }
 

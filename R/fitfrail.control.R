@@ -4,7 +4,7 @@ fitfrail.control <- function(fitmethod="loglik",
                              maxit=100,
                              int.abstol=0,
                              int.reltol=1e-8, 
-                             int.maxit=100, 
+                             int.maxit=1000, 
                              verbose=FALSE
                              ) {
   

@@ -21,6 +21,8 @@ fitfrail(formula, dat, control, frailty, weights, ...)
 
 \item{weights}{vector of cluster weights}
 
+\item{se}{logical value, whether the standard errors of the regression coefficient and frailty distribution parameter estimates should be calculated. These are obtained using the \code{vcov.fitfrail} function}
+
 \item{...}{additional arguments will be passed to \code{\link[frailtyr]{fitfrail.control}}}
 }
 

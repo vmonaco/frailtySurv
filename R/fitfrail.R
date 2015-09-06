@@ -1,4 +1,4 @@
-fitfrail <- function(formula, dat, control, frailty, weights=NULL, ...) {
+fitfrail <- function(formula, dat, control, frailty, weights=NULL, se=FALSE, ...) {
   Call <- match.call()
   
   # Remove missing observations with a warning
@@ -97,6 +97,14 @@ fitfrail <- function(formula, dat, control, frailty, weights=NULL, ...) {
                                     fit$VARS$n.clusters, " clusters (avg. size ", 
                                     format(mean(fit$VARS$cluster_sizes), nsmall=2), "), ",
                                     toString(frailty), " frailty", sep="")
+  
+  if (se) {
+    fit$vcov <- vcov(fit)
+    fit$se <- diag(sqrt(fit$vcov))
+    
+    fit$se.beta <- fit$se[1:length(fit$beta)]
+    fit$se.theta <- fit$se[(length(fit$beta)+1):(length(fit$beta)+length(fit$theta))]
+  }
   
   fit
 }

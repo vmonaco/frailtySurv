@@ -22,8 +22,6 @@ The following code shows how to generate data and fit the model.
 ``` r
 set.seed(1234)
 library(frailtyr)
-#> Loading required package: survival
-#> Welcome to frailtyr
 dat <- genfrail(N=200, K=2, beta=c(log(2),log(3)), 
                 frailty="gamma", theta=2,
                 censor.rate=0.35,
@@ -31,17 +29,20 @@ dat <- genfrail(N=200, K=2, beta=c(log(2),log(3)),
 
 fit <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family), 
                 dat, frailty="gamma")
+```
+
+``` r
 fit
 #> Call: fitfrail(formula = Surv(time, status) ~ Z1 + Z2 + cluster(family), 
 #>     dat = dat, frailty = "gamma")
 #> 
-#>      Covariate       Coefficient
-#>      Z1                    0.654
-#>      Z2                    1.006
+#>      Covariate     Coefficient
+#>             Z1           0.654
+#>             Z2           1.006
 #> 
-#> Frailty distribution   gamma(1.802), VAR = 1.802
+#> Frailty distribution   gamma(1.802), VAR of frailty variates = 1.802
 #> Log-likelihood         -1575.752
-#> Converged (method)     10 iterations (maximized log-likelihood)
+#> Converged (method)     10 iterations, 6.791 secs (maximized log-likelihood)
 ```
 
 Parameter traces are given by
@@ -50,7 +51,7 @@ Parameter traces are given by
 plot(fit, "trace")
 ```
 
-![](figures/unnamed-chunk-4-1.png)
+![](figures/unnamed-chunk-5-1.png)
 
 The estimated cumulative baseline hazard is given by
 
@@ -58,7 +59,7 @@ The estimated cumulative baseline hazard is given by
 plot(fit, "hazard")
 ```
 
-![](figures/unnamed-chunk-5-1.png)
+![](figures/unnamed-chunk-6-1.png)
 
 Note that this takes some time to compute since the cumulative baseline hazard variance is estimated by a weighted bootstrap procedure. These results can be compared to other estimation techniques.
 
@@ -85,7 +86,7 @@ coxph(Surv(time, status) ~ Z1 + Z2 + frailty.gamma(family), data=dat)
 frailtyPenal(Surv(time, status) ~ Z1 + Z2 + cluster(family), data=dat, n.knots=10, kappa=2)
 #> 
 #> Be patient. The program is computing ... 
-#> The program took 0.4 seconds
+#> The program took 0.39 seconds
 #> Call:
 #> frailtyPenal(formula = Surv(time, status) ~ Z1 + Z2 + cluster(family), 
 #>     data = dat, n.knots = 10, kappa = 2)
