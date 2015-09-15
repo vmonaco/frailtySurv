@@ -15,19 +15,23 @@ summary.fitfrail <- function(object, Lambda.times=NULL, censored=FALSE, se=FALSE
   Lambda.times <- sort(unique(Lambda.times))
   
   status <- as.integer(fit$VARS$status > 0)
-  n.failures <- vapply(Lambda.times, function(t) {
-    sum(status[fit$VARS$time < t])
-  }, 0)
+  n.risk.total <- length(status)
   
-  n.event <- vapply(Lambda.times, function(t) {
-    sum(status[fit$VARS$time == t])
-  }, 0)
+  n.risk <- n.risk.total - vapply(Lambda.times, function(t) {
+    sum(fit$VARS$time < t)
+  }, 0) # num failures at time t-
+  
+  n.event <- c(sum(status[fit$VARS$time <= Lambda.times[1]]), 
+               diff(vapply(Lambda.times, 
+                 function(t) {
+                   sum(status[fit$VARS$time <= t])
+                 }, 0))) # num failures at time t-
   
   surv <- exp(-fit$Lambda.fun(Lambda.times))
   
   result <- data.frame(time=Lambda.times,
                        surv=surv,
-                       n.risk=length(fit$VARS$status) - n.failures,
+                       n.risk=n.risk,
                        n.event=n.event)
   rownames(result) <- NULL
   
