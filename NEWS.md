@@ -1,6 +1,12 @@
 frailtySurv
 --------
 
+# Version 1.2.0 (September 2015)
+
+## New features
+  * Renamed package to `frailtySurv`
+  * Added uniform censorship to `genfrail`
+
 # Version 1.1.1 (September 2015)
 
 ## Bug fixes

@@ -1,5 +1,5 @@
 library(testthat)
-library(frailtyr)
+library(frailtySurv)
 
 test_that("fitfrail recovers parameters within error", {
   

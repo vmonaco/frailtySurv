@@ -27,7 +27,7 @@ genfrail <- function(# Number of clusters and cluster sizes
                      covar.matrix = NULL,
                      
                      # Censoring distribution and parameters vector
-                     # censor.distr can be one of: "normal", "lognormal", "none"
+                     # censor.distr can be one of: "normal", "lognormal", "uniform", "none"
                      censor.distr = "normal",
                      censor.param = c(130,15),
                      censor.rate = NULL, # If specified, overrides censor.mu
@@ -155,6 +155,13 @@ genfrail <- function(# Number of clusters and cluster sizes
     censor.quantile <- qlnorm
     censor.sigma <- sqrt(log(1 + censor.param[2]^2/censor.param[1]^2))
     censor.mu <- log(censor.param[1]) - censor.sigma^2/2
+  } else if (censor.distr == "uniform") {
+    censor.density <- dunif
+    censor.random <- runif
+    censor.quantile <- qunif
+    censor.lower <- censor.param[1]
+    censor.upper <- censor.param[2]
+    stopifnot(censor.lower < censor.upper)
   } else if (censor.distr == "none") {
     warning("Censoring distribution is set to none")
   } else {
@@ -172,19 +179,40 @@ genfrail <- function(# Number of clusters and cluster sizes
       esurv <- ecdf(fail.time)
       efail <- function(t) 1 - esurv(t)
       
-      # Split the integral up into 2 parts since it may actually be ~0 for 
-      # most of the interval. Make this split at the 50th percentile
-      censor.mu <- uniroot(function(mu) 
-        censor.rate - 
-          (integrate(function(t) efail(t)*censor.density(t, mu, censor.sigma), 
-            -Inf, censor.quantile(0.5, mu, censor.sigma), subdivisions=1e3)$value +
-           integrate(function(t) efail(t)*censor.density(t, mu, censor.sigma), 
-            censor.quantile(0.5, mu, censor.sigma), Inf, subdivisions=1e3)$value),
-        lower=0, upper=100, extendInt="up")$root
+      if (censor.distr == "uniform") {
+        interval <- censor.upper - censor.lower
+        # Split the integral up into 2 parts since it may actually be ~0 for 
+        # most of the interval. Make this split at the 50th percentile
+        mu <- uniroot(function(mu) {
+            lower <- mu - interval/2
+            upper <- mu + interval/2
+            censor.rate - 
+              (integrate(function(t) efail(t)*censor.density(t, lower, upper), 
+                         -Inf, censor.quantile(0.5, lower, upper), subdivisions=1e3)$value +
+                 integrate(function(t) efail(t)*censor.density(t, lower, upper), 
+                           censor.quantile(0.5, lower, upper), Inf, subdivisions=1e3)$value)
+          }, lower=0, upper=100, extendInt="up")$root
+        censor.lower <- mu - interval/2
+        censor.upper <- mu + interval/2
+      } else {
+        # Split the integral up into 2 parts since it may actually be ~0 for 
+        # most of the interval. Make this split at the 50th percentile
+        censor.mu <- uniroot(function(mu) 
+          censor.rate - 
+            (integrate(function(t) efail(t)*censor.density(t, mu, censor.sigma), 
+                       -Inf, censor.quantile(0.5, mu, censor.sigma), subdivisions=1e3)$value +
+               integrate(function(t) efail(t)*censor.density(t, mu, censor.sigma), 
+                         censor.quantile(0.5, mu, censor.sigma), Inf, subdivisions=1e3)$value),
+          lower=0, upper=100, extendInt="up")$root
+      }
     }
     
     # Non-informative right censoring
-    censor.time <- censor.random(NK, censor.mu, censor.sigma)
+    if (censor.distr == "uniform") {
+      censor.time <- censor.random(NK, censor.lower, censor.upper)
+    } else {
+      censor.time <- censor.random(NK, censor.mu, censor.sigma)
+    }
     obs.status <- sign(fail.time <= censor.time)
     obs.time <- pmin(fail.time, censor.time)
   }

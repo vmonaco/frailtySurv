@@ -1,4 +1,4 @@
 library(testthat)
-library(frailtyr)
+library(frailtySurv)
 
-test_check("frailtyr")
+test_check("frailtySurv")

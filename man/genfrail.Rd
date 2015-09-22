@@ -39,9 +39,9 @@ genfrail(N = 300, K = 2, K.param = c(2, 0), beta = c(log(2)),
   \item{covar.param}{vector covariate distribution parameters.}
   \item{covar.matrix}{matrix with dimensions \code{c(NK, length(beta))} that contains the desired covariates. If not NULL, this overrides \code{covar.distr} and \code{covar.param}.}
   
-  \item{censor.distr}{string censoring distribution to use. Followup times are sampled from the censoring distribution to simulate non-informative right censorship. The censoring distribution can be one of: "normal", "lognormal", "none".}
-  \item{censor.param}{vector of censoring distribution parameters, }
-  \item{censor.rate}{numeric value between 0 and 1 to specify the empirical censoring rate. The mean specified in the \code{censor.param} parameter is adjusted to achieve a desired censoring rate if \code{censor.rate} is given. Note that the standard deviation (the second parameter in \code{censor.param}) must still be specified so that the problem is identifiable.}
+  \item{censor.distr}{string censoring distribution to use. Followup times are sampled from the censoring distribution to simulate non-informative right censorship. The censoring distribution can be one of: "normal", "lognormal", "uniform", "none".}
+  \item{censor.param}{vector of censoring distribution parameters. For normal and lognormal censorship, this should be c(mu,sigma) where mu is the mean and sigma is the standard deviation (Note: this is still the mean and standard deviation for lognormal). For uniform censorship, the vector \code{c(lower, upper)} should specify the lower and upper bounds.}
+  \item{censor.rate}{numeric value between 0 and 1 to specify the empirical censoring rate. The mean specified in the \code{censor.param} parameter is adjusted to achieve a desired censoring rate if \code{censor.rate} is given. Note that the standard deviation (the second parameter in \code{censor.param}) must still be specified so that the problem is identifiable. For uniform censorship, the interval given by \code{c(lower, upper)} is adjusted to achieve the desired censorship, while keeping the variance fixed (i.e., upper - lower does not change).}
 
   \item{lambda_0}{function baseline hazard. Only one of \code{lambda_0}, \code{Lambda_0}, and \code{Lambda_0_inv} need to be specified. Passing the baseline hazard (\code{lambda_0}) is the most computationally expensive since this requires numeric integration inside a root-finding algorithm.}
   \item{Lambda_0}{function cumulative baseline hazard. This overrides \code{lambda_0}.}
@@ -93,7 +93,6 @@ dat.3 <- genfrail(N = 300, K = 2,
 
 # Generate data with PVF frailty, truncated Poisson cluster sizes, normal
 # covariates, and 0.35 censorship from a lognormal distribution
-set.seed(1234)
 dat.4 <- genfrail(N = 100, K = "poisson", K.param=c(5, 1), 
                   beta = c(log(2),log(3)),
                   frailty = "pvf", theta = 0.3, 
@@ -106,6 +105,15 @@ summary(dat.4)
 # An oscillating baseline hazard
 dat.5 <- genfrail(lambda_0=function(t, tau=4.6, C=0.01, A=2, f=0.1) 
                               A^sin(f*pi*t) * (tau*(C*t)^tau)/t)
+
+# Uniform censorship with 0.25 censoring rate
+dat.6 <- genfrail(N = 300, K = 2, 
+                  beta = c(log(2),log(3)),
+                  frailty = "gamma", theta = 2, 
+                  censor.distr = "uniform", 
+                  censor.param = c(50, 150), 
+                  censor.rate = 0.25,
+                  Lambda_0_inv=function(t, tau=4.6, C=0.01) (t^(1/tau))/C)
 }
 
 \keyword{ survival data }

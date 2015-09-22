@@ -1,10 +1,10 @@
 \docType{package}
-\name{frailtyr}
-\alias{frailtyr}
-\alias{frailtyr-package}
+\name{frailtySurv}
+\alias{frailtySurv}
+\alias{frailtySurv-package}
 \title{General semiparametric shared frailty model}
 \description{
-The R package frailtyr is for simulating and fitting semiparametric shared frailty models. It implements a relatively simple estimator with desirable asymptotic properties under several permissible technical conditions. The frailtyr package provides functions
+The R package frailtySurv is for simulating and fitting semiparametric shared frailty models. It implements a relatively simple estimator with desirable asymptotic properties under several permissible technical conditions. The frailtySurv package provides functions
 \itemize{
 \item{\code{genfrail} for data generation}
 \item{\code{fitfrail} for model fitting}
@@ -14,7 +14,7 @@ The R package frailtyr is for simulating and fitting semiparametric shared frail
 
 \details{
   \tabular{ll}{
-     Package: \tab frailtyr\cr
+     Package: \tab frailtySurv\cr
      Type: \tab Package\cr
      Version: \tab 1.0.0\cr
      Date: \tab August 2015\cr

@@ -1,5 +1,5 @@
 .onAttach <- function(libname, pkgname) {
-  packageStartupMessage("Welcome to frailtyr")
+  packageStartupMessage("Welcome to frailtySurv")
 }
 
 .onLoad <- function(libname, pkgname) {
@@ -7,5 +7,5 @@
 }
 
 .onUnload <- function (libpath) {
-  library.dynam.unload("frailtyr", libpath)
+  library.dynam.unload("frailtySurv", libpath)
 }

@@ -1,8 +1,8 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-frailtyr
+frailtySurv
 --------
 
-frailtyr is an R package for simulating and fitting semiparametric shared frailty models.
+frailtySurv is an R package for simulating and fitting semiparametric shared frailty models.
 
 Installation
 ------------
@@ -11,7 +11,7 @@ To get started, you can install the package from github using `devtools`.
 
 ``` r
 library(devtools)
-install_github("vmonaco/frailtyr")
+install_github("vmonaco/frailtySurv")
 ```
 
 Example
@@ -21,7 +21,7 @@ The following code shows how to generate data and fit the model.
 
 ``` r
 set.seed(1234)
-library(frailtyr)
+library(frailtySurv)
 dat <- genfrail(N=200, K=2, beta=c(log(2),log(3)), 
                 frailty="gamma", theta=2,
                 censor.rate=0.35,
@@ -122,7 +122,7 @@ Clone and build
 Instead of installing from github, you can clone and build the project from source. To create a project in RStudio from this repository, you must have both RStudio and git installed.
 
 -   In RStudio, go to File -\> New Project -\> Version Control -\> Git
--   Name the project (eg. frailtyr), choose location, and specify the Repository URL as `https://github.com/vmonaco/frailtyr`
+-   Name the project (eg. frailtySurv), choose location, and specify the Repository URL as `https://github.com/vmonaco/frailtySurv`
 
 More information about [RStudio and git](https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN)
 
@@ -158,11 +158,11 @@ Build the vignettes with the command:
 devtools::build_vignettes()
 ```
 
-Compiled vignettes will reside in `inst/doc`. In particular, see frailtyr.pdf
+Compiled vignettes will reside in `inst/doc`. In particular, see frailtySurv.pdf
 
 ### Run tests
 
-frailtyr uses the `testthat` library for tests. Test files are all located in `tests/testthat`. To run all tests, use the command `devtools::test()` or shortcut **Ctrl+Shift+T**
+frailtySurv uses the `testthat` library for tests. Test files are all located in `tests/testthat`. To run all tests, use the command `devtools::test()` or shortcut **Ctrl+Shift+T**
 
 ### git pull
 

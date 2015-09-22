@@ -1,5 +1,5 @@
 library(testthat)
-library(frailtyr)
+library(frailtySurv)
 
 test_that("R and C++ distribution functions are well defined", {
   

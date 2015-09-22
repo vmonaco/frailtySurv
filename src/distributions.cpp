@@ -19,7 +19,7 @@ using namespace Rcpp;
 #define INT_MAXIT 0
 
 // Number of iterations for posstab and pvf densities
-#define DPOSSTAB_K 100
+#define DPOSSTAB_K 200
 
 NumericVector vectorized_density(NumericVector *x, NumericVector *p, density_fn density) {
   int n = x->size();
@@ -634,21 +634,21 @@ double deriv_deriv_lt_dpvf_c(int m, double s, double alpha) {
 // Positive stable (PS)
 
 // Laplace transform of positive stable
-double lt_dposstab(int p, double s, double* params) {
+double lt_dposstab(int m, double s, double* params) {
   double alpha = params[0];
   
-  if (p == 0) {
+  if (m == 0) {
     return exp(-alpha*pow(s, alpha)/alpha);
   }
   
   double factor1 = lt_dposstab(0, s, params);
   
   double factor2 = 0;
-  for (int j = 1; j <= p; ++j) {
-    factor2 += lt_dpvf_coef(p, j, alpha) * pow(alpha, j) * pow(s, (j*alpha - p));
+  for (int j = 1; j <= m; ++j) {
+    factor2 += lt_dpvf_coef(m, j, alpha) * pow(alpha, j) * pow(s, (j*alpha - m));
   }
   
-  return pow(-1, p)*factor1*factor2;
+  return pow(-1, m)*factor1*factor2;
 }
 
 // [[Rcpp::export]]
@@ -657,8 +657,8 @@ NumericVector dposstab_c(NumericVector x, NumericVector alpha) {
 }
 
 // [[Rcpp::export]]
-double lt_dposstab_c(int p, double s, double alpha) {
-  return lt_dposstab(p, s, &alpha);
+double lt_dposstab_c(int m, double s, double alpha) {
+  return lt_dposstab(m, s, &alpha);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

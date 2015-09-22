@@ -23,7 +23,7 @@ fitfrail(formula, dat, control, frailty, weights = NULL, se = FALSE, ...)
 
 \item{se}{logical value, whether the standard errors of the regression coefficient and frailty distribution parameter estimates should be calculated. These are obtained using the \code{vcov.fitfrail} function}
 
-\item{...}{additional arguments will be passed to \code{\link[frailtyr]{fitfrail.control}}}
+\item{...}{additional arguments will be passed to \code{\link[frailtySurv]{fitfrail.control}}}
 }
 
 \value{
@@ -100,4 +100,21 @@ fit.drs <- fitfrail(Surv(time, status) ~ treated + cluster(subject_id),
                     drs, frailty="gamma")
 fit.drs
 }
+
+# 
+# A small example with c(log(2),log(3)) coefficients, Gamma(2) frailty, and
+# 0.10 censorship.
+# 
+dat <- genfrail(N=30, K=2, beta=c(log(2),log(3)), 
+                frailty="gamma", theta=2,
+                censor.rate=0.10,
+                Lambda_0=function(t, tau=4.6, C=0.01) (C*t)^tau)
+
+# Fit a shared frailty model
+fit <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family), 
+                dat, frailty="gamma", se=TRUE)
+fit
+
+# Summarize the survival curve
+head(summary(fit))
 }
