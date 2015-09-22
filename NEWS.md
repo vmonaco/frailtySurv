@@ -1,10 +1,5 @@
-frailtyr
+frailtySurv
 --------
-
-# Version 1.2.0 (September 2015)
-
-## Bug fixes
-  * Renamed package to `frailtySurv`
 
 # Version 1.1.1 (September 2015)
 
