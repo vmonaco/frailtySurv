@@ -1,6 +1,7 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-frailtySurv
---------
+# frailtySurv
+
+[![Travis-CI Build Status](https://travis-ci.org/vmonaco/frailtySurv.svg?branch=master)](https://travis-ci.org/vmonaco/frailtySurv)
 
 frailtySurv is an R package for simulating and fitting semiparametric shared frailty models.
 
