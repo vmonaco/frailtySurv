@@ -20,11 +20,10 @@ The baseline hazard can be specified by the inverse cumualative baseline hazard,
 genfrail(N = 300, K = 2, K.param = c(2, 0), beta = c(log(2)),
          frailty = "gamma", theta = c(2), 
          covar.distr = "normal", covar.param = c(0, 1), covar.matrix = NULL,
-         censor.distr = "normal", censor.mu = 130, 
-         censor.sigma = 15, censor.rate = NULL, 
+         censor.distr = "normal", censor.param = c(130, 15), censor.rate = NULL,
          lambda_0 = NULL, Lambda_0 = NULL, Lambda_0_inv = NULL, round.base = NULL)
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
   \item{N}{integer; number of clusters}
   
@@ -41,9 +40,8 @@ genfrail(N = 300, K = 2, K.param = c(2, 0), beta = c(log(2)),
   \item{covar.matrix}{matrix with dimensions \code{c(NK, length(beta))} that contains the desired covariates. If not NULL, this overrides \code{covar.distr} and \code{covar.param}.}
   
   \item{censor.distr}{string censoring distribution to use. Followup times are sampled from the censoring distribution to simulate non-informative right censorship. The censoring distribution can be one of: "normal", "lognormal", "none".}
-  \item{censor.mu}{numeric mean of the censoring distribution (log-mean if \code{censor.distr} is "lognormal")}
-  \item{censor.sigma}{numeric standard deviation of the censoring distribution (log-standard deviation if \code{censor.distr} is "lognormal"}
-  \item{censor.rate}{numeric value between 0 and 1 to specify the empirical censoring rate. The \code{censor.mu} parameter is adjusted to achieve a desired censoring rate if \code{censor.rate} is specified. This only overrides \code{censor.mu}, and \code{censor.sigma} must still be specified so that the problem is identifiable.}
+  \item{censor.param}{vector of censoring distribution parameters, }
+  \item{censor.rate}{numeric value between 0 and 1 to specify the empirical censoring rate. The mean specified in the \code{censor.param} parameter is adjusted to achieve a desired censoring rate if \code{censor.rate} is given. Note that the standard deviation (the second parameter in \code{censor.param}) must still be specified so that the problem is identifiable.}
 
   \item{lambda_0}{function baseline hazard. Only one of \code{lambda_0}, \code{Lambda_0}, and \code{Lambda_0_inv} need to be specified. Passing the baseline hazard (\code{lambda_0}) is the most computationally expensive since this requires numeric integration inside a root-finding algorithm.}
   \item{Lambda_0}{function cumulative baseline hazard. This overrides \code{lambda_0}.}
@@ -94,12 +92,12 @@ dat.3 <- genfrail(N = 300, K = 2,
                   Lambda_0_inv=function(t, tau=4.6, C=0.01) (t^(1/tau))/C)
 
 # Generate data with PVF frailty, truncated Poisson cluster sizes, normal
-# covariates, and 0.35 censorship
+# covariates, and 0.35 censorship from a lognormal distribution
 set.seed(1234)
 dat.4 <- genfrail(N = 100, K = "poisson", K.param=c(5, 1), 
                   beta = c(log(2),log(3)),
                   frailty = "pvf", theta = 0.3, 
-                  covar.distr = "normal", 
+                  covar.distr = "lognormal", 
                   censor.rate = 0.35) # Use the default baseline hazard
 
 # Cluster sizes have size >= 2, summarized by

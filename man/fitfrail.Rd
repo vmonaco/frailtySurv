@@ -7,7 +7,7 @@ Fit a Cox proportional hazards model with hidden shared frailty and unspecified 
 }
 
 \usage{
-fitfrail(formula, dat, control, frailty, weights, ...)
+fitfrail(formula, dat, control, frailty, weights = NULL, se = FALSE, ...)
 }
 
 \arguments{

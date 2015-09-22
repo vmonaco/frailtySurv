@@ -1,9 +1,16 @@
 frailtyr
 --------
 
-# Version 1.0.0 (August 2015)
+# Version 1.2.0 (September 2015)
 
-  **Initial release**
+## Bug fixes
+  * Renamed package to `frailtySurv`
+
+# Version 1.1.1 (September 2015)
+
+## Bug fixes
+  * Fixed bug in `summary.fitfrail`
+  * Fixed `censor.param` parameter in `genfrail`
   
 # Version 1.1.0 (September 2015)
 
@@ -19,3 +26,7 @@ frailtyr
   * Improved print.summary.genfrail
   * Added sanity checks to frailty distribution params
   * Fixed parallel support on Windows (runs in serial with a warning for now)
+  
+# Version 1.0.0 (August 2015)
+
+  **Initial release**

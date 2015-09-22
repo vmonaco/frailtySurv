@@ -29,8 +29,7 @@ genfrail <- function(# Number of clusters and cluster sizes
                      # Censoring distribution and parameters vector
                      # censor.distr can be one of: "normal", "lognormal", "none"
                      censor.distr = "normal",
-                     censor.mu = 130,
-                     censor.sigma = 15,
+                     censor.param = c(130,15),
                      censor.rate = NULL, # If specified, overrides censor.mu
                      
                      # Only one of these needs to be specified
@@ -148,10 +147,14 @@ genfrail <- function(# Number of clusters and cluster sizes
     censor.density <- dnorm
     censor.random <- rnorm
     censor.quantile <- qnorm
+    censor.mu <- censor.param[1]
+    censor.sigma <- censor.param[2]
   } else if (censor.distr == "lognormal") {
     censor.density <- dlnorm
     censor.random <- rlnorm
     censor.quantile <- qlnorm
+    censor.sigma <- sqrt(log(1 + censor.param[2]^2/censor.param[1]^2))
+    censor.mu <- log(censor.param[1]) - censor.sigma^2/2
   } else if (censor.distr == "none") {
     warning("Censoring distribution is set to none")
   } else {
@@ -163,9 +166,6 @@ genfrail <- function(# Number of clusters and cluster sizes
     obs.time <- fail.time
   } else {
     if (!is.null(censor.rate)) {
-#       if (!is.null(censor.mu))
-#         warning("Censoring rate will override mean")
-      
       stopifnot(0 <= censor.rate && censor.rate <= 1)
       
       # Empirical survivor and hazard functions

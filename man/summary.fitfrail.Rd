@@ -8,7 +8,7 @@ Summary of the survival curve
 Returns a \code{data.frame} summarizing the survival curve of the fitted model. If specified, this function uses a weighted bootstrap procedure to calculate SE of the survival curve estimates. Subsequente calls with the same arguments will use the cached SE and avoid performing the weighted bootstrap again.
 }
 \usage{
-summary.fitfrail(object, Lambda.times, censored = FALSE, se = FALSE, CI = 0.95, ...)
+\method{summary}{fitfrail}(object, Lambda.times, censored = FALSE, se = FALSE, CI = 0.95, ...)
 }
 
 \arguments{
@@ -58,4 +58,4 @@ fit <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family),
 surv <- summary(fitfrail, B=50, se=TRUE, CI=0.95)
 head(surv)
 }
-
+}
