@@ -16,7 +16,7 @@ The R package frailtySurv is for simulating and fitting semiparametric shared fr
   \tabular{ll}{
      Package: \tab frailtySurv\cr
      Type: \tab Package\cr
-     Version: \tab 1.0.0\cr
+     Version: \tab 1.2.0\cr
      Date: \tab August 2015\cr
      License: \tab LGPL-2\cr
      LazyLoad: \tab Yes\cr
