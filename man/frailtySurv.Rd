@@ -4,11 +4,13 @@
 \alias{frailtySurv-package}
 \title{General semiparametric shared frailty model}
 \description{
-The R package frailtySurv is for simulating and fitting semiparametric shared frailty models. It implements a relatively simple estimator with desirable asymptotic properties under several permissible technical conditions. The frailtySurv package provides functions
+\pkg{frailtySurv} provides a suite of functions for generating clustered survival data, fitting multivariate shared frailty models under a wide range of frailty distributions, and visualizing the output. The semi-parametric estimators have better asymptotic properties than most existing implementations, including consistent and asymptotically-normal estimators. Moreover, this is the first package that implements semi-parametric estimators with inverse Gaussian and PVF frailty models.
+
+The \pkg{frailtySurv} package provides functions
 \itemize{
-\item{\code{genfrail} for data generation}
-\item{\code{fitfrail} for model fitting}
-\item{\code{simfrail} for survival simulation}
+\item{\code{\link{genfrail}} for data generation}
+\item{\code{\link{fitfrail}} for model fitting}
+\item{\code{\link{simfrail}} for survival simulation}
 }
 }
 

@@ -53,7 +53,7 @@ plot.simfrail.residuals <- function(sim, n.Lambda=3, ...) {
   p
 }
 
-plot.simfrail.hazard <- function(sim, CI=0.95, skip.SE=FALSE, ...) {
+plot.simfrail.hazard <- function(sim, CI=0.95, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE) || 
       !requireNamespace("reshape2", quietly = TRUE)) {
     stop("Plotting requires the ggplot2, reshape2 packages")
@@ -86,10 +86,6 @@ plot.simfrail.hazard <- function(sim, CI=0.95, skip.SE=FALSE, ...) {
     ylab("Cumulative baseline hazard")
   
   if (all(is.na(mean.se))) {
-    skip.SE <- TRUE
-  }
-  
-  if (skip.SE) {
     p <- p + scale_colour_manual("Legend", values=c("black","blue"))
   } else {
     p <- p + 

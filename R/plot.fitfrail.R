@@ -1,13 +1,13 @@
-plot.fitfrail <- function(x, type="hazard", ...) {
+plot.fitfrail <- function(x, type=c("hazard", "trace"), ...) {
   fit <- x
   if (type == "hazard") {
     plot.fitfrail.hazard(fit, ...)
   } else if (type == "trace") {
-    plot.fitfrail.fitter(fit, ...)
+    plot.fitfrail.trace(fit, ...)
   }
 }
 
-plot.fitfrail.fitter <- function(fit, show.loglik=TRUE, ...) {
+plot.fitfrail.trace <- function(fit, show.loglik=TRUE, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE) || 
       !requireNamespace("reshape2", quietly = TRUE)) {
     stop("Plotting requires the ggplot2, reshape2 packages")
@@ -43,10 +43,9 @@ plot.fitfrail.fitter <- function(fit, show.loglik=TRUE, ...) {
   } else {
     p
   }
-  
 }
 
-plot.fitfrail.hazard <- function(fit, se=FALSE, CI=0.95, end=NULL, ...) {
+plot.fitfrail.hazard <- function(fit, CI=0, end=NULL, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Plotting requires the ggplot2 package")
   }
@@ -68,7 +67,7 @@ plot.fitfrail.hazard <- function(fit, se=FALSE, CI=0.95, end=NULL, ...) {
     ylab("Cumulative baseline hazard") + 
     theme(legend.position="none")
   
-  if (se & CI > 0) {
+  if ((CI > 0)&&(CI < 1)) {
     COV <- vcov(fit, boot=TRUE, ...)
     se.Lambda <- sqrt(diag(COV))[(fit$VARS$n.gamma+1):nrow(COV)]
     se.Lambda <- se.Lambda[1:nrow(Lambda)]
