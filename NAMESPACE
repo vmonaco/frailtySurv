@@ -8,7 +8,7 @@ importFrom(nleqslv, nleqslv)
 importFrom(reshape2, melt)
 importFrom(numDeriv, grad)
 
-export("genfrail", "fitfrail", "fitfrail.control", "simfrail")
+export("genfrail", "fitfrail", "fitfrail.control", "simfrail", "simcoxph")
 
 S3method(plot, fitfrail)
 S3method(plot, simfrail)
