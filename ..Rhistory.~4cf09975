@@ -1,0 +1,167 @@
+library(frailtySurv)
+tau1.theta.posstab <- frailtySurv:::theta.given.tau(tau1, "posstab")
+tau1.theta.invgauss <- frailtySurv:::theta.given.tau(tau1, "invgauss")
+tau1 <- 0.3
+tau1.theta.invgauss <- frailtySurv:::theta.given.tau(tau1, "invgauss")
+tau1.theta.invgauss
+tau1.theta.posstab <- frailtySurv:::theta.given.tau(tau1, "posstab")
+library(frailtySurv)
+tau1.theta.posstab <- frailtySurv:::theta.given.tau(tau1, "posstab")
+?lt_dposstab_c
+?frailtySurve:::lt_dposstab_c
+?frailtySurv:::lt_dposstab_c
+frailtySurv:::lt_dposstab_c
+frailtySurv:::tau.numerical(0.5, "posstab")
+frailtySurv:::tau.numerical(1.0, "posstab")
+frailtySurv:::tau.numerical(0.99, "posstab")
+frailtySurv:::tau.numerical(0.1, "posstab")
+frailtySurv:::tau.numerical(0.01, "posstab")
+frailtySurv:::tau.numerical(0.05, "posstab")
+frailtySurv:::tau.numerical(0.1, "posstab")
+frailtySurv:::tau.numerical(0.3, "posstab")
+frailtySurv:::tau.numerical(0.7, "posstab")
+frailtySurv:::tau.empirical(0.7, "posstab")
+frailtySurv:::theta.given.tau(0.3, "posstab")
+frailtySurv:::theta.given.tau(0.3, "pvf")
+frailtySurv:::theta.given.tau(0.3, "posstab")
+library(frailtySurv)
+frailtySurv:::tau.numerical(0.7, "posstab")
+frailtySurv:::tau.empirical(0.7, "posstab")
+library(frailtySurv)
+frailtySurv:::tau.empirical(0.7, "posstab")
+library(frailtySurv)
+frailtySurv:::tau.empirical(0.7, "posstab")
+library(frailtySurv)
+frailtySurv:::tau.empirical(0.7, "posstab")
+rlaptrans(10, lt_dposstab_r, m=0, alpha=0.3)
+frailtySurv:::rlaptrans(10, lt_dposstab_r, m=0, alpha=0.3)
+frailtySurv:::rlaptrans(10, frailtySurv:::lt_dposstab_r, m=0, alpha=0.3)
+frailtySurv:::rlaptrans(10, frailtySurv:::lt_dposstab_r, p=0, alpha=0.3)
+library(frailtySurv)
+rlaptrans(10, lt_dposstab_r, alist(m=0, alpha=0.3))
+frailtySurv:::rlaptrans(10, frailtySurv:::lt_dposstab_r, p=0, alpha=0.3)
+frailtySurv:::rlaptrans(10, frailtySurv:::lt_dposstab_r, alist(m=0, alpha=0.3))
+library(frailtySurv)
+frailtySurv:::tau.numerical(0.7, "posstab")
+frailtySurv:::tau.empirical(0.7, "posstab")
+library(frailtySurv)
+frailtySurv:::theta.given.tau(tau1, "posstab")
+frailtySurv:::theta.given.tau(0.3, "posstab")
+library(frailtySurv)
+frailtySurv:::theta.given.tau(0.3, "posstab")
+library(frailtySurv)
+frailtySurv:::theta.given.tau(0.3, "posstab")
+frailtySurv:::theta.given.tau(0.1, "posstab")
+frailtySurv:::tau.numerical(0.1, "posstab")
+frailtySurv:::tau.numerical(0.9, "posstab")
+frailtySurv:::tau.numerical(0.90, "posstab")
+frailtySurv:::tau.numerical(0.95, "posstab")
+frailtySurv:::tau.numerical(0.99, "posstab")
+frailtySurv:::tau.numerical(0.01, "posstab")
+frailtySurv:::tau.numerical(0.1, "posstab")
+frailtySurv:::tau.numerical(0.09, "posstab")
+frailtySurv:::tau.numerical(0.55, "posstab")
+frailtySurv:::dposstab_c
+library(frailtySurv)
+frailtySurv:::dposstab_r
+frailtySurv:::dinvgauss_c(0.1, 15.28)
+frailtySurv:::dinvgauss_c(0.01, 15.28)
+frailtySurv:::dinvgauss_c(0.001, 15.28)
+frailtySurv:::dinvgauss_c(0.01, 15.28)
+frailtySurv:::dinvgauss_c(0.02, 15.28)
+frailtySurv:::dinvgauss_c(0.03, 15.28)
+x <- seq(0, 3, length.out=1000)
+plot(x, frailtySurv:::dinvgauss_c(x, 15.28), type="l")
+library(frailtySurv)
+dat <- genfrail(N=50, K=10, beta=c(log(2),log(3)), theta=2, frailty="gamma", censor.distr="uniform", censor.param=c(0,100))
+dat
+sum(dat$status)
+dat <- genfrail(N=50, K=10, beta=c(log(2),log(3)), theta=2, frailty="gamma", censor.distr="uniform", censor.param=c(0,100))
+sum(dat$status)
+dat <- genfrail(N=50, K=10, beta=c(log(2),log(3)), theta=2, frailty="gamma", censor.distr="uniform", censor.param=c(0,100), censor.rate=0.3)
+sum(dat$status)
+dat <- genfrail(N=50, K=10, beta=c(log(2),log(3)), theta=2, frailty="gamma", censor.distr="uniform", censor.param=c(0,100), censor.rate=0.3)
+sum(dat$status)
+339/600
+library(frailtySurv)
+dat <- genfrail(N=50, K=10, beta=c(log(2),log(3)), theta=2, frailty="gamma", censor.distr="uniform", censor.param=c(0,100), censor.rate=0.3)
+sum(dat$status)
+dat <- genfrail(N=50, K=10, beta=c(log(2),log(3)), theta=2, frailty="gamma", censor.distr="uniform", censor.param=c(0,100), censor.rate=0.5)
+50*10
+sum(dat$status)
+dat <- genfrail(N=50, K=10, beta=c(log(2),log(3)), theta=2, frailty="gamma", censor.distr="uniform", censor.param=c(0,100), censor.rate=0.5)
+sum(dat$status)
+dat <- genfrail(N=50, K=10, beta=c(log(2),log(3)), theta=2, frailty="gamma", censor.distr="uniform", censor.param=c(0,100), censor.rate=0.5)
+sum(dat$status)
+dat <- genfrail(N=50, K=10, beta=c(log(2),log(3)), theta=2, frailty="gamma", censor.distr="uniform", censor.param=c(0,100), censor.rate=0.5)
+sum(dat$status)
+dat <- genfrail(N=50, K=10, beta=c(log(2),log(3)), theta=2, frailty="gamma", censor.distr="uniform", censor.param=c(0,100), censor.rate=0.5)
+sum(dat$status)
+dat <- genfrail(N=50, K=10, beta=c(log(2),log(3)), theta=2, frailty="gamma", censor.distr="uniform", censor.param=c(0,100), censor.rate=0.5)
+sum(dat$status)
+dat <- genfrail(N=50, K=10, beta=c(log(2),log(3)), theta=2, frailty="gamma", censor.distr="uniform", censor.param=c(0,100), censor.rate=0.5)
+sum(dat$status)
+dat <- genfrail(N=50, K=10, beta=c(log(2),log(3)), theta=2, frailty="gamma", censor.distr="uniform", censor.param=c(0,100), censor.rate=0.5)
+sum(dat$status)
+library(frailtySurv)
+example(genfrail)
+dat
+dat2
+dat.2
+example("fitfrail")
+library(frailtySurv)
+example("fitfrail")
+library(frailtySurv)
+example("fitfrail")
+fit
+devtools::use_travis("frailtySurv")
+devtools::load_all(".")
+devtools::use_travis("frailtySurv")
+devtools::use_travis()
+help(frailtySurv)
+set.seed(1234)
+dat <- genfrail(N=30, K=2, beta=c(log(2),log(3)), theta=2, frailty="gamma")
+fit <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family), dat, frailty="gamma")
+fit <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family), dat, frailty="gamma", verbose=TRUE)
+fit <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family), dat, frailty="gamma", verbose=TRUE, se=TRUE)
+fit <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family), dat, frailty="gamma", verbose=TRUE, se=TRUE, fitmethod="score")
+fit
+library(frailtySurv)
+fit.2 <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family), dat, frailty="gamma", verbose=TRUE, se=TRUE, fitmethod="score")
+fit
+fit.2
+?fitfrail
+data(drs)
+fit.drs <- fitfrail(Surv(time, status) ~ treated + cluster(subject_id),
+drs, frailty="gamma")
+fit.drs <- fitfrail(Surv(time, status) ~ treated + cluster(subject_id),
+drs, frailty="gamma", verbose=TRUE, fitmethod="score")
+fit.drs
+fit.drs <- fitfrail(Surv(time, status) ~ treated + cluster(subject_id),
+drs, frailty="gamma", verbose=TRUE, fitmethod="score", se=TRUE)
+fit.drs
+vcov(fit.drs)
+set.seed(2015)
+dat <- genfrail(N=300, K=2, beta=c(log(2),log(3)),
+frailty="gamma", theta=2,
+lambda_0=function(t, tau=4.6, C=0.01) (tau*(C*t)^tau)/t)
+fit <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family),
+dat, frailty="gamma", fitmethod="loglik")
+COV.est <- vcov(fit)
+COV.est
+sqrt(diag(COV.est))
+library(frailtySurv)
+fit.3 <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family), dat, frailty="gamma", verbose=TRUE, se=TRUE, fitmethod="score")
+fit.3
+set.seed(1234)
+dat <- genfrail(N=30, K=2, beta=c(log(2),log(3)), theta=2, frailty="gamma")
+fit.3 <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family), dat, frailty="gamma", verbose=TRUE, se=TRUE, fitmethod="score")
+fit.2
+fit.3
+fit
+library(frailtySurv)
+fit <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family), dat, frailty="gamma", verbose=TRUE, se=TRUE, fitmethod="score")
+fit
+fit.2
+fit.3
+library(frailtySurv)

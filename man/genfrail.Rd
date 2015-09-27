@@ -6,13 +6,13 @@ Generate survival data
 }
 
 \description{
-Generate survival data from a shared frailty model, with hazard function given by
+Generate clustered survival data from a shared frailty model, with hazard function given by
 
 \deqn{S(t)=\exp [-\Lambda_0(t) \omega_i \exp (\beta Z_{ij})]}
 
-where \eqn{\Lambda_0} is the cumulative baseline hazard, \eqn{\omega_i} is the frailty value for cluster \eqn{i}, \eqn{\beta} is the regression coefficient vector, and \eqn{Z_ij} is the covariate vector for individual \eqn{i} in cluster \eqn{j}.
+where \eqn{\Lambda_0} is the cumulative baseline hazard, \eqn{\omega_i} is the frailty value of cluster \eqn{i}, \eqn{\beta} is the regression coefficient vector, and \eqn{Z_ij} is the covariate vector for individual \eqn{i} in cluster \eqn{j}.
 
-The baseline hazard can be specified by the inverse cumualative baseline hazard, cumulative baseline hazard, or simply the baseline hazard. Frailty values are sampled from 
+The baseline hazard can be specified by the inverse cumualative baseline hazard, cumulative baseline hazard, or simply the baseline hazard. Frailty values can be sampled from gamma, power variance function (PVF), log-normal, inverse Gaussian, and positive stable distributions.
 
 }
 

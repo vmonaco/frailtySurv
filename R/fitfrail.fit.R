@@ -287,10 +287,10 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
   hat.theta <- hat.gamma[(n.beta+1):(n.gamma)]
   
   # Unique time steps where failures occur
-  Lambda.df <- aggregate(VARS$lambda, list(time_steps), sum)
-  names(Lambda.df) <- c("time","lambda")
-  Lambda.df <- data.frame(time=Lambda.df$time, Lambda=cumsum(Lambda.df$lambda))
-  Lambda.df <- Lambda.df[duplicated(Lambda.df$Lambda)==FALSE,]
+  Lambda.df.cens <- aggregate(VARS$lambda, list(time_steps), sum)
+  names(Lambda.df.cens) <- c("time","lambda")
+  Lambda.df.cens <- data.frame(time=Lambda.df.cens$time, Lambda=cumsum(Lambda.df.cens$lambda))
+  Lambda.df <- Lambda.df.cens[duplicated(Lambda.df.cens$Lambda)==FALSE,]
   
   Lambda.fun <- Vectorize(function(t) {
     if (t <= 0) {
@@ -302,6 +302,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
   list(beta=hat.beta,
        theta=setNames(hat.theta, paste("theta.", 1:length(hat.theta), sep="")),
        Lambda=Lambda.df,
+       Lambda.all=Lambda.df.cens,
        Lambda.fun=Lambda.fun,
        frailty=frailty,
        frailty.variance=vfrailty[[frailty]](hat.theta),
