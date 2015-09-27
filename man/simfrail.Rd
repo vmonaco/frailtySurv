@@ -5,7 +5,7 @@
 Simulate survival data and fit models
 }
 \description{
-Run a survival simulation by repeatedly generating data and fitting models. Respective arguments are passed to genfrail and fitfrail, and the resulting parameter estimates are aggregated and summarized.
+Generates simulated clustered survival data by repeatedly generating data, using a shared frailty model, and fitting the models. Respective arguments are passed to genfrail and fitfrail, and the resulting parameter estimates are aggregated and summarized.
 }
 \usage{
 simfrail(reps, genfrail.args, fitfrail.args, Lambda.times, 

@@ -106,7 +106,6 @@ simcoxph <- function(reps,
                      genfrail.args, 
                      coxph.args,
                      Lambda.times, # where to evaluate the baseline hazard function
-                     vcov.args=list(),
                      cores=0 # 0 to use all available cores, -1 to use all but 1, etc
 ) { 
   Call <- match.call()

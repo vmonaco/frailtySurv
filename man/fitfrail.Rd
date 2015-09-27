@@ -3,7 +3,7 @@
 \title{Fit a shared frailty model}
 
 \description{
-Fit a Cox proportional hazards model with hidden shared frailty and unspecified baseline hazard using a general semiparametric noniterative estimation technique. See Gorfine (2006) and Zucker (2008) for details.
+Fit an extended Cox proportional hazards model with unobserved shared frailty variate and unspecified baseline hazard function, using a semiparametric estimation technique. See Gorfine et al.~(2006) and Zucker et al.~(2008) for details.
 }
 
 \usage{
@@ -32,22 +32,11 @@ A fitfrail object representing the shared frailty model.
   \item{beta}{the estimated regression coefficients}
   \item{theta}{the estimated frailty distribution parameters}
   \item{Lambda}{a \code{data.frame} with the estimated baseline hazard at each failure time}
+  \item{Lambda}{a \code{data.frame} with the estimated baseline hazard at all observed times}
   \item{Lambda.fun}{a function of time that returns the estimated baseline}
   \item{loglik}{the log-likelihood}
   \item{iter}{the number of iterations performed}
   \item{trace}{the parameter trace during estimation}
-}
-
-\section{Assumptions}{
-Some technical conditions apply in order for the valid estimates to be obtained.
-\enumerate{
-  \item{Within each cluster, the data are independent and identically distribution.}
-  \item{Censorship is non-informative.}
-  \item{The frailty distribution has finite moments up to 2 plus the largest cluster size.}
-  \item{There is a positive probability of failure for at least two members in each cluster.}
-}
-
-This list is not exhaustive, but highlists some important conditions. See Zucker (2008) for the complete technical conditions. 
 }
 
 \section{Convergence}{
