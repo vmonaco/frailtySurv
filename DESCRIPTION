@@ -11,7 +11,7 @@ Authors@R: c(person("John V. Monaco", role = c("aut", "cre"),
 	           person("Li Hsu", role = "aut",
 		          email = "lih@fredhutch.org"))
 Description: Simulates and fits semiparametric shared frailty models under a
-    wide range of frailty distributions using a consistent and 
+    wide range of frailty distributions using a consistent and
     asymptotically-normal estimator. Currently supports: gamma, power variance
     function, log-normal, and inverse Gaussian frailty models.
 License: LGPL-2
