@@ -1,18 +1,23 @@
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-# frailtySurv
+[![Travis-CI Build Status](https://travis-ci.org/vmonaco/frailtySurv.svg?branch=master)](https://travis-ci.org/vmonaco/frailtySurv) [![CRAN Downloads](http://cranlogs.r-pkg.org/badges/frailtySurv)](http://cran.rstudio.com/web/packages/frailtySurv/index.html)
 
-[![Travis-CI Build Status](https://travis-ci.org/vmonaco/frailtySurv.svg?branch=master)](https://travis-ci.org/vmonaco/frailtySurv)
+frailtySurv
+-----------
 
 frailtySurv is an R package for simulating and fitting semiparametric shared frailty models.
 
 Installation
 ------------
 
-To get started, you can install the package from github using `devtools`.
+For the latest stable version, install from CRAN:
 
 ``` r
-library(devtools)
-install_github("vmonaco/frailtySurv")
+install.packages("frailtySurv")
+```
+
+The development version can be installed from github using `devtools`.
+
+``` r
+devtools::install_github("vmonaco/frailtySurv")
 ```
 
 Example
@@ -23,6 +28,8 @@ The following code shows how to generate data and fit the model.
 ``` r
 set.seed(1234)
 library(frailtySurv)
+#> Loading required package: survival
+#> Welcome to frailtySurv
 dat <- genfrail(N=200, K=2, beta=c(log(2),log(3)), 
                 frailty="gamma", theta=2,
                 censor.rate=0.35,
@@ -43,7 +50,7 @@ fit
 #> 
 #> Frailty distribution   gamma(1.802), VAR of frailty variates = 1.802
 #> Log-likelihood         -1575.752
-#> Converged (method)     10 iterations, 6.791 secs (maximized log-likelihood)
+#> Converged (method)     10 iterations, 6.81 secs (maximized log-likelihood)
 ```
 
 Parameter traces are given by
@@ -52,7 +59,7 @@ Parameter traces are given by
 plot(fit, "trace")
 ```
 
-![](figures/unnamed-chunk-5-1.png)
+![](figures/unnamed-chunk-6-1.png)
 
 The estimated cumulative baseline hazard is given by
 
@@ -60,9 +67,9 @@ The estimated cumulative baseline hazard is given by
 plot(fit, "hazard")
 ```
 
-![](figures/unnamed-chunk-6-1.png)
+![](figures/unnamed-chunk-7-1.png)
 
-Note that this takes some time to compute since the cumulative baseline hazard variance is estimated by a weighted bootstrap procedure. These results can be compared to other estimation techniques.
+The results can be compared to other estimation techniques.
 
 ``` r
 library(survival)
@@ -120,7 +127,7 @@ frailtyPenal(Surv(time, status) ~ Z1 + Z2 + cluster(family), data=dat, n.knots=1
 Clone and build
 ---------------
 
-Instead of installing from github, you can clone and build the project from source. To create a project in RStudio from this repository, you must have both RStudio and git installed.
+You can clone the repository and build the project from source using RStudio. To create a project in RStudio from this repository, you must have both RStudio and git installed.
 
 -   In RStudio, go to File -\> New Project -\> Version Control -\> Git
 -   Name the project (eg. frailtySurv), choose location, and specify the Repository URL as `https://github.com/vmonaco/frailtySurv`
