@@ -1,6 +1,13 @@
 frailtySurv
 --------
 
+# Version 1.2.1 (September 2015)
+
+## Bug fixes
+  * Resolved undefined global vars
+  * Added `Lambda.all` to the fitted model object for estimated cumulative baseline hazard at all observed times
+  * Minor changes to man pages
+
 # Version 1.2.0 (September 2015)
 
 ## New features

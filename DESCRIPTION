@@ -2,17 +2,18 @@ Title: General Semiparametric Shared Frailty Model
 Priority: optional
 Type: Package
 Package: frailtySurv
-Version: 1.2.0
-Date: 2015-09-27
+Version: 1.2.1
+Date: 2015-09-28
 Authors@R: c(person("John V. Monaco", role = c("aut", "cre"),
 		          email = "vincent@vmonaco.com"),
 	           person("Malka Gorfine", role = "aut",
 	            email = "gorfinem@post.tau.ac.il"),
 	           person("Li Hsu", role = "aut",
 		          email = "lih@fredhutch.org"))
-Description: The R package frailtySurv is for simulating and fitting semiparametric
-    shared frailty models. It implements a relatively simple estimator with
-    desirable asymptotic properties under several permissible technical conditions.
+Description: Simulates and fits semiparametric shared frailty models under a
+    wide range of frailty distributions using a consistent and 
+    asymptotically-normal estimator. Currently supports: gamma, power variance
+    function, log-normal, and inverse Gaussian frailty models.
 License: LGPL-2
 URL: https://github.com/vmonaco/frailtySurv/
 BugReports: https://github.com/vmonaco/frailtySurv/issues
