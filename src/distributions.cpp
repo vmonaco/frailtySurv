@@ -74,7 +74,7 @@ double deriv_dgamma(double x, double *params, int deriv_idx) {
 double lt_dgamma(int m, double s, double* params) {
   double theta = params[0];
   
-  return pow(-1, m) * pow(1/theta, 1/theta) * 
+  return pow(-1.0, m) * pow(1/theta, 1/theta) * 
     pow((1/theta) + s, -((1/theta) + m)) * 
     tgamma((1/theta) + m)/tgamma((1/theta));
 }
@@ -84,7 +84,7 @@ double deriv_lt_dgamma(int m, double s, double* params, int deriv_idx) {
   double theta = params[0];
   // TODO: maybe clean this up a bit?
   double tmp1 = pow(1/theta, 1/theta);
-  double tmp2 = pow(-1, m);
+  double tmp2 = pow(-1.0, m);
   double tmp3 = tgamma(m + 1/theta);
   double tmp4 = (1/theta + s);
   double tmp5 = (-1/theta - m);
@@ -109,7 +109,7 @@ double deriv_deriv_lt_dgamma(int m, double s, double* params, int deriv_idx_1, i
   double theta = params[0];
   
   return
-    ((pow((-1),m) * pow((1/theta),(1/theta)) * ((pow(((1/theta) + s),(-((1/theta) + 
+    ((pow((-1.0),m) * pow((1/theta),(1/theta)) * ((pow(((1/theta) + s),(-((1/theta) + 
       m))) * (log(((1/theta) + s)) * (1/pow(theta,2))) - pow(((1/theta) + 
       s),((-((1/theta) + m)) - 1)) * ((-((1/theta) + m)) * (1/pow(theta,2)))) * 
       (log(((1/theta) + s)) * (1/pow(theta,2))) - pow(((1/theta) + s),(-((1/theta) + 
@@ -119,17 +119,17 @@ double deriv_deriv_lt_dgamma(int m, double s, double* params, int deriv_idx_1, i
       s),(((-((1/theta) + m)) - 1) - 1)) * (((-((1/theta) + m)) - 
       1) * (1/pow(theta,2)))) * ((-((1/theta) + m)) * (1/pow(theta,2))) + 
       pow(((1/theta) + s),((-((1/theta) + m)) - 1)) * (1/pow(theta,2) * (1/pow(theta,2)) - 
-      (-((1/theta) + m)) * (2 * theta/pow((pow(theta,2)),2))))) - pow((-1),m) * 
+      (-((1/theta) + m)) * (2 * theta/pow((pow(theta,2)),2))))) - pow((-1.0),m) * 
       (pow((1/theta),(1/theta)) * (log((1/theta)) * (1/pow(theta,2))) + pow((1/theta),((1/theta) - 
       1)) * ((1/theta) * (1/pow(theta,2)))) * (pow(((1/theta) + s),(-((1/theta) + 
       m))) * (log(((1/theta) + s)) * (1/pow(theta,2))) - pow(((1/theta) + 
       s),((-((1/theta) + m)) - 1)) * ((-((1/theta) + m)) * (1/pow(theta,2)))) - 
-      (pow((-1),m) * (pow((1/theta),(1/theta)) * (log((1/theta)) * (1/pow(theta,2))) + 
+      (pow((-1.0),m) * (pow((1/theta),(1/theta)) * (log((1/theta)) * (1/pow(theta,2))) + 
       pow((1/theta),((1/theta) - 1)) * ((1/theta) * (1/pow(theta,2)))) * 
       (pow(((1/theta) + s),(-((1/theta) + m))) * (log(((1/theta) + 
       s)) * (1/pow(theta,2))) - pow(((1/theta) + s),((-((1/theta) + 
       m)) - 1)) * ((-((1/theta) + m)) * (1/pow(theta,2)))) - 
-      pow((-1),m) * (pow((1/theta),((1/theta) - 1)) * ((1/theta) * (2 * 
+      pow((-1.0),m) * (pow((1/theta),((1/theta) - 1)) * ((1/theta) * (2 * 
       theta/pow((pow(theta,2)),2)) + 1/pow(theta,2) * (1/pow(theta,2))) + (pow((1/theta),((1/theta) - 
       1)) * (log((1/theta)) * (1/pow(theta,2))) + pow((1/theta),(((1/theta) - 
       1) - 1)) * (((1/theta) - 1) * (1/pow(theta,2)))) * ((1/theta) * 
@@ -139,47 +139,47 @@ double deriv_deriv_lt_dgamma(int m, double s, double* params, int deriv_idx_1, i
       pow((1/theta),((1/theta) - 1)) * ((1/theta) * (1/pow(theta,2)))) * 
       (log((1/theta)) * (1/pow(theta,2))))) * pow(((1/theta) + 
       s),(-((1/theta) + m))))) * tgamma((1/theta) + m) - 
-      (pow((-1),m) * pow((1/theta),(1/theta)) * (pow(((1/theta) + s),(-((1/theta) + 
+      (pow((-1.0),m) * pow((1/theta),(1/theta)) * (pow(((1/theta) + s),(-((1/theta) + 
       m))) * (log(((1/theta) + s)) * (1/pow(theta,2))) - pow(((1/theta) + 
       s),((-((1/theta) + m)) - 1)) * ((-((1/theta) + m)) * (1/pow(theta,2)))) - 
-      pow((-1),m) * (pow((1/theta),(1/theta)) * (log((1/theta)) * (1/pow(theta,2))) + 
+      pow((-1.0),m) * (pow((1/theta),(1/theta)) * (log((1/theta)) * (1/pow(theta,2))) + 
       pow((1/theta),((1/theta) - 1)) * ((1/theta) * (1/pow(theta,2)))) * 
       pow(((1/theta) + s),(-((1/theta) + m)))) * (1/pow(theta,2) * 
-      (tgamma((1/theta) + m) * Rf_digamma((1/theta) + m))) - ((pow((-1),m) * 
+      (tgamma((1/theta) + m) * Rf_digamma((1/theta) + m))) - ((pow((-1.0),m) * 
       pow((1/theta),(1/theta)) * (pow(((1/theta) + s),(-((1/theta) + m))) * 
       (log(((1/theta) + s)) * (1/pow(theta,2))) - pow(((1/theta) + s),((-((1/theta) + 
-      m)) - 1)) * ((-((1/theta) + m)) * (1/pow(theta,2)))) - pow((-1),m) * 
+      m)) - 1)) * ((-((1/theta) + m)) * (1/pow(theta,2)))) - pow((-1.0),m) * 
       (pow((1/theta),(1/theta)) * (log((1/theta)) * (1/pow(theta,2))) + pow((1/theta),((1/theta) - 
       1)) * ((1/theta) * (1/pow(theta,2)))) * pow(((1/theta) + s),(-((1/theta) + 
       m)))) * (1/pow(theta,2) * (tgamma((1/theta) + m) * Rf_digamma((1/theta) + 
-      m))) - pow((-1),m) * pow((1/theta),(1/theta)) * pow(((1/theta) + s),(-((1/theta) + 
+      m))) - pow((-1.0),m) * pow((1/theta),(1/theta)) * pow(((1/theta) + s),(-((1/theta) + 
       m))) * (1/pow(theta,2) * (tgamma((1/theta) + m) * (1/pow(theta,2) * Rf_trigamma((1/theta) + 
       m)) + 1/pow(theta,2) * (tgamma((1/theta) + m) * Rf_digamma((1/theta) + 
       m)) * Rf_digamma((1/theta) + m)) + 2 * theta/pow((pow(theta,2)),2) * (tgamma((1/theta) + 
-      m) * Rf_digamma((1/theta) + m)))))/tgamma((1/theta)) + ((pow((-1),m) * 
+      m) * Rf_digamma((1/theta) + m)))))/tgamma((1/theta)) + ((pow((-1.0),m) * 
       pow((1/theta),(1/theta)) * (pow(((1/theta) + s),(-((1/theta) + m))) * 
       (log(((1/theta) + s)) * (1/pow(theta,2))) - pow(((1/theta) + s),((-((1/theta) + 
-      m)) - 1)) * ((-((1/theta) + m)) * (1/pow(theta,2)))) - pow((-1),m) * 
+      m)) - 1)) * ((-((1/theta) + m)) * (1/pow(theta,2)))) - pow((-1.0),m) * 
       (pow((1/theta),(1/theta)) * (log((1/theta)) * (1/pow(theta,2))) + pow((1/theta),((1/theta) - 
       1)) * ((1/theta) * (1/pow(theta,2)))) * pow(((1/theta) + s),(-((1/theta) + 
-      m)))) * tgamma((1/theta) + m) - pow((-1),m) * pow((1/theta),(1/theta)) * 
+      m)))) * tgamma((1/theta) + m) - pow((-1.0),m) * pow((1/theta),(1/theta)) * 
       pow(((1/theta) + s),(-((1/theta) + m))) * (1/pow(theta,2) * (tgamma((1/theta) + 
       m) * Rf_digamma((1/theta) + m)))) * (1/pow(theta,2) * (tgamma((1/theta)) * 
-      Rf_digamma((1/theta))))/pow(tgamma((1/theta)),2) + ((((pow((-1),m) * pow((1/theta),(1/theta)) * 
+      Rf_digamma((1/theta))))/pow(tgamma((1/theta)),2) + ((((pow((-1.0),m) * pow((1/theta),(1/theta)) * 
       (pow(((1/theta) + s),(-((1/theta) + m))) * (log(((1/theta) + s)) * 
       (1/pow(theta,2))) - pow(((1/theta) + s),((-((1/theta) + m)) - 
-      1)) * ((-((1/theta) + m)) * (1/pow(theta,2)))) - pow((-1),m) * (pow((1/theta),(1/theta)) * 
+      1)) * ((-((1/theta) + m)) * (1/pow(theta,2)))) - pow((-1.0),m) * (pow((1/theta),(1/theta)) * 
       (log((1/theta)) * (1/pow(theta,2))) + pow((1/theta),((1/theta) - 1)) * 
       ((1/theta) * (1/pow(theta,2)))) * pow(((1/theta) + s),(-((1/theta) + 
-      m)))) * tgamma((1/theta) + m) - pow((-1),m) * pow((1/theta),(1/theta)) * 
+      m)))) * tgamma((1/theta) + m) - pow((-1.0),m) * pow((1/theta),(1/theta)) * 
       pow(((1/theta) + s),(-((1/theta) + m))) * (1/pow(theta,2) * (tgamma((1/theta) + 
       m) * Rf_digamma((1/theta) + m)))) * (1/pow(theta,2) * (tgamma((1/theta)) * 
-      Rf_digamma((1/theta)))) - pow((-1),m) * pow((1/theta),(1/theta)) * pow(((1/theta) + 
+      Rf_digamma((1/theta)))) - pow((-1.0),m) * pow((1/theta),(1/theta)) * pow(((1/theta) + 
       s),(-((1/theta) + m))) * tgamma((1/theta) + m) * (1/pow(theta,2) * 
       (tgamma((1/theta)) * (1/pow(theta,2) * Rf_trigamma((1/theta))) + 1/pow(theta,2) * 
       (tgamma((1/theta)) * Rf_digamma((1/theta))) * Rf_digamma((1/theta))) + 
       2 * theta/pow((pow(theta,2)),2) * (tgamma((1/theta)) * Rf_digamma((1/theta)))))/pow(tgamma((1/theta)),2) + 
-      pow((-1),m) * pow((1/theta),(1/theta)) * pow(((1/theta) + s),(-((1/theta) + 
+      pow((-1.0),m) * pow((1/theta),(1/theta)) * pow(((1/theta) + s),(-((1/theta) + 
       m))) * tgamma((1/theta) + m) * (1/pow(theta,2) * (tgamma((1/theta)) * 
       Rf_digamma((1/theta)))) * (2 * (1/pow(theta,2) * (tgamma((1/theta)) * 
       Rf_digamma((1/theta))) * tgamma((1/theta))))/pow((pow(tgamma((1/theta)),2)),2));
@@ -543,7 +543,7 @@ double lt_dpvf(int p, double s, double* params) {
     factor2 += lt_dpvf_coef(p, j, alpha) * pow(1 + s, j*alpha - p);
   }
   
-  return pow(-1, p)*factor1*factor2;
+  return pow(-1.0, p)*factor1*factor2;
 }
 
 double deriv_lt_dpvf(int m, double s, double* params, int deriv_idx) {
@@ -564,8 +564,8 @@ double deriv_lt_dpvf(int m, double s, double* params, int deriv_idx) {
             lt_dpvf_coef(m, j, alpha) * j * pow(1 + s,j*alpha - m) * log(1 + s);
   }
   
-  double term1 = pow(-1, m) * deriv_lt_dpvf(0, s, &alpha, deriv_idx) * sum1;
-  double term2 = pow(-1, m) * lt_dpvf(0, s, &alpha) * sum2;
+  double term1 = pow(-1.0, m) * deriv_lt_dpvf(0, s, &alpha, deriv_idx) * sum1;
+  double term2 = pow(-1.0, m) * lt_dpvf(0, s, &alpha) * sum2;
   
   return term1 + term2;
 }
@@ -588,7 +588,7 @@ double deriv_deriv_lt_dpvf(int m, double s, double* params, int deriv_idx_1, int
   sum1 = sum2 = sum3 = sum4 = sum5 = sum6 = 0;
   
   for (int j = 1; j <= m; ++j) {
-    sum1 += lt_dpvf_coef(m, j, alpha) * pow((1 + s),(j*alpha - m)) * pow(j,2) * pow(log(1 + s),2);
+    sum1 += lt_dpvf_coef(m, j, alpha) * pow((1 + s),(j*alpha - m)) * pow((double)j,2) * pow(log(1 + s),2);
     sum2 += deriv_lt_dpvf_coef(m, j, alpha) * pow((1 + s),(j*alpha - m)) * j * log(1 + s);
     sum3 += deriv_deriv_lt_dpvf_coef(m, j, alpha) * pow((1 + s),(j*alpha - m));
     sum4 += lt_dpvf_coef(m, j, alpha) * pow((1 + s),(j*alpha - m)) * j * log(1 + s);
@@ -600,12 +600,12 @@ double deriv_deriv_lt_dpvf(int m, double s, double* params, int deriv_idx_1, int
   double dlt = deriv_lt_dpvf(0, s, params, deriv_idx_1);
   double ddlt = deriv_deriv_lt_dpvf(0, s, params, deriv_idx_1, deriv_idx_2);
   
-  double term1 = pow(-1, m) * lt * sum1;
-  double term2 = 2 * pow(-1, m) * lt * sum2;
-  double term3 = pow(-1, m) * lt * sum3;
-  double term4 = 2 * pow(-1, m) * dlt * sum4;
-  double term5 = pow(-1, m) * ddlt * sum5;
-  double term6 = 2 * pow(-1, m) * dlt * sum6;
+  double term1 = pow(-1.0, m) * lt * sum1;
+  double term2 = 2 * pow(-1.0, m) * lt * sum2;
+  double term3 = pow(-1.0, m) * lt * sum3;
+  double term4 = 2 * pow(-1.0, m) * dlt * sum4;
+  double term5 = pow(-1.0, m) * ddlt * sum5;
+  double term6 = 2 * pow(-1.0, m) * dlt * sum6;
     
   return term1 + term2 + term3 + term4 + term5 + term6;
 }
@@ -648,7 +648,7 @@ double lt_dposstab(int m, double s, double* params) {
     factor2 += lt_dpvf_coef(m, j, alpha) * pow(alpha, j) * pow(s, (j*alpha - m));
   }
   
-  return pow(-1, m)*factor1*factor2;
+  return pow(-1.0, m)*factor1*factor2;
 }
 
 // [[Rcpp::export]]

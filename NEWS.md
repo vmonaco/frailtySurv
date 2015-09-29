@@ -1,6 +1,11 @@
 frailtySurv
 --------
 
+# Version 1.2.2 (September 2015)
+
+## Bug fixes
+  * Fixed ambiguous C++ calls to pow
+
 # Version 1.2.1 (September 2015)
 
 ## Bug fixes

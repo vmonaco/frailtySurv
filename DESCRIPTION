@@ -2,8 +2,8 @@ Title: General Semiparametric Shared Frailty Model
 Priority: optional
 Type: Package
 Package: frailtySurv
-Version: 1.2.1
-Date: 2015-09-28
+Version: 1.2.2
+Date: 2015-09-29
 Authors@R: c(person("John V. Monaco", role = c("aut", "cre"),
 		          email = "vincent@vmonaco.com"),
 	           person("Malka Gorfine", role = "aut",

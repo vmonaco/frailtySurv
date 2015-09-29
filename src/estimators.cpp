@@ -12,13 +12,13 @@ using namespace Rcpp;
 double phi(int k, int N_dot, double H_dot, double *theta, String frailty, 
            double abstol, double reltol, int maxit) {
   if (frailty == "gamma") {
-    return lt_dgamma(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
+    return lt_dgamma(N_dot + k - 1, H_dot, theta) * pow(-1.0, N_dot + k - 1);
   } else if (frailty == "pvf") {
-    return lt_dpvf(N_dot + k - 1, H_dot, theta) * pow(-1, N_dot + k - 1);
+    return lt_dpvf(N_dot + k - 1, H_dot, theta) * pow(-1.0, N_dot + k - 1);
   } else if (frailty == "lognormal") {
-    return lt_dlognormal(N_dot + k - 1, H_dot, theta, abstol, reltol, maxit) * pow(-1, N_dot + k - 1);
+    return lt_dlognormal(N_dot + k - 1, H_dot, theta, abstol, reltol, maxit) * pow(-1.0, N_dot + k - 1);
   } else if (frailty == "invgauss") {
-    return lt_dinvgauss(N_dot + k - 1, H_dot, theta, abstol, reltol, maxit) * pow(-1, N_dot + k - 1);
+    return lt_dinvgauss(N_dot + k - 1, H_dot, theta, abstol, reltol, maxit) * pow(-1.0, N_dot + k - 1);
   } else {
     throw std::range_error("Unsupported frailty distribution");
   }
@@ -28,13 +28,13 @@ double phi(int k, int N_dot, double H_dot, double *theta, String frailty,
 double phi_prime(int k, int N_dot, double H_dot, double *theta, String frailty, 
                  int deriv_idx, double abstol, double reltol, int maxit) {
   if (frailty == "gamma") {
-    return deriv_lt_dgamma(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
+    return deriv_lt_dgamma(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1.0, N_dot + k - 1);
   } else if (frailty == "pvf") {
-    return deriv_lt_dpvf(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1, N_dot + k - 1);
+    return deriv_lt_dpvf(N_dot + k - 1, H_dot, theta, deriv_idx) * pow(-1.0, N_dot + k - 1);
   } else if (frailty == "lognormal") {
-    return deriv_lt_dlognormal(N_dot + k - 1, H_dot, theta, deriv_idx, abstol, reltol, maxit) * pow(-1, N_dot + k - 1);
+    return deriv_lt_dlognormal(N_dot + k - 1, H_dot, theta, deriv_idx, abstol, reltol, maxit) * pow(-1.0, N_dot + k - 1);
   } else if (frailty == "invgauss") {
-    return deriv_lt_dinvgauss(N_dot + k - 1, H_dot, theta, deriv_idx, abstol, reltol, maxit) * pow(-1, N_dot + k - 1);
+    return deriv_lt_dinvgauss(N_dot + k - 1, H_dot, theta, deriv_idx, abstol, reltol, maxit) * pow(-1.0, N_dot + k - 1);
   } else {
     throw std::range_error("Unsupported frailty distribution");
   }
@@ -44,13 +44,13 @@ double phi_prime(int k, int N_dot, double H_dot, double *theta, String frailty,
 double phi_prime_prime(int k, int N_dot, double H_dot, double *theta, String frailty, 
                        int deriv_idx_1, int deriv_idx_2, double abstol, double reltol, int maxit) {
   if (frailty == "gamma") {
-    return deriv_deriv_lt_dgamma(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2) * pow(-1, N_dot + k - 1);
+    return deriv_deriv_lt_dgamma(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2) * pow(-1.0, N_dot + k - 1);
   } else if (frailty == "pvf") {
-    return deriv_deriv_lt_dpvf(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2) * pow(-1, N_dot + k - 1);
+    return deriv_deriv_lt_dpvf(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2) * pow(-1.0, N_dot + k - 1);
   } else if (frailty == "lognormal") {
-    return deriv_deriv_lt_dlognormal(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2, abstol, reltol, maxit) * pow(-1, N_dot + k - 1);
+    return deriv_deriv_lt_dlognormal(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2, abstol, reltol, maxit) * pow(-1.0, N_dot + k - 1);
   } else if (frailty == "invgauss") {
-    return deriv_deriv_lt_dinvgauss(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2, abstol, reltol, maxit) * pow(-1, N_dot + k - 1);
+    return deriv_deriv_lt_dinvgauss(N_dot + k - 1, H_dot, theta, deriv_idx_1, deriv_idx_2, abstol, reltol, maxit) * pow(-1.0, N_dot + k - 1);
   } else {
     throw std::range_error("Unsupported frailty distribution");
   }
@@ -948,7 +948,7 @@ NumericVector Upsilon(List X_,
       }
     }
     
-    Upsilon_(s) = pow(n_clusters, -2) * pow(Ycal_(s), -2) * factor3;
+    Upsilon_(s) = pow((double)n_clusters, -2) * pow(Ycal_(s), -2) * factor3;
   }
   
   return Upsilon_;
@@ -1025,7 +1025,7 @@ NumericVector p_hat(List I_,
           
           double omega_integral = 0;
           for (int u = s; u <= t; ++u) omega_integral += Omega_i(j, u);
-          omega_integral = pow(n_clusters, -2) * omega_integral;
+          omega_integral = pow((double)n_clusters, -2) * omega_integral;
           
           inner_sum += (I_i(j) * Upsilon_(s) + omega_integral) * 
             (N_tilde_i(j, s) - N_tilde_i(j, s - 1));
