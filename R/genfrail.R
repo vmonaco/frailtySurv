@@ -65,16 +65,22 @@ genfrail <- function(# Number of clusters and cluster sizes
   # Generate the covariates
   p <- length(beta)
   Z <- matrix(0, nrow=NK, ncol=p)
-  for (j in 1:p) {
-    if (!is.null(covar.matrix)) {
-      Z <- covar.matrix
-    } else if (covar.distr == "normal") {
-      Z[, j] <- rnorm(NK, covar.param[1], covar.param[2])
-    } else if (covar.distr == "uniform") {
-      Z[, j] <- runif(NK, covar.param[1], covar.param[2])
-    } else if (covar.distr == "zero") {
-      Z[, j] <- rep(0, NK)
-      covar.param <- NULL
+  if (!is.null(covar.matrix)) {
+    if (nrow(covar.matrix) != NK || ncol(covar.matrix) != p) {
+      stop("covar.matrix must have N*K rows and length(beta) columns")
+    }
+    Z <- covar.matrix
+  } else {
+    Z <- matrix(0, nrow=NK, ncol=p)
+    for (j in 1:p) {
+      if (covar.distr == "normal") {
+        Z[, j] <- rnorm(NK, covar.param[1], covar.param[2])
+      } else if (covar.distr == "uniform") {
+        Z[, j] <- runif(NK, covar.param[1], covar.param[2])
+      } else if (covar.distr == "zero") {
+        Z[, j] <- rep(0, NK)
+        covar.param <- NULL
+      }
     }
   }
   
