@@ -34,9 +34,9 @@ genfrail <- function(# Number of clusters and cluster sizes
                      
                      # Only one of these needs to be specified
                      # Order of preference is: Lambda_0_inv, Lambda_0, lambda_0
-                     lambda_0 = NULL, #i.e. function(t, tau=4.6, C=0.01) (tau*(C*t)^tau)/t,
-                     Lambda_0 = NULL, #i.e. function(t, tau=4.6, C=0.01) (C*t)^tau,
-                     Lambda_0_inv = NULL, #i.e. function(t, tau=4.6, C=0.01) (t^(1/tau))/C,
+                     lambda_0 = NULL, #i.e. function(t, c=0.01, d=4.6) (d*(c*t)^d)/t,
+                     Lambda_0 = NULL, #i.e. function(t, c=0.01, d=4.6) (c*t)^d,
+                     Lambda_0_inv = NULL, #i.e. function(t, c=0.01, d=4.6) (t^(1/d))/c,
                      
                      # Round time to nearest round.base
                      round.base = NULL
