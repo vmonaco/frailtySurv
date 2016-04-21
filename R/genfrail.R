@@ -131,7 +131,7 @@ genfrail <- function(# Number of clusters and cluster sizes
       hazard <- list(Lambda_0=Lambda_0)
     } else {
       warning("Using a default baseline hazard. Did you forget to pass Lambda_0?")
-      Lambda_0 <- function(t, tau=4.6, C=0.01) (C*t)^tau
+      Lambda_0 <- function(t, c=0.01, d=4.6) (c*t)^d
       hazard <- list(Lambda_0=Lambda_0)
     }
     
