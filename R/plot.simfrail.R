@@ -55,8 +55,9 @@ plot.simfrail.residuals <- function(sim, n.Lambda=3, ...) {
 
 plot.simfrail.hazard <- function(sim, CI=0.95, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE) || 
-      !requireNamespace("reshape2", quietly = TRUE)) {
-    stop("Plotting requires the ggplot2, reshape2 packages")
+      !requireNamespace("reshape2", quietly = TRUE) ||
+      !requireNamespace("Hmisc", quietly = TRUE)) {
+    stop("Plotting requires the ggplot2, reshape2, and Hmisc packages")
   }
   
   hats <- sim[,grepl("^hat.Lambda", names(sim))]
