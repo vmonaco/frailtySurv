@@ -181,8 +181,7 @@ genfrail <- function(# Number of clusters and cluster sizes
     }
   
     if (censor.distr == "none") {
-      obs.status <- rep(1, NK)
-      obs.time <- fail.time
+      censor.time <- rep(max(fail.time), NK)
     } else {
       if (!is.null(censor.rate)) {
         stopifnot(0 <= censor.rate && censor.rate <= 1)
