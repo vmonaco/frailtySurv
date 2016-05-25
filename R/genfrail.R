@@ -31,6 +31,7 @@ genfrail <- function(# Number of clusters and cluster sizes
                      censor.distr = "normal",
                      censor.param = c(130,15),
                      censor.rate = NULL, # If specified, overrides censor.mu
+                     censor.time = NULL, # If specified, overrides all other censor params
                      
                      # Only one of these needs to be specified
                      # Order of preference is: Lambda_0_inv, Lambda_0, lambda_0
@@ -149,79 +150,85 @@ genfrail <- function(# Number of clusters and cluster sizes
     })
   }
   
-  if (censor.distr == "normal") {
-    censor.density <- dnorm
-    censor.random <- rnorm
-    censor.quantile <- qnorm
-    censor.mu <- censor.param[1]
-    censor.sigma <- censor.param[2]
-  } else if (censor.distr == "lognormal") {
-    censor.density <- dlnorm
-    censor.random <- rlnorm
-    censor.quantile <- qlnorm
-    censor.sigma <- sqrt(log(1 + censor.param[2]^2/censor.param[1]^2))
-    censor.mu <- log(censor.param[1]) - censor.sigma^2/2
-  } else if (censor.distr == "uniform") {
-    censor.density <- dunif
-    censor.random <- runif
-    censor.quantile <- qunif
-    censor.lower <- censor.param[1]
-    censor.upper <- censor.param[2]
-    stopifnot(censor.lower < censor.upper)
-  } else if (censor.distr == "none") {
-    warning("Censoring distribution is set to none")
+  if (!is.null(censor.time)) {
+    if (length(censor.time) != NK) {
+      stop("censor.time must have length N*K")
+    }
   } else {
-    stop("Censoring distribution must be normal or lognormal")
-  }
+    if (censor.distr == "normal") {
+      censor.density <- dnorm
+      censor.random <- rnorm
+      censor.quantile <- qnorm
+      censor.mu <- censor.param[1]
+      censor.sigma <- censor.param[2]
+    } else if (censor.distr == "lognormal") {
+      censor.density <- dlnorm
+      censor.random <- rlnorm
+      censor.quantile <- qlnorm
+      censor.sigma <- sqrt(log(1 + censor.param[2]^2/censor.param[1]^2))
+      censor.mu <- log(censor.param[1]) - censor.sigma^2/2
+    } else if (censor.distr == "uniform") {
+      censor.density <- dunif
+      censor.random <- runif
+      censor.quantile <- qunif
+      censor.lower <- censor.param[1]
+      censor.upper <- censor.param[2]
+      stopifnot(censor.lower < censor.upper)
+    } else if (censor.distr == "none") {
+      warning("Censoring distribution is set to none")
+    } else {
+      stop("Censoring distribution must be normal or lognormal")
+    }
   
-  if (censor.distr == "none") {
-    obs.status <- rep(1, NK)
-    obs.time <- fail.time
-  } else {
-    if (!is.null(censor.rate)) {
-      stopifnot(0 <= censor.rate && censor.rate <= 1)
-      
-      # Empirical survivor and hazard functions
-      esurv <- ecdf(fail.time)
-      efail <- function(t) 1 - esurv(t)
-      
-      if (censor.distr == "uniform") {
-        interval <- censor.upper - censor.lower
-        # Split the integral up into 2 parts since it may actually be ~0 for 
-        # most of the interval. Make this split at the 50th percentile
-        mu <- uniroot(function(mu) {
-            lower <- mu - interval/2
-            upper <- mu + interval/2
+    if (censor.distr == "none") {
+      obs.status <- rep(1, NK)
+      obs.time <- fail.time
+    } else {
+      if (!is.null(censor.rate)) {
+        stopifnot(0 <= censor.rate && censor.rate <= 1)
+        
+        # Empirical survivor and hazard functions
+        esurv <- ecdf(fail.time)
+        efail <- function(t) 1 - esurv(t)
+        
+        if (censor.distr == "uniform") {
+          interval <- censor.upper - censor.lower
+          # Split the integral up into 2 parts since it may actually be ~0 for 
+          # most of the interval. Make this split at the 50th percentile
+          mu <- uniroot(function(mu) {
+              lower <- mu - interval/2
+              upper <- mu + interval/2
+              censor.rate - 
+                (integrate(function(t) efail(t)*censor.density(t, lower, upper), 
+                           -Inf, censor.quantile(0.5, lower, upper), subdivisions=1e3)$value +
+                   integrate(function(t) efail(t)*censor.density(t, lower, upper), 
+                             censor.quantile(0.5, lower, upper), Inf, subdivisions=1e3)$value)
+            }, lower=0, upper=100, extendInt="up")$root
+          censor.lower <- mu - interval/2
+          censor.upper <- mu + interval/2
+        } else {
+          # Split the integral up into 2 parts since it may actually be ~0 for 
+          # most of the interval. Make this split at the 50th percentile
+          censor.mu <- uniroot(function(mu) 
             censor.rate - 
-              (integrate(function(t) efail(t)*censor.density(t, lower, upper), 
-                         -Inf, censor.quantile(0.5, lower, upper), subdivisions=1e3)$value +
-                 integrate(function(t) efail(t)*censor.density(t, lower, upper), 
-                           censor.quantile(0.5, lower, upper), Inf, subdivisions=1e3)$value)
-          }, lower=0, upper=100, extendInt="up")$root
-        censor.lower <- mu - interval/2
-        censor.upper <- mu + interval/2
+              (integrate(function(t) efail(t)*censor.density(t, mu, censor.sigma), 
+                         -Inf, censor.quantile(0.5, mu, censor.sigma), subdivisions=1e3)$value +
+                 integrate(function(t) efail(t)*censor.density(t, mu, censor.sigma), 
+                           censor.quantile(0.5, mu, censor.sigma), Inf, subdivisions=1e3)$value),
+            lower=0, upper=100, extendInt="up")$root
+        }
+      }
+      
+      # Non-informative right censoring
+      if (censor.distr == "uniform") {
+        censor.time <- censor.random(NK, censor.lower, censor.upper)
       } else {
-        # Split the integral up into 2 parts since it may actually be ~0 for 
-        # most of the interval. Make this split at the 50th percentile
-        censor.mu <- uniroot(function(mu) 
-          censor.rate - 
-            (integrate(function(t) efail(t)*censor.density(t, mu, censor.sigma), 
-                       -Inf, censor.quantile(0.5, mu, censor.sigma), subdivisions=1e3)$value +
-               integrate(function(t) efail(t)*censor.density(t, mu, censor.sigma), 
-                         censor.quantile(0.5, mu, censor.sigma), Inf, subdivisions=1e3)$value),
-          lower=0, upper=100, extendInt="up")$root
+        censor.time <- censor.random(NK, censor.mu, censor.sigma)
       }
     }
-    
-    # Non-informative right censoring
-    if (censor.distr == "uniform") {
-      censor.time <- censor.random(NK, censor.lower, censor.upper)
-    } else {
-      censor.time <- censor.random(NK, censor.mu, censor.sigma)
-    }
-    obs.status <- sign(fail.time <= censor.time)
-    obs.time <- pmin(fail.time, censor.time)
   }
+  obs.status <- sign(fail.time <= censor.time)
+  obs.time <- pmin(fail.time, censor.time)
   
   if (is.numeric(round.base)) {
     obs.time <- round.base*floor(obs.time/round.base + 0.5)
