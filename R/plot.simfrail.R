@@ -51,7 +51,7 @@ plot.simfrail.residuals <- function(sim, n.Lambda=3, Lambda.times=NULL, ...) {
   
   res.melt <- melt(residuals, id = c("N"))
   cases <- c(t(unique(res.melt["N"])))
-  res.melt$x <- factor(0.5*floor(res.melt$N))
+  res.melt$x <- factor(res.melt$N)
   
   p <- ggplot(res.melt, aes_string(x='x', y='value', fill='variable')) + 
     geom_boxplot(notch=TRUE) +
