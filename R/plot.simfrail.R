@@ -7,7 +7,7 @@ plot.simfrail <- function(x, type=c("residuals","hazard"), ...) {
   }
 }
 
-plot.simfrail.residuals <- function(sim, n.Lambda=3, ...) {
+plot.simfrail.residuals <- function(sim, n.Lambda=3, Lambda.times=NULL, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE) || 
       !requireNamespace("reshape2", quietly = TRUE)) {
     stop("Plotting requires the ggplot2, and reshape2 packages")
@@ -15,20 +15,29 @@ plot.simfrail.residuals <- function(sim, n.Lambda=3, ...) {
   Lambda.cols <- names(sim)[grepl("^Lambda", names(sim))]
   
   # All BUT n.Lambda
-  if (n.Lambda < 0) {
-    n.Lambda <- max(length(Lambda.cols) + n.Lambda, 0)
-  } 
-  
-  if (n.Lambda == 0) {
-    # No Lambda
-    Lambda.cols <- NULL
-  } else if (length(Lambda.cols) > n.Lambda) {
-    # Evenly spaced n.Lambda
-    idx <- round(seq(0, length(Lambda.cols), 
-                     length.out=(n.Lambda+2))[2:(n.Lambda+1)])
+  if (!is.null(Lambda.times)) {
+    # Lambda.times overrides n.Lambda
+    if (!is.null(n.Lambda)) {
+      warning("Specifying Lambda.times overrides n.Lambda")
+    }
+    Lambda.cols <- paste("Lambda", Lambda.times, sep=".")
+  } else {
+    if (n.Lambda < 0) {
+      n.Lambda <- max(length(Lambda.cols) + n.Lambda, 0)
+    } 
     
-    Lambda.cols <- Lambda.cols[idx]
+    if (n.Lambda == 0) {
+      # No Lambda
+      Lambda.cols <- NULL
+    } else if (length(Lambda.cols) > n.Lambda) {
+      # Evenly spaced n.Lambda
+      idx <- round(seq(0, length(Lambda.cols), 
+                       length.out=(n.Lambda+2))[2:(n.Lambda+1)])
+      
+      Lambda.cols <- Lambda.cols[idx]
+    }
   }
+  
   hat.cols <- c(names(sim)[grepl("^hat.beta|^hat.theta", names(sim))], 
                 paste("hat.", Lambda.cols, sep=""))
   value.cols <- c(names(sim)[grepl("^beta|^theta", names(sim))], Lambda.cols)
