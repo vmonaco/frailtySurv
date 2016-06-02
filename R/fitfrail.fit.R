@@ -115,12 +115,26 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
     
     # Modify the execution environment of fitfrail.fit
     with(VARS, {
-      # Check for convergence and maximum iters first
-      if (converged || (control$maxit > 0 && iter >= control$maxit)) {
+      # Check for maximum iters
+      if (control$maxit > 0 && iter >= control$maxit) {
         if (control$fitmethod == "loglik") {
           return(loglik)
         } else if (control$fitmethod == "score") {
           return(U_)
+        }
+      }
+      
+      # Check for convergence of loglik. See docs for fitfrail.
+      if (control$fitmethod == "loglik" && iter > 1) {
+        abs.reduction <- abs(loglik - prev.loglik)
+        rel.reduction <- abs((loglik - prev.loglik)/loglik)
+        
+        if ((control$abstol == 0 && control$reltol > 0 && rel.reduction <= control$reltol) ||
+            (control$reltol == 0 && control$abstol > 0 && abs.reduction <= control$abstol) ||
+            (abs.reduction > 0 && rel.reduction > 0 && 
+             (abs.reduction <= control$abstol || rel.reduction <= control$reltol))) {
+          hat.gamma <- prev.hat.gamma
+          return(loglik)
         }
       }
       
@@ -131,6 +145,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
       # Need at least 1 iter to have previous values
       if (iter > 1) {
         prev.loglik <- loglik
+        prev.hat.gamma <- hat.gamma
       }
       
       # Unpack parameter estimates
@@ -191,22 +206,6 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
       U_ <- colMeans(weights * xi_)
       
       trace <- rbind(trace, c(iter, unname(hat.gamma), loglik))
-      
-      # Update the absolute and relative reductions of the objective function
-      # Check for convergence if at least 1 iteration has been performed
-      if (control$fitmethod == "loglik" && iter > 1) {
-        abs.reduction <- abs(loglik - prev.loglik)
-        rel.reduction <- abs((loglik - prev.loglik)/loglik)
-        
-        # Check for convergence of loglik. See docs for fitfrail.
-        if ((control$abstol == 0 && control$reltol > 0 && rel.reduction <= control$reltol) ||
-            (control$reltol == 0 && control$abstol > 0 && abs.reduction <= control$abstol) ||
-            (abs.reduction > 0 && rel.reduction > 0 && 
-             (abs.reduction <= control$abstol || rel.reduction <= control$reltol))) {
-          cat("Done\n")
-          converged <- TRUE
-        }
-      }
       
       if (control$fitmethod == "loglik") {
         loglik
@@ -293,7 +292,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
                     control=list(factr=0,  pgtol=0, fnscale=-1, lmm=1, 
                                  maxit=.Machine$integer.max)
                     )
-    hat.gamma <- fitter$par
+    # hat.gamma <- fitter$par
   } else if (control$fitmethod == "score") {
     fitter <- nleqslv(init.gamma, fit_fn, 
                       control=list(xtol=control$reltol, ftol=control$abstol, 
@@ -303,7 +302,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
                       jac=score_jacobian,
                       jacobian=FALSE
                       )
-    hat.gamma <- fitter$x
+    # hat.gamma <- fitter$x
   }
   fit.time <- Sys.time() - start.time
   
@@ -316,6 +315,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
   
   trace <- data.frame(trace)
   
+  hat.gamma <- VARS$hat.gamma
   hat.beta <- hat.gamma[1:n.beta]
   hat.theta <- hat.gamma[(n.beta+1):(n.gamma)]
   
