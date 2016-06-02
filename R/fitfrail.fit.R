@@ -94,7 +94,12 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
       as.numeric(K_[[i]][j] >= 1:k_tau)
     }, rep(0, k_tau))
   
+  # Global convergence variables
   iter <- 0
+  converged <- FALSE
+  rel.reduction <- 0
+  abs.reduction <- 0
+  
   trace <- matrix(nrow=0, ncol=n.gamma+2)
   colnames(trace) <- c("Iteration",
                        paste("beta.", names(init.beta), sep=""),
@@ -110,15 +115,25 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
     
     # Modify the execution environment of fitfrail.fit
     with(VARS, {
-      if (iter >= control$maxit) {
+      # Check for convergence and maximum iters first
+      if (converged || (control$maxit > 0 && iter >= control$maxit)) {
         if (control$fitmethod == "loglik") {
           return(loglik)
         } else if (control$fitmethod == "score") {
           return(U_)
         }
       }
+      
+      # The outer estimation loop logically starts here
       iter <- iter + 1
       
+      # Save the previous objective function to check for convergence below
+      # Need at least 1 iter to have previous values
+      if (iter > 1) {
+        prev.loglik <- loglik
+      }
+      
+      # Unpack parameter estimates
       hat.beta <- hat.gamma[1:n.beta]
       hat.theta <- hat.gamma[(n.beta+1):(n.beta+n.theta)]
       
@@ -131,6 +146,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
         exp(sum(hat.beta * X_[[i]][j,]))
       }, 0)
       
+      # Enter the inner estimation loop for the baseline hazard
       bh_ <- bh(d_, R_star, K_, Y_, N_, N_dot_, hat.beta, hat.theta, frailty, weights,
                 control$int.abstol, control$int.reltol, control$int.maxit)
       
@@ -176,6 +192,22 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
       
       trace <- rbind(trace, c(iter, unname(hat.gamma), loglik))
       
+      # Update the absolute and relative reductions of the objective function
+      # Check for convergence if at least 1 iteration has been performed
+      if (control$fitmethod == "loglik" && iter > 1) {
+        abs.reduction <- abs(loglik - prev.loglik)
+        rel.reduction <- abs((loglik - prev.loglik)/loglik)
+        
+        # Check for convergence of loglik. See docs for fitfrail.
+        if ((control$abstol == 0 && control$reltol > 0 && rel.reduction <= control$reltol) ||
+            (control$reltol == 0 && control$abstol > 0 && abs.reduction <= control$abstol) ||
+            (abs.reduction > 0 && rel.reduction > 0 && 
+             (abs.reduction <= control$abstol || rel.reduction <= control$reltol))) {
+          cat("Done\n")
+          converged <- TRUE
+        }
+      }
+      
       if (control$fitmethod == "loglik") {
         loglik
       } else if (control$fitmethod == "score") {
@@ -185,7 +217,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
   
   # Already computed
   loglik_jacobian <- function(gamma=NULL) with(VARS, {
-    U_
+      U_
   })
   
   score_jacobian <- function(gamma=NULL) with(VARS, {
@@ -258,17 +290,18 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
                     lower=c(rep(-Inf, VARS$n.beta), lb.frailty[[frailty]]), 
                     upper=c(rep(Inf, VARS$n.beta),  ub.frailty[[frailty]]), 
                     method="L-BFGS-B",
-                    control=list(factr=control$reltol/.Machine$double.eps, 
-                                 pgtol=0, fnscale=-1)
+                    control=list(factr=0,  pgtol=0, fnscale=-1, lmm=1, 
+                                 maxit=.Machine$integer.max)
                     )
     hat.gamma <- fitter$par
   } else if (control$fitmethod == "score") {
     fitter <- nleqslv(init.gamma, fit_fn, 
-                      control=list(xtol=control$reltol, ftol=control$abstol, btol=1e-3,
-                                   allowSingular=TRUE),
-                      method="Newton",
+                      control=list(xtol=control$reltol, ftol=control$abstol, 
+                                   cndtol=.Machine$integer.max,
+                                   allowSingular=TRUE, maxit=.Machine$integer.max),
+                      method="Broyden",
                       jac=score_jacobian,
-                      jacobian=TRUE
+                      jacobian=FALSE
                       )
     hat.gamma <- fitter$x
   }
