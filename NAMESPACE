@@ -4,8 +4,7 @@ import(ggplot2)
 importFrom(nleqslv, nleqslv)
 importFrom(reshape2, melt)
 importFrom(numDeriv, grad)
-importFrom(survival, coxph, Surv, untangle.specials, 
-           strata, coxph.fit, coxph.control, basehaz)
+importFrom(survival, coxph, Surv, untangle.specials, coxph.control, basehaz)
 importFrom(stats, optim, vcov, .getXlevels, aggregate, complete.cases,
              cor, cov, dgamma, dlnorm, dnorm, dpois, dunif,
              ecdf, integrate, model.extract, model.matrix,

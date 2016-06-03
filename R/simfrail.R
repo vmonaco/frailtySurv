@@ -276,3 +276,31 @@ simfrailtyPenal <- function(reps,
   
   sim
 }
+
+sim.enum.gen <- function(sim.fun, reps, seed, genfrail.args, fitfrail.args, Lambda.times,
+                          param.name, param.values, ...) {
+  sim <- lapply(param.values, function(pvalue) {
+    genfrail.args[[param.name]] <- pvalue
+    set.seed(seed) # seed before each run
+    sim.fun(reps, genfrail.args, fitfrail.args, Lambda.times, ...)
+  })
+  
+  sim <- do.call("rbind", sim)
+  class(sim) <- c("simfrail", "data.frame")
+  
+  sim
+}
+
+sim.enum.fit <- function(sim.fun, reps, seed, genfrail.args, fitfrail.args, Lambda.times,
+                          param.name, param.values, ...) {
+  sim <- lapply(param.values, function(pvalue) {
+    fitfrail.args[[param.name]] <- pvalue
+    set.seed(seed) # seed before each run
+    sim.fun(reps, genfrail.args, fitfrail.args, Lambda.times, ...)
+  })
+  
+  sim <- do.call("rbind", sim)
+  class(sim) <- c("simfrail", "data.frame")
+  
+  sim
+}

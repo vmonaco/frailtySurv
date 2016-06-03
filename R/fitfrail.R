@@ -38,7 +38,7 @@ fitfrail <- function(formula, dat, control, frailty, weights=NULL, se=FALSE, ...
   # Default to the fitfrail.control defaults
   if (missing(control)) control <- fitfrail.control(...)
   
-  if (!match(frailty,c("gamma","lognormal","invgauss","pvf"), nomatch=0))
+  if (!match(frailty,c("gamma","lognormal","invgauss", "pvf"), nomatch=0))
     stop("Unsupported frailty distribution:", frailty)
   
   Y <- model.extract(mf, "response")
@@ -77,30 +77,46 @@ fitfrail <- function(formula, dat, control, frailty, weights=NULL, se=FALSE, ...
   X <- X[, !xdrop, drop=FALSE]
   
   # Initialize beta to the coeffs determined by a coxph model without hidden frailty
-  fit.coxph <- coxph.fit(X, Y, strata=NULL,
-                         offset=NULL, init=NULL,
-                         control=coxph.control(), weights=NULL,
-                         method="efron", row.names(mf))
-
-  init.beta <- fit.coxph$coefficients
-
-  # TODO: theta should initialize to a zero vector, dependening the num density args
-  init.theta <- init.frailty[[frailty]]
-  
-  
-  # fit.coxph <- coxph.fit(X, Y, strata=cluster,
-  #                        offset=NULL, init=NULL,
-  #                        control=coxph.control(), weights=NULL,
-  #                        method="efron", row.names(mf))
-  # init.beta <- fit.coxph$coefficients
+  # init.beta <- coxph.fit(X, Y, strata=NULL, 
+  #                        offset=NULL, init=NULL, 
+  #                        control=coxph.control(), weights=NULL, 
+  #                        method="efron", row.names(mf))$coefficients
+  # 
+  # # TODO: theta should initialize to a zero vector, dependening the num density args
   # init.theta <- init.frailty[[frailty]]
-  # theta.given.tau(frailtySurv:::tau.numerical(fit.coxph$history[[1]]$theta, "gamma"), frailty)
   
+  init.beta <- setNames(rep(0, ncol(X)), 
+                        paste("beta", seq(1, ncol(X)), sep="."))
+  init.theta <- setNames(init.frailty[[frailty]], 
+                         paste("theta", length(init.frailty[[frailty]]), sep="."))
+  
+  # Try to initialize beta and theta from coxph estimates.
+  # theta is initialized to the frailty distribution with same rank correlation 
+  # as the gamma frailty estimated by coxph
+  if (control$coxph.init) {
+    result <- tryCatch({
+      # Replace the cluster term with frailty.gamma
+      cluster.term.idx <- which.max(grepl("cluster", attr(terms(formula), "term.labels")))
+      coxph.formula <- update(drop.terms(terms(formula), cluster.term.idx, keep.response=TRUE), ~ . + frailty.gamma(family))
+      fit.coxph <- coxph(coxph.formula, data=dat)
+      
+      init.beta <- setNames(fit.coxph$coefficients,
+                            paste("beta", seq(1, ncol(X)), sep="."))
+      init.theta <- setNames(theta.given.tau(tau.numerical(fit.coxph$history[[1]]$theta, "gamma"), frailty),
+                             paste("theta", length(init.frailty[[frailty]]), sep="."))
+    }, warning = function(war) {
+      # Nothing
+    }, error = function(err) {
+      # Nothing
+    }, finally = {
+      # Nothing
+    }) # END tryCatch
+  }
   
   fit <- fitfrail.fit(X, Y, cluster, 
-                           init.beta, init.theta, 
-                           frailty,
-                           control, row.names(mf),
+                      init.beta, init.theta, 
+                      frailty,
+                      control, row.names(mf),
                       weights)
   class(fit) <- 'fitfrail'
   fit$call <- Call
