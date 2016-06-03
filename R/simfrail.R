@@ -188,3 +188,91 @@ simcoxph <- function(reps,
   
   sim
 }
+
+# Simulation wrapper for frailtyPenal
+simfrailtyPenal <- function(reps, 
+                     genfrail.args, 
+                     frailtyPenal.args,
+                     Lambda.times, # where to evaluate the baseline hazard function
+                     cores=0 # 0 to use all available cores, -1 to use all but 1, etc
+) { 
+  Call <- match.call()
+  
+  # To make the result reproducable when parallelized, seed each run from 
+  # a list of random seeds sampled from a meta seed
+  seeds <- sample(1:1e7, reps, replace=TRUE)
+  
+  fn <- function(s) {
+    set.seed(s)
+    
+    # Generate new random data, give this to coxph
+    # Generate new random data, give this to coxph
+    dat <- do.call("genfrail", as.list(genfrail.args))
+    frailtyPenal.args[["data"]] = dat
+    
+    # Obtain the true values for each parameter
+    beta <- attr(dat, "beta")
+    theta <- attr(dat, "theta")
+    Lambda <- setNames(attr(dat, "Lambda_0")(Lambda.times),
+                       paste("Lambda.", Lambda.times, sep=""))
+    
+    # Elapsed time of the fitter
+    runtime <- system.time(fit <- do.call("frailtyPenal", as.list(frailtyPenal.args)))[["elapsed"]]
+    
+    cens <- 1 - sum(dat$status)/length(dat$status)
+    
+    hat.beta <- setNames(fit$coef, paste("hat.beta.", 1:length(beta), sep=""))
+    
+    hat.theta <- setNames(fit$theta, paste("hat.theta.", 1:length(theta), sep=""))
+    
+    # Lambda_hat <- cumsum(fit.frailtyPenal$lam[,1,])
+    Lambda_hat <- -log(fit.frailtyPenal$surv[,1,])
+    time_steps <- fit.frailtyPenal$x
+    
+    Lambda.fun <- Vectorize(function(t) {
+      if (t <= 0) {
+        return(0);
+      }
+      Lambda_hat[sum(t > time_steps)]
+    })
+    
+    hat.Lambda <- setNames(Lambda.fun(Lambda.times),
+                           paste("hat.Lambda.", Lambda.times, sep=""))
+    
+    SE <- sqrt(diag(fit.frailtyPenal$varHIH))
+    se.beta <- setNames(SE[1:length(beta)],
+                        paste("se.beta.", 1:length(hat.beta), sep=""))
+    
+    se.theta <- setNames(rep(NA, length(hat.theta)),
+                         paste("se.theta.", 1:length(hat.theta), sep=""))
+    
+    se.Lambda <- setNames(rep(NA, length(Lambda.times)),
+                          paste("se.Lambda.", Lambda.times, sep=""))
+    
+    c(seed=s,
+      runtime=runtime,
+      N=length(unique(dat$family)),
+      mean.K=mean(table(dat$family)),
+      cens=cens,
+      beta,
+      hat.beta,
+      se.beta,
+      theta,
+      hat.theta,
+      se.theta,
+      Lambda,
+      hat.Lambda,
+      se.Lambda)
+  }
+  
+  sim <- data.frame(t(simplify2array(plapply(reps, fn, cores))))
+  class(sim) <- append("simfrail", class(sim))
+  
+  attributes(sim) <- append(attributes(sim), list(
+    call=Call,
+    reps=reps,
+    frailty=unique(c(genfrail.args[["frailty"]]))
+  ))
+  
+  sim
+}

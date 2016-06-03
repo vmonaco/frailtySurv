@@ -38,7 +38,7 @@ fitfrail <- function(formula, dat, control, frailty, weights=NULL, se=FALSE, ...
   # Default to the fitfrail.control defaults
   if (missing(control)) control <- fitfrail.control(...)
   
-  if (!match(frailty,c("gamma","lognormal","invgauss", "pvf"), nomatch=0))
+  if (!match(frailty,c("gamma","lognormal","invgauss","pvf"), nomatch=0))
     stop("Unsupported frailty distribution:", frailty)
   
   Y <- model.extract(mf, "response")
@@ -77,13 +77,25 @@ fitfrail <- function(formula, dat, control, frailty, weights=NULL, se=FALSE, ...
   X <- X[, !xdrop, drop=FALSE]
   
   # Initialize beta to the coeffs determined by a coxph model without hidden frailty
-  init.beta <- coxph.fit(X, Y, strata=NULL, 
-                          offset=NULL, init=NULL, 
-                          control=coxph.control(), weights=NULL, 
-                          method="efron", row.names(mf))$coefficients
-  
+  fit.coxph <- coxph.fit(X, Y, strata=NULL,
+                         offset=NULL, init=NULL,
+                         control=coxph.control(), weights=NULL,
+                         method="efron", row.names(mf))
+
+  init.beta <- fit.coxph$coefficients
+
   # TODO: theta should initialize to a zero vector, dependening the num density args
   init.theta <- init.frailty[[frailty]]
+  
+  
+  # fit.coxph <- coxph.fit(X, Y, strata=cluster,
+  #                        offset=NULL, init=NULL,
+  #                        control=coxph.control(), weights=NULL,
+  #                        method="efron", row.names(mf))
+  # init.beta <- fit.coxph$coefficients
+  # init.theta <- init.frailty[[frailty]]
+  # theta.given.tau(frailtySurv:::tau.numerical(fit.coxph$history[[1]]$theta, "gamma"), frailty)
+  
   
   fit <- fitfrail.fit(X, Y, cluster, 
                            init.beta, init.theta, 

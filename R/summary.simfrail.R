@@ -17,6 +17,10 @@ summary.simfrail <- function(object, ...) {
     )
   }
   
+  sum.runtime <- sum(sim$runtime)
+  mean.runtime <- mean(sim$runtime)
+  sd.runtime <- sd(sim$runtime)
+  
   param.names <- names(sim)[grepl("^beta|^theta|^Lambda", names(sim))]
   sum.sim <- vapply(param.names, fn, rep(0, 5))
   class(sum.sim) <- append("summary.simfrail", class(sum.sim))
@@ -28,7 +32,9 @@ summary.simfrail <- function(object, ...) {
     description=paste("Simulation: ", 
                     attr(sim, "reps"), " reps, ",
                     toString(unique(sim$N)), " clusters (avg. size ", format(mean(sim$mean.K), digits=4), "), ",
-                    toString(attr(sim, "frailty")), " frailty", sep="")
+                    toString(attr(sim, "frailty")), " frailty", "\n",
+                    sprintf("Serial runtime (s): %.2f (%.2f +/- %.2f per rep)", sum.runtime, mean.runtime, sd.runtime),
+                    sep="")
   ))
   
   sum.sim
