@@ -5,7 +5,8 @@ fitfrail.control <- function(fitmethod="loglik",
                              int.abstol=0,
                              int.reltol=1, 
                              int.maxit=1000, 
-                             verbose=FALSE
+                             verbose=FALSE,
+                             coxph.init=TRUE
                              ) {
   
   if (!fitmethod %in% c("loglik", "score")) 
@@ -30,6 +31,7 @@ fitfrail.control <- function(fitmethod="loglik",
        int.abstol=int.abstol,
        int.reltol=int.reltol,
        int.maxit=as.integer(int.maxit),
-       verbose=as.logical(verbose)
+       verbose=as.logical(verbose),
+       coxph.init=as.logical(coxph.init)
        )
 }
