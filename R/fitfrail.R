@@ -38,7 +38,7 @@ fitfrail <- function(formula, dat, control, frailty, weights=NULL, se=FALSE, ...
   # Default to the fitfrail.control defaults
   if (missing(control)) control <- fitfrail.control(...)
   
-  if (!match(frailty,c("gamma","lognormal","invgauss", "pvf"), nomatch=0))
+  if (!match(frailty,c("gamma","lognormal","invgauss","pvf"), nomatch=0))
     stop("Unsupported frailty distribution:", frailty)
   
   Y <- model.extract(mf, "response")
@@ -76,15 +76,6 @@ fitfrail <- function(formula, dat, control, frailty, weights=NULL, se=FALSE, ...
   xdrop <- Xatt$assign %in% adrop  # columns to drop (always the intercept)
   X <- X[, !xdrop, drop=FALSE]
   
-  # Initialize beta to the coeffs determined by a coxph model without hidden frailty
-  # init.beta <- coxph.fit(X, Y, strata=NULL, 
-  #                        offset=NULL, init=NULL, 
-  #                        control=coxph.control(), weights=NULL, 
-  #                        method="efron", row.names(mf))$coefficients
-  # 
-  # # TODO: theta should initialize to a zero vector, dependening the num density args
-  # init.theta <- init.frailty[[frailty]]
-  
   init.beta <- setNames(rep(0, ncol(X)), 
                         paste("beta", seq(1, ncol(X)), sep="."))
   init.theta <- setNames(init.frailty[[frailty]], 
@@ -96,8 +87,10 @@ fitfrail <- function(formula, dat, control, frailty, weights=NULL, se=FALSE, ...
   if (control$coxph.init) {
     result <- tryCatch({
       # Replace the cluster term with frailty.gamma
-      cluster.term.idx <- which.max(grepl("cluster", attr(terms(formula), "term.labels")))
-      coxph.formula <- update(drop.terms(terms(formula), cluster.term.idx, keep.response=TRUE), ~ . + frailty.gamma(family))
+      # TODO: maybe a better way to specify frailty.gamma(cluster.term)
+      cluster.term <- regmatches(tempc$vars, gregexpr("(?<=\\().*?(?=\\))", tempc$vars, perl=T))[[1]]
+      coxph.formula <- update(drop.terms(terms(formula), tempc$terms, keep.response=TRUE),
+                              as.formula(sprintf("~ . + frailty.gamma(%s)", cluster.term)))
       fit.coxph <- coxph(coxph.formula, data=dat)
       
       init.beta <- setNames(fit.coxph$coefficients,
