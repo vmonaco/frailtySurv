@@ -101,6 +101,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
   abs.reduction <- 0
   
   trace <- matrix(nrow=0, ncol=n.gamma+2)
+  
   colnames(trace) <- c("Iteration",
                        paste("beta.", names(init.beta), sep=""),
                        paste("theta.", 1:n.theta, sep=""), 
