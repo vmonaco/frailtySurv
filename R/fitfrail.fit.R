@@ -96,12 +96,11 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
   
   # Global convergence variables
   iter <- 0
-  converged <- FALSE
-  rel.reduction <- 0
-  abs.reduction <- 0
+  rel.reduction <- Inf
+  abs.reduction <- Inf
+  loglik <- Inf
   
   trace <- matrix(nrow=0, ncol=n.gamma+2)
-  
   colnames(trace) <- c("Iteration",
                        paste("beta.", names(init.beta), sep=""),
                        paste("theta.", 1:n.theta, sep=""), 
@@ -112,6 +111,9 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
   # reused in other places (jacobian, covar matrix)
   fit_fn <- function(hat.gamma) {
     # Update the current estimate. Everything below depends on this
+    if (iter > 0) {
+      VARS$prev.hat.gamma <- VARS$hat.gamma
+    }
     VARS$hat.gamma <- hat.gamma
     
     # Modify the execution environment of fitfrail.fit
@@ -126,7 +128,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
       }
       
       # Check for convergence of loglik. See docs for fitfrail.
-      if (control$fitmethod == "loglik" && iter > 1) {
+      if (control$fitmethod == "loglik" && iter > 0 && loglik > prev.loglik) {
         abs.reduction <- abs(loglik - prev.loglik)
         rel.reduction <- abs((loglik - prev.loglik)/loglik)
         
@@ -141,13 +143,6 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
       
       # The outer estimation loop logically starts here
       iter <- iter + 1
-      
-      # Save the previous objective function to check for convergence below
-      # Need at least 1 iter to have previous values
-      if (iter > 1) {
-        prev.loglik <- loglik
-        prev.hat.gamma <- hat.gamma
-      }
       
       # Unpack parameter estimates
       hat.beta <- hat.gamma[1:n.beta]
@@ -179,6 +174,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
                     control$int.abstol, control$int.reltol, control$int.maxit))
       
       loglik_vec <- loglikelihood(X_, K_, I_, phi_1_, lambda, hat.beta)
+      prev.loglik <- loglik
       loglik <- sum(weights * loglik_vec)
       
       if (control$verbose) {
@@ -268,7 +264,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
         jacobian_theta_beta(phi_1_, phi_2_,
                             phi_prime_1_[[theta_idx]], phi_prime_2_[[theta_idx]],
                             dH_dbeta_[[s]]$dH_dot_dbeta_)
-      } else if (l > n.beta && s > n.beta) {
+      } else if (l > n.beta && s > n.beta) {control$reltol/.Machine$double.eps
         theta_idx_1 <- l - n.beta
         theta_idx_2 <- s - n.beta
         jacobian_theta_theta(phi_1_, phi_2_,
@@ -290,15 +286,14 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
                     lower=c(rep(-Inf, VARS$n.beta), lb.frailty[[frailty]]), 
                     upper=c(rep(Inf, VARS$n.beta),  ub.frailty[[frailty]]), 
                     method="L-BFGS-B",
-                    control=list(factr=0,  pgtol=0, fnscale=-1, lmm=1, 
+                    control=list(factr=0, pgtol=0, fnscale=-1, lmm=10, 
                                  maxit=.Machine$integer.max)
                     )
     # hat.gamma <- fitter$par
   } else if (control$fitmethod == "score") {
     fitter <- nleqslv(init.gamma, fit_fn, 
-                      control=list(xtol=control$reltol, ftol=control$abstol, 
-                                   cndtol=.Machine$integer.max,
-                                   allowSingular=TRUE, maxit=.Machine$integer.max),
+                      control=list(xtol=control$reltol, ftol=control$abstol,
+                                   allowSingular=TRUE, maxit=control$maxit),
                       method="Broyden",
                       jac=score_jacobian,
                       jacobian=FALSE
