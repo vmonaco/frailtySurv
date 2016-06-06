@@ -747,7 +747,7 @@ init.frailty <- list(
 
 # Soft lower and upper bounds (for estimation)
 lb.frailty <- list(
-  gamma=1e-2,
+  gamma=5e-2,
   pvf=1e-5,
   posstab=1e-5,
   invgauss=1e-2,
