@@ -32,8 +32,8 @@ fitfrail.control <- function(fitmethod="loglik",
        int.abstol=int.abstol,
        int.reltol=int.reltol,
        int.maxit=as.integer(int.maxit),
-       verbose=as.logical(verbose),
        init.beta=init.beta,
-       init.theta=init.theta
+       init.theta=init.theta,
+       verbose=as.logical(verbose)
        )
 }
