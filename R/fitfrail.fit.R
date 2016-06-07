@@ -264,7 +264,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
         jacobian_theta_beta(phi_1_, phi_2_,
                             phi_prime_1_[[theta_idx]], phi_prime_2_[[theta_idx]],
                             dH_dbeta_[[s]]$dH_dot_dbeta_)
-      } else if (l > n.beta && s > n.beta) {control$reltol/.Machine$double.eps
+      } else if (l > n.beta && s > n.beta) {
         theta_idx_1 <- l - n.beta
         theta_idx_2 <- s - n.beta
         jacobian_theta_theta(phi_1_, phi_2_,
