@@ -1,11 +1,9 @@
 sudo: false
 language: r
-cache: packages
-warnings_are_errors: false
+warnings_are_errors: true
 
-env:
- global:
-   - CRAN: http://cran.rstudio.com
+repos:
+   CRAN: http://cran.rstudio.com
 
 notifications:
   email:
