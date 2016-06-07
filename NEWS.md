@@ -1,6 +1,14 @@
 frailtySurv
 --------
 
+# Version 1.3 (June 2016)
+
+## Bug fixes
+  * Made both loglik and score fit methods use the same convergence control parameters
+  
+## New features
+  * Added init.beta and init.theta control parameters for parameter initialization
+  
 # Version 1.2.2 (September 2015)
 
 ## Bug fixes
