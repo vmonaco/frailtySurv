@@ -30,9 +30,9 @@ fitfrail.control(fitmethod = "loglik",
   }
   \item{int.maxit}{integer, maximum number of numeric integration function evaluations. Only applicable for frailty distributions that require numerical integration. If 0, then no limit. Default is 100.
   }
-  \item{init.beta}{
+  \item{init.beta}{initial regression coefficients paramater estimates, can be numeric, string, or NULL. If NULL, then a zero vector is used. If "coxph" is passed, then regression coefficients are initialized to the estimates given by coxph (with or without frailty, depending on the init.theta parameter, see below). If numeric, then the initial regression coefficients are specified explicitly.
   }
-  \item{init.theta}{
+  \item{init.theta}{initial frailty distribution parameter estimates, can be numeric, string, or NULL. If NULL, then a sensible starting value is chosen for the specified frailty distribution. If "coxph", then hat.theta is initialized such that the initial frailty distribution has the same rank correlation as the estimated gamma frailty distribution. This is achieved by assuming gamma frailty and estimating theta using coxph. This estimate is then transferred to the appropriate frailty distribution through Kendall's tau. This method only works well for weak cluster dependence, i.e., small Kendall's tau. If numeric, then the initial frailty distribution parameters are specified explicitly.
   }
   \item{verbose}{logical value, whether to print a trace of the parameter estimation.
   }

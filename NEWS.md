@@ -5,9 +5,14 @@ frailtySurv
 
 ## Bug fixes
   * Made both loglik and score fit methods use the same convergence control parameters
+  * Improved loglik parameter estimation and convergence
+  * Fixed the labels of residuals boxplot x-axis
+  * Added check for Hmisc package in plotting
   
 ## New features
   * Added init.beta and init.theta control parameters for parameter initialization
+  * Added censor.time parameter to genfrail for user-defined censorship times
+  * Added option to specify Lambda.times when plotting residuals
   
 # Version 1.2.2 (September 2015)
 
