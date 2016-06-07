@@ -5,9 +5,9 @@ fitfrail.control <- function(fitmethod="loglik",
                              int.abstol=0,
                              int.reltol=1, 
                              int.maxit=1000, 
-                             verbose=FALSE,
                              init.beta="coxph",
-                             init.theta=NULL
+                             init.theta=NULL,
+                             verbose=FALSE
                              ) {
   
   if (!fitmethod %in% c("loglik", "score")) 

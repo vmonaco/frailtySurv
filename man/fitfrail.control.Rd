@@ -26,9 +26,13 @@ fitfrail.control(fitmethod = "loglik",
   }
   \item{int.abstol}{numeric absolute tolerence for convergence of the numeric integration. Only applicable for frailty distributions that require numerical integration. If 0, then ignore. Default is 0.
   }
-  \item{int.reltol}{numeric relative tolerence for convergence of the numeric integration. Only applicable for frailty distributions that require numerical integration. If 0, then ignore. Default is 1e-08.
+  \item{int.reltol}{numeric relative tolerence for convergence of the numeric integration. Only applicable for frailty distributions that require numerical integration. If 0, then ignore. Default is 1e-06.
   }
   \item{int.maxit}{integer, maximum number of numeric integration function evaluations. Only applicable for frailty distributions that require numerical integration. If 0, then no limit. Default is 100.
+  }
+  \item{init.beta}{
+  }
+  \item{init.theta}{
   }
   \item{verbose}{logical value, whether to print a trace of the parameter estimation.
   }
