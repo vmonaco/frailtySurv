@@ -3,9 +3,6 @@ language: r
 cache: packages
 warnings_are_errors: true
 
-before_install:
-  - curl -L https://raw.githubusercontent.com/krlmlr/texlive-squashfs/master/out/texlive.tar.xz | tar xJC ~
-  
 repos:
    CRAN: http://cran.rstudio.com
 
