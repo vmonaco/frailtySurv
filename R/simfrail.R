@@ -225,9 +225,8 @@ simfrailtyPenal <- function(reps,
     
     hat.theta <- setNames(fit$theta, paste("hat.theta.", 1:length(theta), sep=""))
     
-    # Lambda_hat <- cumsum(fit.frailtyPenal$lam[,1,])
-    Lambda_hat <- -log(fit.frailtyPenal$surv[,1,])
-    time_steps <- fit.frailtyPenal$x
+    Lambda_hat <- -log(fit$surv[,1,])
+    time_steps <- fit$x
     
     Lambda.fun <- Vectorize(function(t) {
       if (t <= 0) {
@@ -239,7 +238,7 @@ simfrailtyPenal <- function(reps,
     hat.Lambda <- setNames(Lambda.fun(Lambda.times),
                            paste("hat.Lambda.", Lambda.times, sep=""))
     
-    SE <- sqrt(diag(fit.frailtyPenal$varHIH))
+    SE <- sqrt(diag(fit$varHIH))
     se.beta <- setNames(SE[1:length(beta)],
                         paste("se.beta.", 1:length(hat.beta), sep=""))
     

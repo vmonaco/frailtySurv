@@ -10,7 +10,7 @@ importFrom(stats, optim, vcov, .getXlevels, aggregate, complete.cases,
              ecdf, integrate, model.extract, model.matrix,
              qlnorm, qnorm, qpois, qunif, rbinom, rchisq,
              rexp, rgamma, rlnorm, rnorm, runif, sd,
-             setNames, terms, uniroot)
+             setNames, terms, uniroot, as.formula, drop.terms, update)
 
 export(genfrail, fitfrail, fitfrail.control, simfrail, simcoxph)
 
