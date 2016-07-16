@@ -20,7 +20,7 @@ The baseline hazard can be specified by the inverse cumualative baseline hazard,
 genfrail(N = 300, K = 2, K.param = c(2, 0), beta = c(log(2)),
          frailty = "gamma", theta = c(2), 
          covar.distr = "normal", covar.param = c(0, 1), covar.matrix = NULL,
-         censor.distr = "normal", censor.param = c(130, 15), censor.rate = NULL,
+         censor.distr = "normal", censor.param = c(130, 15), censor.rate = NULL, censor.time = NULL,
          lambda_0 = NULL, Lambda_0 = NULL, Lambda_0_inv = NULL, round.base = NULL)
 }
 

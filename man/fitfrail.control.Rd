@@ -10,9 +10,9 @@ This function creates a list of control parameters needed by fitfrail.
 
 \usage{
 fitfrail.control(fitmethod = "loglik", 
-                 abstol = 1e-08, reltol = 1e-06, maxit = 100,
-                 int.abstol = 0, int.reltol = 1e-08, int.maxit = 1000, 
-                 verbose = FALSE)
+                 abstol = 0, reltol = 1e-06, maxit = 100,
+                 int.abstol = 0, int.reltol = 1, int.maxit = 1000, 
+                 init.beta="coxph", init.theta=NULL, verbose = FALSE)
 }
 
 \arguments{
@@ -26,7 +26,7 @@ fitfrail.control(fitmethod = "loglik",
   }
   \item{int.abstol}{numeric absolute tolerence for convergence of the numeric integration. Only applicable for frailty distributions that require numerical integration. If 0, then ignore. Default is 0.
   }
-  \item{int.reltol}{numeric relative tolerence for convergence of the numeric integration. Only applicable for frailty distributions that require numerical integration. If 0, then ignore. Default is 1e-06.
+  \item{int.reltol}{numeric relative tolerence for convergence of the numeric integration. Only applicable for frailty distributions that require numerical integration. If 0, then ignore. Default is 1.
   }
   \item{int.maxit}{integer, maximum number of numeric integration function evaluations. Only applicable for frailty distributions that require numerical integration. If 0, then no limit. Default is 100.
   }
