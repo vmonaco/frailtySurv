@@ -8,6 +8,7 @@ frailtySurv
   * Improved loglik parameter estimation and convergence
   * Fixed the labels of residuals boxplot x-axis
   * Added check for Hmisc package in plotting
+  * Fixed clang warning with static casts
   
 ## New features
   * Added init.beta and init.theta control parameters for parameter initialization
