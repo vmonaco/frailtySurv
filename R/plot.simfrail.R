@@ -56,8 +56,9 @@ plot.simfrail.residuals <- function(sim, n.Lambda=3, Lambda.times=NULL, ...) {
   p <- ggplot(res.melt, aes_string(x='x', y='value', fill='variable')) + 
     geom_boxplot(notch=TRUE) +
     facet_grid(.~variable) +
-    labs(x="N",y="Residual") + 
-    theme(legend.position="none",axis.text.x=element_text(angle=-90, vjust=0.4,hjust=1))
+    labs(x="N", y="Residual") + 
+    theme(legend.position="none", 
+          axis.text.x=element_text(angle=-90, vjust=0.4, hjust=1))
   
   p
 }
@@ -65,7 +66,8 @@ plot.simfrail.residuals <- function(sim, n.Lambda=3, Lambda.times=NULL, ...) {
 plot.simfrail.hazard <- function(sim, CI=0.95, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE) || 
       !requireNamespace("reshape2", quietly = TRUE) ||
-      !requireNamespace("Hmisc", quietly = TRUE)) {
+      !requireNamespace("Hmisc", quietly = TRUE)
+      ) {
     stop("Plotting requires the ggplot2, reshape2, and Hmisc packages")
   }
   
