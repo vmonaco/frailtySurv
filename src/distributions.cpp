@@ -252,9 +252,8 @@ int lt_dlognormal_deriv(unsigned ndim, const double *x, void *fdata, unsigned fd
 }
 
 double lt_dlognormal(int m, double s, double* theta, double abstol, double reltol, int maxit) {
-  double result, error;
   double xmin[1] = {0}, xmax[1] = {1}, val, err;
-  double params[3] = {m, s, *theta};
+  double params[3] = {static_cast<double>(m), s, *theta};
   hcubature(1, lt_dlognormal_deriv, params, 1, xmin, xmax, maxit, 
             abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
   return val;
@@ -275,9 +274,8 @@ int deriv_lt_dlognormal_deriv(unsigned ndim, const double *x, void *fdata,
 
 double deriv_lt_dlognormal(int m, double s, double* theta, int deriv_idx,
                            double abstol, double reltol, int maxit) {
-  double result, error;
   double xmin[1] = {0}, xmax[1] = {1}, val, err;
-  double params[4] = {m, s, *theta, deriv_idx};
+  double params[4] = {static_cast<double>(m), s, *theta, static_cast<double>(deriv_idx)};
   hcubature(1, deriv_lt_dlognormal_deriv, params, 1, xmin, xmax, maxit, 
             abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
   return val;
@@ -300,9 +298,10 @@ int deriv_deriv_lt_dlognormal_deriv(unsigned ndim, const double *x, void *fdata,
 
 double deriv_deriv_lt_dlognormal(int m, double s, double* theta, int deriv_idx_1, int deriv_idx_2,
                                  double abstol, double reltol, int maxit) {
-  double result, error;
   double xmin[1] = {0}, xmax[1] = {1}, val, err;
-  double params[5] = {m, s, *theta, deriv_idx_1, deriv_idx_2};
+  double params[5] = {static_cast<double>(m), s, *theta, 
+                      static_cast<double>(deriv_idx_1), 
+                      static_cast<double>(deriv_idx_2)};
   hcubature(1, deriv_deriv_lt_dlognormal_deriv, params, 1, xmin, xmax, maxit, 
             abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
   return val;
@@ -379,9 +378,8 @@ int lt_dinvgauss_deriv(unsigned ndim, const double *x, void *fdata, unsigned fdi
 
 double lt_dinvgauss(int m, double s, double* theta,
                     double abstol, double reltol, int maxit) {
-  double result, error;
   double xmin[1] = {0}, xmax[1] = {1}, val, err;
-  double params[3] = {m, s, *theta};
+  double params[3] = {static_cast<double>(m), s, *theta};
   hcubature(1, lt_dinvgauss_deriv, params, 1, xmin, xmax, maxit, 
             abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
   return val;
@@ -402,9 +400,8 @@ int deriv_lt_dinvgauss_deriv(unsigned ndim, const double *x, void *fdata,
 
 double deriv_lt_dinvgauss(int m, double s, double* theta, int deriv_idx,
                           double abstol, double reltol, int maxit) {
-  double result, error;
   double xmin[1] = {0}, xmax[1] = {1}, val, err;
-  double params[4] = {m, s, *theta, deriv_idx};
+  double params[4] = {static_cast<double>(m), s, *theta, static_cast<double>(deriv_idx)};
   hcubature(1, deriv_lt_dinvgauss_deriv, params, 1, xmin, xmax, maxit, 
             abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
   return val;
@@ -427,9 +424,8 @@ int deriv_deriv_lt_dinvgauss_deriv(unsigned ndim, const double *x, void *fdata,
 
 double deriv_deriv_lt_dinvgauss(int m, double s, double* theta, int deriv_idx_1, int deriv_idx_2,
                                 double abstol, double reltol, int maxit) {
-  double result, error;
   double xmin[1] = {0}, xmax[1] = {1}, val, err;
-  double params[5] = {m, s, *theta, deriv_idx_1, deriv_idx_2};
+  double params[5] = {static_cast<double>(m), s, *theta, static_cast<double>(deriv_idx_1), static_cast<double>(deriv_idx_2)};
   hcubature(1, deriv_deriv_lt_dinvgauss_deriv, params, 1, xmin, xmax, maxit, 
             abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
   return val;
