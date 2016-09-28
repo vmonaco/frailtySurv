@@ -56,7 +56,7 @@ plot.simfrail.residuals <- function(sim, n.Lambda=3, Lambda.times=NULL, ...) {
   p <- ggplot(res.melt, aes_string(x='x', y='value', fill='variable')) + 
     geom_boxplot(notch=TRUE) +
     facet_grid(.~variable) +
-    labs(x="N", y="Residual") + 
+    labs(x="N", y="Bias") + 
     theme(legend.position="none", 
           axis.text.x=element_text(angle=-90, vjust=0.4, hjust=1))
   
