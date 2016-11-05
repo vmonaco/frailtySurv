@@ -22,7 +22,8 @@ genfrail(N = 300, K = 2, K.param = c(2, 0), beta = c(log(2)),
          covar.distr = "normal", covar.param = c(0, 1), covar.matrix = NULL,
          censor.distr = "normal", censor.param = c(130, 15), 
          censor.rate = NULL, censor.time = NULL,
-         lambda_0 = NULL, Lambda_0 = NULL, Lambda_0_inv = NULL, round.base = NULL)
+         lambda_0 = NULL, Lambda_0 = NULL, Lambda_0_inv = NULL, 
+         round.base = NULL, control, ...)
 }
 
 \arguments{
@@ -50,6 +51,10 @@ genfrail(N = 300, K = 2, K.param = c(2, 0), beta = c(log(2)),
   \item{Lambda_0_inv}{function inverse cumulative baseline hazard. This overrides both \code{lambda_0} and \code{Lambda_0}.}
   
   \item{round.base}{numeric if specified, round the followup times to the nearest \code{round.base}}
+  
+  \item{control}{control parameters in the form of a \code{\link{genfrail.control}} object}
+  
+  \item{...}{additional arguments will be passed to \code{\link[frailtySurv]{genfrail.control}}}
 }
 
 \value{

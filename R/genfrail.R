@@ -1,10 +1,12 @@
 genfrail <- function(# Number of clusters and cluster sizes
                      N = 300,
+                     
                      # If K is int, then fixed cluster sizes
                      # If K is numeric vector, then sizes provided
                      # Otherwise draw random
                      # can be one of: "poisson", "pareto", "uniform"
                      K = 2, 
+                     
                      # cluster size distributian params:
                      # K-truncated Poisson: c(lambda, truncated value)
                      # Discrete Pareto: c(alpha, max value inclusive)
@@ -15,8 +17,10 @@ genfrail <- function(# Number of clusters and cluster sizes
                      beta = c(log(2)),
                      
                      # Frailty distribution and parameter vector
-                     # Can be one of: "gamma", "pvf", "lognormal", "invgauss", "posstab", "none"
+                     # Can be one of: "gamma", "pvf", "lognormal", 
+                     # "invgauss", "posstab", "none"
                      frailty = "gamma",
+                     
                      # Frailty distribution parameter vector
                      theta = c(2), 
                      
@@ -27,7 +31,8 @@ genfrail <- function(# Number of clusters and cluster sizes
                      covar.matrix = NULL,
                      
                      # Censoring distribution and parameters vector
-                     # censor.distr can be one of: "normal", "lognormal", "uniform", "none"
+                     # censor.distr can be one of: "normal", "lognormal", 
+                     # "uniform", "none"
                      censor.distr = "normal",
                      censor.param = c(130,15),
                      censor.rate = NULL, # If specified, overrides censor.mu
@@ -40,9 +45,26 @@ genfrail <- function(# Number of clusters and cluster sizes
                      Lambda_0_inv = NULL, #i.e. function(t, c=0.01, d=4.6) (t^(1/d))/c,
                      
                      # Round time to nearest round.base
-                     round.base = NULL
+                     round.base = NULL,
+                     
+                     # Control parameters, mostly for numeric integration
+                     control,
+                     
+                     ...
 ) {
   Call <- match.call()
+  
+  # Match any ... args to genfrail.control
+  extraargs <- list(...)
+  if (length(extraargs)) {
+    controlargs <- names(formals(genfrail.control)) #legal arg names
+    indx <- pmatch(names(extraargs), controlargs, nomatch=0L)
+    if (any(indx==0L))
+      stop(gettextf("Argument %s not matched", names(extraargs)[indx==0L]),
+           domain = NA)
+  }
+  
+  if (missing(control)) control <- genfrail.control(...)
   
   # Determine cluster sizes
   if (is.numeric(K) && length(K) == 1) {
@@ -125,7 +147,9 @@ genfrail <- function(# Number of clusters and cluster sizes
         if (t <= 0) {
           return(0)
         }
-        integrate(lambda_0, 0, t, subdivisions = 1000L)$value
+        integrate(lambda_0, 0, t, 
+                  subdivisions=control$crowther.subdivisions,
+                  rel.tol=control$crowther.reltol)$value
       })
       hazard <- list(lambda_0=lambda_0)
     } else if (!is.null(Lambda_0)) {
@@ -179,7 +203,7 @@ genfrail <- function(# Number of clusters and cluster sizes
     } else {
       stop("Censoring distribution must be normal or lognormal")
     }
-  
+    
     if (censor.distr == "none") {
       censor.time <- rep(max(fail.time), NK)
     } else {
@@ -199,9 +223,13 @@ genfrail <- function(# Number of clusters and cluster sizes
               upper <- mu + interval/2
               censor.rate - 
                 (integrate(function(t) efail(t)*censor.density(t, lower, upper), 
-                           -Inf, censor.quantile(0.5, lower, upper), subdivisions=1e3)$value +
-                   integrate(function(t) efail(t)*censor.density(t, lower, upper), 
-                             censor.quantile(0.5, lower, upper), Inf, subdivisions=1e3)$value)
+                           -Inf, censor.quantile(0.5, lower, upper), 
+                           subdivisions=control$censor.subdivisions,
+                           rel.tol=control$censor.reltol)$value +
+                 integrate(function(t) efail(t)*censor.density(t, lower, upper), 
+                           censor.quantile(0.5, lower, upper), Inf, 
+                           subdivisions=control$censor.subdivisions,
+                           rel.tol=control$censor.reltol)$value)
             }, lower=0, upper=100, extendInt="up")$root
           censor.lower <- mu - interval/2
           censor.upper <- mu + interval/2
@@ -211,9 +239,13 @@ genfrail <- function(# Number of clusters and cluster sizes
           censor.mu <- uniroot(function(mu) 
             censor.rate - 
               (integrate(function(t) efail(t)*censor.density(t, mu, censor.sigma), 
-                         -Inf, censor.quantile(0.5, mu, censor.sigma), subdivisions=1e3)$value +
+                         -Inf, censor.quantile(0.5, mu, censor.sigma), 
+                         subdivisions=control$censor.subdivisions,
+                         rel.tol=control$censor.reltol)$value +
                  integrate(function(t) efail(t)*censor.density(t, mu, censor.sigma), 
-                           censor.quantile(0.5, mu, censor.sigma), Inf, subdivisions=1e3)$value),
+                           censor.quantile(0.5, mu, censor.sigma), Inf, 
+                           subdivisions=control$censor.subdivisions,
+                           rel.tol=control$censor.reltol)$value),
             lower=0, upper=100, extendInt="up")$root
         }
       }

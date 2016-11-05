@@ -35,6 +35,7 @@ fitfrail <- function(formula, dat, control, frailty, weights=NULL, se=FALSE, ...
       stop(gettextf("Argument %s not matched", names(extraargs)[indx==0L]),
            domain = NA)
   }
+  
   # Default to the fitfrail.control defaults
   if (missing(control)) control <- fitfrail.control(...)
   
