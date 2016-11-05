@@ -1,6 +1,11 @@
 frailtySurv
 --------
 
+# Version 1.3.1 (November 2016)
+  
+## New features
+  * Added numeric integration control parameters to genfrail (see genfrail.control)
+    
 # Version 1.3 (June 2016)
 
 ## Bug fixes
