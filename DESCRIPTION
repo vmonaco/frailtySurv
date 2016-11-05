@@ -29,7 +29,6 @@ Imports:
     numDeriv
 Suggests:
     knitr,
-    testthat,
     parallel,
     gridExtra
 NeedsCompilation: yes
