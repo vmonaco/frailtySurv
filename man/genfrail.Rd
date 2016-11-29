@@ -46,7 +46,7 @@ genfrail(N = 300, K = 2, K.param = c(2, 0), beta = c(log(2)),
   \item{censor.rate}{numeric value between 0 and 1 to specify the empirical censoring rate. The mean specified in the \code{censor.param} parameter is adjusted to achieve a desired censoring rate if \code{censor.rate} is given. Note that the standard deviation (the second parameter in \code{censor.param}) must still be specified so that the problem is identifiable. For uniform censorship, the interval given by \code{c(lower, upper)} is adjusted to achieve the desired censorship, while keeping the variance fixed (i.e., upper - lower does not change).}
   \item{censor.time}{vector of right-censorship times. This must have length N*K and specifies the right-censoring times of each observation. Note that this overrides all other censor.* params and cannot be used with variable cluster sizes.}
 
-  \item{lambda_0}{function baseline hazard. Only one of \code{lambda_0}, \code{Lambda_0}, and \code{Lambda_0_inv} need to be specified. Passing the baseline hazard (\code{lambda_0}) is the most computationally expensive since this requires numeric integration inside a root-finding algorithm.}
+  \item{lambda_0}{function baseline hazard. Only one of \code{lambda_0}, \code{Lambda_0}, and \code{Lambda_0_inv} need to be specified. Passing the baseline hazard (\code{lambda_0}) is the most computationally expensive since this requires numerical integration inside a root-finding algorithm.}
   \item{Lambda_0}{function cumulative baseline hazard. This overrides \code{lambda_0}.}
   \item{Lambda_0_inv}{function inverse cumulative baseline hazard. This overrides both \code{lambda_0} and \code{Lambda_0}.}
   
