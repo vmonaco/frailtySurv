@@ -3,24 +3,24 @@ frailtySurv
 
 # Version 1.3.1 (December 2016)
   
-## Bug fixes
-  * Removed unnecssary imports
-  
 ## New features
   * Added numeric integration control parameters to genfrail (see genfrail.control)
-    
+
+## Bug fixes
+  * Removed unnecssary imports
+
 # Version 1.3 (June 2016)
+  
+## New features
+  * Added init.beta and init.theta control parameters for parameter initialization
+  * Added censor.time parameter to genfrail for user-defined censorship times
+  * Added option to specify Lambda.times when plotting residuals
 
 ## Bug fixes
   * Made both loglik and score fit methods use the same convergence control parameters
   * Improved loglik parameter estimation and convergence
   * Fixed the labels of residuals boxplot x-axis
   * Fixed clang warning with static casts
-  
-## New features
-  * Added init.beta and init.theta control parameters for parameter initialization
-  * Added censor.time parameter to genfrail for user-defined censorship times
-  * Added option to specify Lambda.times when plotting residuals
   
 # Version 1.2.2 (September 2015)
 
