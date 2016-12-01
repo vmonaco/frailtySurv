@@ -9,7 +9,7 @@ output:
 
 ## frailtySurv
 
-```{r, cache = FALSE, echo = FALSE}
+```{r, echo=FALSE, cache=FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -23,19 +23,19 @@ frailtySurv is an R package for simulating and fitting semiparametric shared fra
 
 For the latest stable version, install from CRAN:
 
-```{r eval = F}
+```{r eval=F}
 install.packages("frailtySurv")
 ```
 
 The development version can be installed from github using `devtools`.
 
-```{r eval = F}
+```{r eval=FALSE}
 devtools::install_github("vmonaco/frailtySurv")
 ```
 
 ## Example
 The following code shows how to generate data and fit the model.
-```{r, echo=TRUE, cache=TRUE}
+```{r, echo=TRUE, cache=FALSE}
 set.seed(1234)
 library(frailtySurv)
 dat <- genfrail(N=200, K=2, beta=c(log(2),log(3)), 
@@ -51,12 +51,12 @@ fit
 ```
 
 Parameter traces are given by
-```{r, message=FALSE, echo=TRUE, fig.height=3, fig.width=8, cache=TRUE}
+```{r, message=FALSE, echo=TRUE, fig.height=3, fig.width=8, cache=FALSE}
 plot(fit, "trace")
 ```
 
 The estimated cumulative baseline hazard is given by
-```{r, message=FALSE, echo=TRUE, fig.height=3, fig.width=8, cache=TRUE}
+```{r, message=FALSE, echo=TRUE, fig.height=3, fig.width=8, cache=FALSE}
 plot(fit, "hazard")
 ```
 
@@ -84,13 +84,13 @@ Also see the chapter in the [R packages book](http://r-pkgs.had.co.nz/git.html)
 ### Build everything
 
 To load the package (simulate installing and loading with `library(frailty)`):
-```{r eval = F}
+```{r eval=FALSE}
 devtools::load_all()
 ```
 or shortuct: **Ctrl+Shift+L**
 
 Use this command to build a source package (binary = FALSE by default)
-```{r eval = F}
+```{r eval=FALSE}
 devtools::build()
 ```
 
@@ -103,7 +103,7 @@ Other usefull commands and shortcuts:
 ### Build vignettes
 
 Build the vignettes with the command:
-```{r eval = F}
+```{r eval=FALSE}
 devtools::build_vignettes()
 ```
 

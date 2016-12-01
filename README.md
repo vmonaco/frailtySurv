@@ -29,7 +29,7 @@ The following code shows how to generate data and fit the model.
 set.seed(1234)
 library(frailtySurv)
 #> Loading required package: survival
-#> Welcome to frailtySurv
+#> Welcome to frailtySurv v1.3.1
 dat <- genfrail(N=200, K=2, beta=c(log(2),log(3)), 
                 frailty="gamma", theta=2,
                 censor.rate=0.35,
@@ -50,7 +50,7 @@ fit
 #> 
 #> Frailty distribution   gamma(1.802), VAR of frailty variates = 1.802
 #> Log-likelihood         -1575.752
-#> Converged (method)     10 iterations, 3.26 secs (maximized log-likelihood)
+#> Converged (method)     10 iterations, 3.05 secs (maximized log-likelihood)
 ```
 
 Parameter traces are given by
@@ -59,7 +59,7 @@ Parameter traces are given by
 plot(fit, "trace")
 ```
 
-![](figures/unnamed-chunk-6-1.png)<!-- -->
+![](figures/unnamed-chunk-6-1.png)
 
 The estimated cumulative baseline hazard is given by
 
@@ -67,7 +67,7 @@ The estimated cumulative baseline hazard is given by
 plot(fit, "hazard")
 ```
 
-![](figures/unnamed-chunk-7-1.png)<!-- -->
+![](figures/unnamed-chunk-7-1.png)
 
 The results can be compared to other estimation techniques.
 
@@ -94,7 +94,7 @@ coxph(Surv(time, status) ~ Z1 + Z2 + frailty.gamma(family), data=dat)
 frailtyPenal(Surv(time, status) ~ Z1 + Z2 + cluster(family), data=dat, n.knots=10, kappa=2)
 #> 
 #> Be patient. The program is computing ... 
-#> The program took 0.12 seconds
+#> The program took 0.34 seconds
 #> Call:
 #> frailtyPenal(formula = Surv(time, status) ~ Z1 + Z2 + cluster(family), 
 #>     data = dat, n.knots = 10, kappa = 2)
