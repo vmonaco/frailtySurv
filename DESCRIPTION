@@ -25,7 +25,6 @@ Imports:
     nleqslv,
     reshape2,
     ggplot2,
-    Hmisc (>= 4.0.0),
     numDeriv
 Suggests:
     knitr,
