@@ -50,7 +50,7 @@ fit
 #> 
 #> Frailty distribution   gamma(1.802), VAR of frailty variates = 1.802
 #> Log-likelihood         -1575.752
-#> Converged (method)     10 iterations, 3.05 secs (maximized log-likelihood)
+#> Converged (method)     10 iterations, 2.84 secs (maximized log-likelihood)
 ```
 
 Parameter traces are given by
@@ -94,7 +94,7 @@ coxph(Surv(time, status) ~ Z1 + Z2 + frailty.gamma(family), data=dat)
 frailtyPenal(Surv(time, status) ~ Z1 + Z2 + cluster(family), data=dat, n.knots=10, kappa=2)
 #> 
 #> Be patient. The program is computing ... 
-#> The program took 0.34 seconds
+#> The program took 0.33 seconds
 #> Call:
 #> frailtyPenal(formula = Surv(time, status) ~ Z1 + Z2 + cluster(family), 
 #>     data = dat, n.knots = 10, kappa = 2)
@@ -167,10 +167,6 @@ devtools::build_vignettes()
 ```
 
 Compiled vignettes will reside in `inst/doc`. In particular, see frailtySurv.pdf
-
-### Run tests
-
-frailtySurv uses the `testthat` library for tests. Test files are all located in `tests/testthat`. To run all tests, use the command `devtools::test()` or shortcut **Ctrl+Shift+T**
 
 ### git pull
 
