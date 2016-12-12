@@ -15,7 +15,7 @@ Returns a \code{data.frame} summarizing the survival curve of the fitted model. 
 \arguments{
   \item{object}{{a \code{fitfrail} object}}
   
-  \item{type}{string indicating the type of summary: either "survival" for a summary of the survival curve, or "hazard" for a summary of the cumulative baseline hazard.}
+  \item{type}{string indicating the type of summary: either "survival" for a summary of the survival curve, or "cum.hazard" for a summary of the cumulative baseline hazard.}
   
   \item{Lambda.times}{vector of times where the curve should be evaluated. The resulting \code{data.frame} will have 1 row for each time. If NULL and censored=TRUE, all observed times are used by default. If NULL and censored=FALSE, only the failure times are including in the results.
 }
@@ -33,7 +33,7 @@ Returns a \code{data.frame} summarizing the survival curve of the fitted model. 
 A \code{data.frame} summarizing the survival curve with the following columns.
 
   \item{time}{the time points}
-  \item{surv/haz}{survival/hazard estimate at time t+}
+  \item{surv/haz}{survival/cumulative hazard estimate at time t+}
   \item{n.risk}{number of subjects at risk at time t-}
   \item{n.event}{the number of failures that occured from the last time point to time t+}
   \item{std.err}{the SE of the survival estimate}

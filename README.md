@@ -50,7 +50,7 @@ fit
 #> 
 #> Frailty distribution   gamma(1.802), VAR of frailty variates = 1.802
 #> Log-likelihood         -1575.752
-#> Converged (method)     10 iterations, 2.83 secs (maximized log-likelihood)
+#> Converged (method)     10 iterations, 2.85 secs (maximized log-likelihood)
 ```
 
 Parameter traces are given by
@@ -66,6 +66,8 @@ The estimated cumulative baseline hazard is given by
 ``` r
 plot(fit, "cum.hazard")
 ```
+
+![](figures/unnamed-chunk-7-1.png)
 
 The results can be compared to other estimation techniques.
 
@@ -92,7 +94,7 @@ coxph(Surv(time, status) ~ Z1 + Z2 + frailty.gamma(family), data=dat)
 frailtyPenal(Surv(time, status) ~ Z1 + Z2 + cluster(family), data=dat, n.knots=10, kappa=2)
 #> 
 #> Be patient. The program is computing ... 
-#> The program took 0.39 seconds
+#> The program took 0.33 seconds
 #> Call:
 #> frailtyPenal(formula = Surv(time, status) ~ Z1 + Z2 + cluster(family), 
 #>     data = dat, n.knots = 10, kappa = 2)

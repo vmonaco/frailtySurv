@@ -20,7 +20,7 @@ fitfrail.control(fitmethod = "loglik",
   }
   \item{abstol}{numeric absolute tolerance for convergence. If fitmethod is "loglik", convergence is reached when the absolute reduction in loglikelihood is less than abstol. If fitmethod is "score", convergence is reached when the absolute value of each normalized score equation is less then abstol.
   }
-  \item{reltol}{numeric relative tolerance for convergence. If fitmethod is "loglik", convergence is reached when the relative reduction in loglikelihood is less than reltol. If fitmethod is "score", convergence is reached when the relative reduction of each score equation is less than reltol.
+  \item{reltol}{numeric relative tolerance for convergence. If fitmethod is "loglik", convergence is reached when the relative reduction in loglikelihood is less than reltol. If fitmethod is "score", convergence is reached when the relative reduction of each estimated parameter is less than reltol.
   }
   \item{maxit}{integer, maximum number of iterations to perform
   }

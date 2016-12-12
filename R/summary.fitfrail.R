@@ -2,8 +2,8 @@ summary.fitfrail <- function(object, type="survival", Lambda.times=NULL,
                              censored=FALSE, se=FALSE, CI=0.95, ...) {
   fit <- object
   
-  if (!match(type,c("survival", "hazard"), nomatch=0))
-    stop("type must be either 'survival' or 'hazard'")
+  if (!match(type,c("survival", "cum.hazard"), nomatch=0))
+    stop("type must be either 'survival' or 'cum.hazard'")
   
   if (!inherits(fit, "fitfrail")) 
     stop("summary.fitfrail can only be used for fitfrail objects")
@@ -40,7 +40,7 @@ summary.fitfrail <- function(object, type="survival", Lambda.times=NULL,
   
   if (type == "survival") {
     result$surv <- exp(-fit$Lambda.fun(Lambda.times))
-  } else if (type == "hazard") {
+  } else if (type == "cum.hazard") {
     result$haz <- fit$Lambda.fun(Lambda.times)
   }
   
@@ -58,7 +58,7 @@ summary.fitfrail <- function(object, type="survival", Lambda.times=NULL,
         result$lower.ci <- lower
         result$upper.ci <- upper
       }
-    } else if (type == "hazard") {
+    } else if (type == "cum.hazard") {
       result$std.err <- cbh.se
       
       if (CI > 0) {
