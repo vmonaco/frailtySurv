@@ -64,10 +64,8 @@ plot(fit, "trace")
 The estimated cumulative baseline hazard is given by
 
 ``` r
-plot(fit, "hazard")
+plot(fit, "cum.hazard")
 ```
-
-![](figures/unnamed-chunk-7-1.png)
 
 The results can be compared to other estimation techniques.
 
@@ -94,7 +92,7 @@ coxph(Surv(time, status) ~ Z1 + Z2 + frailty.gamma(family), data=dat)
 frailtyPenal(Surv(time, status) ~ Z1 + Z2 + cluster(family), data=dat, n.knots=10, kappa=2)
 #> 
 #> Be patient. The program is computing ... 
-#> The program took 0.34 seconds
+#> The program took 0.39 seconds
 #> Call:
 #> frailtyPenal(formula = Surv(time, status) ~ Z1 + Z2 + cluster(family), 
 #>     data = dat, n.knots = 10, kappa = 2)
