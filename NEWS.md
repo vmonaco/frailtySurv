@@ -1,6 +1,11 @@
 frailtySurv
 --------
 
+# Version 1.3.2 (January 2017)
+
+## Bug fixes
+  * Renamed plot.fitfrail type to "cum.hazard" to avoid confusion with the baseline hazard rate.
+
 # Version 1.3.1 (December 2016)
   
 ## New features

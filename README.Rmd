@@ -57,7 +57,7 @@ plot(fit, "trace")
 
 The estimated cumulative baseline hazard is given by
 ```{r, message=FALSE, echo=TRUE, fig.height=3, fig.width=8, cache=FALSE}
-plot(fit, "hazard")
+plot(fit, "cum.hazard")
 ```
 
 The results can be compared to other estimation techniques.
