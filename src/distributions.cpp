@@ -230,14 +230,14 @@ double deriv_dlognormal(double x, double *params, int deriv_idx) {
 
 double deriv_deriv_dlognormal(double x, double *params, int deriv_idx_1, int deriv_idx_2) {
   double theta = params[0];
-  return pow(log(x), 2) * (exp(-(pow(log(x), 2))/(2 * theta)) * ((pow(log(x), 2)) * 
-   2/pow((2 * theta),2)))/(2 * sqrt(2 * PI) * pow(theta,5.0/2.0) * x) - (pow(log(x), 2) * 
-   exp(-(pow(log(x), 2))/(2 * theta))) * (2 * sqrt(2 * PI) * 
-   (pow(theta,((5.0/2.0) - 1)) * (5/2)) * x)/pow((2 * sqrt(2 * PI) * pow(theta,5.0/2.0) * x),2) - 
-   (exp(-(pow(log(x), 2))/(2 * theta)) * ((pow(log(x), 2)) * 2/pow((2 * theta),2))/(2 * 
-   sqrt(2 * PI) * pow(theta,3.0/2.0) * x) - (exp(-(pow(log(x), 2))/(2 * 
-   theta))) * (2 * sqrt(2 * PI) * (pow(theta,((3.0/2.0) - 1)) * (3.0/2.0)) * 
-   x)/pow((2 * sqrt(2 * PI) * pow(theta,3.0/2.0) * x),2));
+  return pow(log(x),2.0) * (exp(-(pow(log(x),2.0))/(2.0 * theta)) * ((pow(log(x),2.0)) * 
+             2.0/pow((2.0 * theta),2.0)))/(2.0 * sqrt(2.0 * PI) * pow(theta,(5.0/2.0)) * x) - (pow(log(x),2.0) * 
+             exp(-(pow(log(x),2.0))/(2.0 * theta))) * (2.0 * sqrt(2.0 * PI) * (pow(theta,((5.0/2.0) - 1)) * 
+             (5.0/2.0)) * x)/pow((2.0 * sqrt(2.0 * PI) * pow(theta,(5.0/2.0)) * x),2.0) - 
+             (exp(-(pow(log(x),2.0))/(2.0 * theta)) * ((pow(log(x),2.0)) * 2.0/pow((2.0 * theta),2.0))/(2.0 * 
+             sqrt(2.0 * PI) * pow(theta,(3.0/2.0)) * x) - (exp(-(pow(log(x),2.0))/(2.0 * 
+             theta))) * (2.0 * sqrt(2.0 * PI) * (pow(theta,((3.0/2.0) - 1)) * (3.0/2.0)) * 
+             x)/pow((2.0 * sqrt(2.0 * PI) * pow(theta,(3.0/2.0)) * x),2.0));
 }
 
 int lt_dlognormal_deriv(unsigned ndim, const double *x, void *fdata, unsigned fdim, double *fval) {
