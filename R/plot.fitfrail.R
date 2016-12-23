@@ -1,5 +1,12 @@
 plot.fitfrail <- function(x, type=c("cumhaz", "trace"), ...) {
   fit <- x
+  
+  if (!inherits(fit, "fitfrail")) 
+    stop("plot.fitfrail can only be used for fitfrail objects")
+  
+  if (!match(type, c("cumhaz", "trace"), nomatch=0))
+    stop("type must be either 'cumhaz' or 'trace'")
+  
   if (type == "cumhaz") {
     plot.fitfrail.cumhaz(fit, ...)
   } else if (type == "trace") {

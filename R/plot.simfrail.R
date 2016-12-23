@@ -1,5 +1,12 @@
 plot.simfrail <- function(x, type=c("residuals", "cumhaz"), ...) {
   sim <- x
+  
+  if (!inherits(sim, "simfrail")) 
+    stop("plot.simfrail can only be used for simfrail objects")
+  
+  if (!match(type, c("residuals", "cumhaz"), nomatch=0))
+    stop("type must be either 'residuals' or 'cumhaz'")
+  
   if (type == "residuals") {
     plot.simfrail.residuals(sim, ...)
   } else if (type == "cumhaz") {

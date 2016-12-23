@@ -2,11 +2,11 @@ summary.fitfrail <- function(object, type=c("survival", "cumhaz"), Lambda.times=
                              censored=FALSE, se=FALSE, CI=0.95, ...) {
   fit <- object
   
-  if (!match(type,c("survival", "cumhaz"), nomatch=0))
-    stop("type must be either 'survival' or 'cumhaz'")
-  
   if (!inherits(fit, "fitfrail")) 
     stop("summary.fitfrail can only be used for fitfrail objects")
+  
+  if (!match(type, c("survival", "cumhaz"), nomatch=0))
+    stop("type must be either 'survival' or 'cumhaz'")
   
   if (!is.null(Lambda.times)) {
     if (!is.numeric(Lambda.times)) 
