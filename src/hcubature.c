@@ -34,9 +34,9 @@
 #include <float.h>
 
 /* Adaptive multidimensional integration on hypercubes (or, really,
-                                                        hyper-rectangles) using cubature rules.
-                                                        
-                                                        A cubature rule takes a function and a hypercube and evaluates
+hyper-rectangles) using cubature rules.
+
+A cubature rule takes a function and a hypercube and evaluates
 the function at a small number of points, returning an estimate
 of the integral as well as an estimate of the error, and also
 a suggested dimension of the hypercube to subdivide.
@@ -453,7 +453,8 @@ static void destroy_rule75genzmalik(rule *r_)
   free(r->p);
 }
 
-static int rule75genzmalik_evalError(rule *r_, unsigned fdim, integrand_v f, void *fdata, unsigned nR, region *R)
+static int rule75genzmalik_evalError(rule *r_, unsigned fdim, integrand_v f, 
+                                     void *fdata, unsigned nR, region *R)
 {
   /* lambda2 = sqrt(9/70), lambda4 = sqrt(9/10), lambda5 = sqrt(9/19) */
   const double lambda2 = 0.3585685828003180919906451539079374954541;
@@ -549,8 +550,10 @@ static int rule75genzmalik_evalError(rule *r_, unsigned fdim, integrand_v f, voi
         sum5 += VALS(k0 + k);
       
       /* Calculate fifth and seventh order results */
-      result = R[iR].h.vol * (r->weight1 * val0 + weight2 * sum2 + r->weight3 * sum3 + weight4 * sum4 + r->weight5 * sum5);
-      res5th = R[iR].h.vol * (r->weightE1 * val0 + weightE2 * sum2 + r->weightE3 * sum3 + weightE4 * sum4);
+      result = R[iR].h.vol * (r->weight1 * val0 + weight2 * sum2 +
+                              r->weight3 * sum3 + weight4 * sum4 + r->weight5 * sum5);
+      res5th = R[iR].h.vol * (r->weightE1 * val0 + weightE2 * sum2 + 
+                              r->weightE3 * sum3 + weightE4 * sum4);
       
       R[iR].ee[j].val = result;
       R[iR].ee[j].err = fabs(res5th - result);

@@ -26,13 +26,9 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
   
   time_sorted_idx <- order(time)
   time_steps <- c(0, time[time_sorted_idx])
-  # time_steps <- c(0, sort(unique(time)))
   k_tau <- length(time_steps) # index of the last time step
   
   # d_[k] is the number of failures at time t_k
-#   d_ <- vapply(seq_along(time_steps), function(k) {
-#     sum(status[time == time_steps[k]])
-#   }, 0)
   d_ <- c(0, unname(status[time_sorted_idx]))
   
   # Variables indexed by [[i]][j,] where i is cluster name and j is member
@@ -46,7 +42,6 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
   }
   
   # Index of the observed time, K_[[i]][j]
-  # K_ <- split(1 + increasing_rank(time), cluster) 
   K_ <- split(1 + rank(time, ties.method="first"), cluster)
   
   # Cluster names and sizes
@@ -110,6 +105,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
   # gamma is c(beta, theta), several global variables are updated since these are
   # reused in other places (jacobian, covar matrix)
   fit_fn <- function(hat.gamma) {
+    
     # Update the current estimate. Everything below depends on this
     if (iter > 0) {
       VARS$prev.hat.gamma <- VARS$hat.gamma
@@ -279,6 +275,7 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
   })
   
   start.time <- Sys.time()
+  
   # The actual optimization takes place here
   if (control$fitmethod == "loglik") {
     fitter <- optim(init.gamma, fit_fn,
@@ -289,7 +286,6 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
                     control=list(factr=0, pgtol=0, fnscale=-1, lmm=10, 
                                  maxit=.Machine$integer.max)
                     )
-    # hat.gamma <- fitter$par
   } else if (control$fitmethod == "score") {
     fitter <- nleqslv(init.gamma, fit_fn, 
                       control=list(xtol=control$reltol, ftol=control$abstol,
@@ -298,8 +294,8 @@ fitfrail.fit <- function(x, y, cluster, init.beta, init.theta, frailty,
                       jac=score_jacobian,
                       jacobian=FALSE
                       )
-    # hat.gamma <- fitter$x
   }
+  
   fit.time <- Sys.time() - start.time
   
   if (control$verbose)
