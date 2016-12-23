@@ -44,7 +44,7 @@ dat <- genfrail(N=200, K=2, beta=c(log(2),log(3)),
                 Lambda_0=function(t, tau=4.6, C=0.01) (C*t)^tau)
 
 fit <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family), 
-                dat, frailty="gamma")
+                dat=dat, frailty="gamma")
 ```
 ```{r, echo=TRUE}
 fit
@@ -52,12 +52,12 @@ fit
 
 Parameter traces are given by
 ```{r, message=FALSE, echo=TRUE, fig.height=3, fig.width=8, cache=FALSE}
-plot(fit, "trace")
+plot(fit, type="trace")
 ```
 
 The estimated cumulative baseline hazard is given by
 ```{r, message=FALSE, echo=TRUE, fig.height=3, fig.width=8, cache=FALSE}
-plot(fit, "cum.hazard")
+plot(fit, type="cumhaz")
 ```
 
 The results can be compared to other estimation techniques.

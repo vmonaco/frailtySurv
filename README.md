@@ -29,14 +29,14 @@ The following code shows how to generate data and fit the model.
 set.seed(1234)
 library(frailtySurv)
 #> Loading required package: survival
-#> Welcome to frailtySurv v1.3.1
+#> Welcome to frailtySurv v1.3.2
 dat <- genfrail(N=200, K=2, beta=c(log(2),log(3)), 
                 frailty="gamma", theta=2,
                 censor.rate=0.35,
                 Lambda_0=function(t, tau=4.6, C=0.01) (C*t)^tau)
 
 fit <- fitfrail(Surv(time, status) ~ Z1 + Z2 + cluster(family), 
-                dat, frailty="gamma")
+                dat=dat, frailty="gamma")
 ```
 
 ``` r
@@ -50,13 +50,13 @@ fit
 #> 
 #> Frailty distribution   gamma(1.802), VAR of frailty variates = 1.802
 #> Log-likelihood         -1575.752
-#> Converged (method)     10 iterations, 2.85 secs (maximized log-likelihood)
+#> Converged (method)     10 iterations, 2.83 secs (maximized log-likelihood)
 ```
 
 Parameter traces are given by
 
 ``` r
-plot(fit, "trace")
+plot(fit, type="trace")
 ```
 
 ![](figures/unnamed-chunk-6-1.png)
@@ -64,7 +64,7 @@ plot(fit, "trace")
 The estimated cumulative baseline hazard is given by
 
 ``` r
-plot(fit, "cum.hazard")
+plot(fit, type="cumhaz")
 ```
 
 ![](figures/unnamed-chunk-7-1.png)
@@ -94,7 +94,7 @@ coxph(Surv(time, status) ~ Z1 + Z2 + frailty.gamma(family), data=dat)
 frailtyPenal(Surv(time, status) ~ Z1 + Z2 + cluster(family), data=dat, n.knots=10, kappa=2)
 #> 
 #> Be patient. The program is computing ... 
-#> The program took 0.33 seconds
+#> The program took 0.4 seconds
 #> Call:
 #> frailtyPenal(formula = Surv(time, status) ~ Z1 + Z2 + cluster(family), 
 #>     data = dat, n.knots = 10, kappa = 2)

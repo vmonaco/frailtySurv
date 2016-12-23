@@ -9,17 +9,17 @@ Plot the estimated parameter residuals or the mean estimated cumulative baseline
 }
 
 \usage{
-\method{plot}{simfrail}(x, type = c("residuals", "hazard"), ...)
+\method{plot}{simfrail}(x, type = c("residuals", "cumhaz"), ...)
 }
 
 \arguments{
   \item{x}{{a \code{fitfrail} object}}
   
-  \item{type}{string, the type of plot. Can be either "residuals" or "hazard". If \code{type="residuals"}, a boxplot of the estimated parameter residuals is created. If \code{type="hazard"}, the mean estimated and true cumulative baseline hazard are plotted.}
+  \item{type}{string, the type of plot. Can be either "residuals" or "cumhaz". If \code{type="residuals"}, a boxplot of the estimated parameter residuals is created. If \code{type="cumhaz"}, the mean estimated and true cumulative baseline hazard are plotted.}
   
   \item{\dots}{extra arguments include: 
   
-    \code{CI} for \code{type="hazard"}, the confidence interval for the empirical cumulative baseline hazard.
+    \code{CI} for \code{type="cumhaz"}, the confidence interval for the empirical cumulative baseline hazard.
   
     \code{n.Lambda} for \code{type="residuals"}, the number of time points to show the cumulative baseline hazard residuals for.}
 }
@@ -50,9 +50,9 @@ sim <- simfrail(1000,
     Lambda.times=1:120)
 
 # Make a boxplot of residuals
-plot(sim, "residuals")
+plot(sim, type="residuals")
 
 # Plot the mean estimated cumulative baseline hazard and empirical 0.95 CI
-plot(sim, "hazard")
+plot(sim, type="cumhaz")
 }
 }

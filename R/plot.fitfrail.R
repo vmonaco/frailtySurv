@@ -1,7 +1,7 @@
-plot.fitfrail <- function(x, type=c("cum.hazard", "trace"), ...) {
+plot.fitfrail <- function(x, type=c("cumhaz", "trace"), ...) {
   fit <- x
-  if (type == "cum.hazard") {
-    plot.fitfrail.cum.hazard(fit, ...)
+  if (type == "cumhaz") {
+    plot.fitfrail.cumhaz(fit, ...)
   } else if (type == "trace") {
     plot.fitfrail.trace(fit, ...)
   }
@@ -45,7 +45,7 @@ plot.fitfrail.trace <- function(fit, show.loglik=TRUE, ...) {
   }
 }
 
-plot.fitfrail.cum.hazard <- function(fit, CI=0, end=NULL, ...) {
+plot.fitfrail.cumhaz <- function(fit, CI=0, end=NULL, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Plotting requires the ggplot2 package")
   }

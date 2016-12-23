@@ -1,9 +1,9 @@
-plot.simfrail <- function(x, type=c("residuals","hazard"), ...) {
+plot.simfrail <- function(x, type=c("residuals", "cumhaz"), ...) {
   sim <- x
   if (type == "residuals") {
     plot.simfrail.residuals(sim, ...)
-  } else if (type == "hazard") {
-    plot.simfrail.hazard(sim, ...)
+  } else if (type == "cumhaz") {
+    plot.simfrail.cumhaz(sim, ...)
   }
 }
 
@@ -63,7 +63,7 @@ plot.simfrail.residuals <- function(sim, n.Lambda=3, Lambda.times=NULL, ...) {
   p
 }
 
-plot.simfrail.hazard <- function(sim, CI=0.95, ...) {
+plot.simfrail.cumhaz <- function(sim, CI=0.95, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE) || 
       !requireNamespace("reshape2", quietly = TRUE)
       ) {
