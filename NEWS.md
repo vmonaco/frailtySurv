@@ -1,7 +1,7 @@
 frailtySurv
 --------
 
-# Version 1.3.2 (January 2017)
+# Version 1.3.2 (February 2017)
 
 ## Bug fixes
   * Renamed "hazard" "cumhaz" in plot/summary functions to avoid confusion with the baseline hazard rate.
