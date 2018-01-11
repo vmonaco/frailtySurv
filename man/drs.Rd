@@ -45,7 +45,7 @@ fit.drs
 vcov(fit.drs)
 
 # Plot the estimated cumulative baseline hazard
-plot(fit.drs, "hazard")
+plot(fit.drs, type="cumhaz")
 }
 }
 \keyword{datasets}
