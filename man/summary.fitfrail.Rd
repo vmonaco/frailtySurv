@@ -8,7 +8,7 @@ Summary of the survival curve
 Returns a \code{data.frame} summarizing the survival curve of the fitted model. If specified, this function uses a weighted bootstrap procedure to calculate SE of the survival curve estimates. Subsequente calls with the same arguments will use the cached SE and avoid performing the weighted bootstrap again.
 }
 \usage{
-\method{summary}{fitfrail}(object, type = c("survival", "cumhaz"), Lambda.times = NULL, 
+\method{summary}{fitfrail}(object, type = "survival", Lambda.times = NULL, 
                            censored = FALSE, se = FALSE, CI = 0.95, ...)
 }
 

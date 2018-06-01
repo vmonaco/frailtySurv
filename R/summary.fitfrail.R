@@ -1,4 +1,4 @@
-summary.fitfrail <- function(object, type=c("survival", "cumhaz"), Lambda.times=NULL, 
+summary.fitfrail <- function(object, type="survival", Lambda.times=NULL, 
                              censored=FALSE, se=FALSE, CI=0.95, ...) {
   fit <- object
   
