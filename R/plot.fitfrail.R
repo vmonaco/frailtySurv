@@ -45,6 +45,7 @@ plot.fitfrail.trace <- function(fit, show.loglik=TRUE, ...) {
       xlab("Iteration") + 
       ylab("Log-liklihood") + 
       scale_x_continuous(breaks = breaks) +
+      theme(plot.title = element_text(hjust = 0.5)) +
       ggtitle("Log-likelihood trace")
     
     gridExtra::grid.arrange(p, p2, ncol=2)

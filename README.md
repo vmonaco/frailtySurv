@@ -29,7 +29,7 @@ The following code shows how to generate data and fit the model.
 set.seed(1234)
 library(frailtySurv)
 #> Loading required package: survival
-#> Welcome to frailtySurv v1.3.2
+#> Welcome to frailtySurv v1.3.3
 dat <- genfrail(N=200, K=2, beta=c(log(2),log(3)), 
                 frailty="gamma", theta=2,
                 censor.rate=0.35,
@@ -50,7 +50,7 @@ fit
 #> 
 #> Frailty distribution   gamma(1.802), VAR of frailty variates = 1.802
 #> Log-likelihood         -1575.752
-#> Converged (method)     10 iterations, 2.83 secs (maximized log-likelihood)
+#> Converged (method)     10 iterations, 3.24 secs (maximized log-likelihood)
 ```
 
 Parameter traces are given by
@@ -59,7 +59,7 @@ Parameter traces are given by
 plot(fit, type="trace")
 ```
 
-![](figures/unnamed-chunk-6-1.png)
+![](man/figures/example-trace-1.png)
 
 The estimated cumulative baseline hazard is given by
 
@@ -67,7 +67,7 @@ The estimated cumulative baseline hazard is given by
 plot(fit, type="cumhaz")
 ```
 
-![](figures/unnamed-chunk-7-1.png)
+![](man/figures/example-cumhaz-1.png)
 
 The results can be compared to other estimation techniques.
 
@@ -90,11 +90,11 @@ coxph(Surv(time, status) ~ Z1 + Z2 + frailty.gamma(family), data=dat)
 #> Iterations: 7 outer, 58 Newton-Raphson
 #>      Variance of random effect= 1.88   I-likelihood = -1319.6 
 #> Degrees of freedom for terms=   0.8   0.8 149.7 
-#> Likelihood ratio test=576  on 151 df, p=0  n= 400
+#> Likelihood ratio test=576  on 151 df, p=<2e-16  n= 400
 frailtyPenal(Surv(time, status) ~ Z1 + Z2 + cluster(family), data=dat, n.knots=10, kappa=2)
 #> 
 #> Be patient. The program is computing ... 
-#> The program took 0.4 seconds
+#> The program took 0.22 seconds
 #> Call:
 #> frailtyPenal(formula = Surv(time, status) ~ Z1 + Z2 + cluster(family), 
 #>     data = dat, n.knots = 10, kappa = 2)
@@ -103,15 +103,15 @@ frailtyPenal(Surv(time, status) ~ Z1 + Z2 + cluster(family), data=dat, n.knots=1
 #>   Shared Gamma Frailty model parameter estimates  
 #>   using a Penalized Likelihood on the hazard function 
 #> 
-#>        coef exp(coef) SE coef (H) SE coef (HIH)       z          p
-#> Z1 0.672355   1.95884   0.0994872     0.0994872 6.75820 1.3972e-11
-#> Z2 1.048828   2.85430   0.1191790     0.1191790 8.80045 0.0000e+00
+#>       coef exp(coef) SE coef (H) SE coef (HIH)       z          p
+#> Z1 0.67236   1.95885   0.0994732     0.0994732 6.75921 1.3875e-11
+#> Z2 1.04884   2.85433   0.1191210     0.1191210 8.80481 0.0000e+00
 #> 
-#>     Frailty parameter, Theta: 1.92375 (SE (H): 0.319542 ) p = 8.703e-10 
+#>     Frailty parameter, Theta: 1.92378 (SE (H): 0.319435 ) p = 8.5895e-10 
 #>  
 #>       penalized marginal log-likelihood = -1378.15
 #>       Convergence criteria: 
-#>       parameters = 6.38e-05 likelihood = 5.61e-07 gradient = 4.67e-10 
+#>       parameters = 0.000362 likelihood = 0.000201 gradient = 2.44e-08 
 #> 
 #>       LCV = the approximate likelihood cross-validation criterion
 #>             in the semi parametrical case     = 3.48287 

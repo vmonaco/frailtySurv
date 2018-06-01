@@ -51,12 +51,12 @@ fit
 ```
 
 Parameter traces are given by
-```{r, message=FALSE, echo=TRUE, fig.height=3, fig.width=8, cache=FALSE}
+```{r example-trace, echo=TRUE, fig.height=3, fig.width=8, message=FALSE, cache=FALSE, fig.path="man/figures/"}
 plot(fit, type="trace")
 ```
 
 The estimated cumulative baseline hazard is given by
-```{r, message=FALSE, echo=TRUE, fig.height=3, fig.width=8, cache=FALSE}
+```{r example-cumhaz, echo=TRUE, fig.height=3, fig.width=8, message=FALSE, cache=FALSE, fig.path="man/figures/"}
 plot(fit, type="cumhaz")
 ```
 
