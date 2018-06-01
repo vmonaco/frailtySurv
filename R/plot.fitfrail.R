@@ -32,7 +32,8 @@ plot.fitfrail.trace <- function(fit, show.loglik=TRUE, ...) {
     xlab("Iteration") + 
     ylab("Estimate") + 
     scale_x_continuous(breaks = breaks) +
-    theme(legend.justification = c(1, 0.5), legend.position = c(1, 0.5)) +
+    theme(legend.justification = c(0.95, 0.5), legend.position = c(0.95, 0.5),
+          plot.title = element_text(hjust = 0.5)) +
     ggtitle("Parameter estimate trace")
   
   if (show.loglik) {

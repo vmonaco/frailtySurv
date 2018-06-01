@@ -99,7 +99,7 @@ plot.simfrail.cumhaz <- function(sim, CI=0.95, ...) {
   p <- ggplot(melthats, aes_string(x='Time',y='value',color='type')) +
     stat_summary(fun.data=mean_cl_boot, geom="smooth") +
     geom_line(aes_string(x='x', y='y', color='type'), values) +
-    theme(legend.position=c(0,1),
+    theme(legend.position=c(0.05,0.95),
           legend.justification=c(0,1)) +
     ylab("Cumulative baseline hazard")
   
