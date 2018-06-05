@@ -1,6 +1,12 @@
 frailtySurv
 --------
 
+# Version 1.3.3 (June 2018)
+
+## Bug fixes
+  * Fixed rifcond error
+  * Fixed missing figures in online docs
+
 # Version 1.3.2 (February 2017)
 
 ## Bug fixes
