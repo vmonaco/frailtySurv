@@ -1,5 +1,5 @@
 .onAttach <- function(libname, pkgname) {
-  packageStartupMessage("Welcome to frailtySurv v1.3.3")
+  packageStartupMessage("Welcome to frailtySurv v1.3.4")
 }
 
 .onLoad <- function(libname, pkgname) {
