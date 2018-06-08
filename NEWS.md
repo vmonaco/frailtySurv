@@ -1,6 +1,12 @@
 frailtySurv
 --------
 
+# Version 1.3.4 (June 2018)
+
+## Bug fixes
+  * Changed default genfrail control params to constants instead derived from .Machine
+  * Added tryCatch to simfrail to avoid failing completely and generate a warning
+
 # Version 1.3.3 (June 2018)
 
 ## Bug fixes

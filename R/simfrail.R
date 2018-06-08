@@ -8,9 +8,6 @@ simfrail <- function(reps,
 ) { 
   Call <- match.call()
   
-  # To make the result reproducable when parallelized, seed each run 
-  seeds <- sample(1:1e7, reps, replace=TRUE)
-  
   fn <- function(s) {
     set.seed(s)
     
@@ -74,7 +71,18 @@ simfrail <- function(reps,
     )
   }
   
-  sim <- data.frame(t(simplify2array(plapply(reps, fn, cores))))
+  # Avoid failing completely, generate a warning if some reps don't finish
+  try.fn <- function(s) {
+    tryCatch(fn(s), error = function(e) NA)
+  }
+  
+  result <- plapply(reps, try.fn, cores)
+  result <- result[!is.na(result)]
+  
+  if (length(result) < reps)
+    warning(reps - length(result), " out of ", reps, " repetitions failed to complete")
+  
+  sim <- data.frame(t(simplify2array(result)))
   class(sim) <- append("simfrail", class(sim))
   
   attributes(sim) <- append(attributes(sim), list(
@@ -109,10 +117,6 @@ simcoxph <- function(reps,
                      cores=0 # 0 to use all available cores, -1 to use all but 1, etc
 ) { 
   Call <- match.call()
-  
-  # To make the result reproducable when parallelized, seed each run from 
-  # a list of random seeds sampled from a meta seed
-  seeds <- sample(1:1e7, reps, replace=TRUE)
   
   fn <- function(s) {
     set.seed(s)
@@ -177,7 +181,18 @@ simcoxph <- function(reps,
       se.Lambda)
   }
   
-  sim <- data.frame(t(simplify2array(plapply(reps, fn, cores))))
+  # Avoid failing completely, generate a warning if some reps don't finish
+  try.fn <- function(s) {
+    tryCatch(fn(s), error = function(e) NA)
+  }
+  
+  result <- plapply(reps, try.fn, cores)
+  result <- result[!is.na(result)]
+  
+  if (length(result) < reps)
+    warning(reps - length(result), " out of ", reps, " repetitions failed to complete")
+  
+  sim <- data.frame(t(simplify2array(result)))
   class(sim) <- append("simfrail", class(sim))
   
   attributes(sim) <- append(attributes(sim), list(
@@ -197,10 +212,6 @@ simfrailtyPenal <- function(reps,
                      cores=0 # 0 to use all available cores, -1 to use all but 1, etc
 ) { 
   Call <- match.call()
-  
-  # To make the result reproducable when parallelized, seed each run from 
-  # a list of random seeds sampled from a meta seed
-  seeds <- sample(1:1e7, reps, replace=TRUE)
   
   fn <- function(s) {
     set.seed(s)
@@ -264,7 +275,18 @@ simfrailtyPenal <- function(reps,
       se.Lambda)
   }
   
-  sim <- data.frame(t(simplify2array(plapply(reps, fn, cores))))
+  # Avoid failing completely, generate a warning if some reps don't finish
+  try.fn <- function(s) {
+    tryCatch(fn(s), error = function(e) NA)
+  }
+  
+  result <- plapply(reps, try.fn, cores)
+  result <- result[!is.na(result)]
+  
+  if (length(result) < reps)
+    warning(reps - length(result), " out of ", reps, " repetitions failed to complete")
+  
+  sim <- data.frame(t(simplify2array(result)))
   class(sim) <- append("simfrail", class(sim))
   
   attributes(sim) <- append(attributes(sim), list(
