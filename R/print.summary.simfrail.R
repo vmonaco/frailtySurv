@@ -19,7 +19,7 @@ print.summary.simfrail <- function(x, n.Lambda=3,
     Lambda.cols <- NULL
   } else if (length(Lambda.cols) > n.Lambda) {
     # Evenly spaced n.Lambda
-    idx <- floor(seq(0, length(Lambda.cols), 
+    idx <- ceil(seq(0, length(Lambda.cols), 
                      length.out=(n.Lambda+2))[2:(n.Lambda+1)])
     
     Lambda.cols <- Lambda.cols[idx]
