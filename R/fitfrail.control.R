@@ -1,6 +1,6 @@
 fitfrail.control <- function(fitmethod="loglik",
                              abstol=0,
-                             reltol=1e-6,
+                             reltol=1e-4,
                              maxit=100,
                              int.abstol=0,
                              int.reltol=1, 
