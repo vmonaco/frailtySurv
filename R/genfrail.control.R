@@ -1,6 +1,6 @@
-genfrail.control <- function(censor.reltol = 0.001,
+genfrail.control <- function(censor.reltol = 1e-4,
                              censor.subdivisions = 1000L,
-                             crowther.reltol = 0.001,
+                             crowther.reltol = 1e-4,
                              crowther.subdivisions = 1000L
                              ) {
   

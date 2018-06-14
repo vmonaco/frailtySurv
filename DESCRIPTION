@@ -3,7 +3,7 @@ Priority: optional
 Type: Package
 Package: frailtySurv
 Version: 1.3.4
-Date: 2018-06-08
+Date: 2018-06-14
 Authors@R: c(person("Vinnie Monaco", role = c("aut", "cre"),
 		          email = "contact@vmonaco.com"),
 	           person("Malka Gorfine", role = "aut",

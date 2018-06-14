@@ -9,9 +9,9 @@ This function creates a list of control parameters needed by genfrail.
 }
 
 \usage{
-genfrail.control(censor.reltol = 0.001,
+genfrail.control(censor.reltol = 1e-4,
                  censor.subdivisions = 1000L,
-                 crowther.reltol = 0.001,
+                 crowther.reltol = 1e-4,
                  crowther.subdivisions = 1000L)
 }
 
