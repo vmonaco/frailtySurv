@@ -10,7 +10,7 @@ This function creates a list of control parameters needed by fitfrail.
 
 \usage{
 fitfrail.control(fitmethod = "loglik", 
-                 abstol = 0, reltol = 1e-04, maxit = 100,
+                 abstol = 0, reltol = 1e-05, maxit = 100,
                  int.abstol = 0, int.reltol = 1, int.maxit = 1000, 
                  init.beta="coxph", init.theta=NULL, verbose = FALSE)
 }
