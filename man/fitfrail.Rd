@@ -52,6 +52,10 @@ The initial values of the regression coefficients are provided by \code{coxph}. 
   Prospective survival analysis with a general semiparametric shared frailty model: A pseudo full likelihood approach.
   \emph{Biometrika}, \bold{93}(3), 735-741.
   
+  Monaco JV, Gorfine M, Hsu L (2018)
+  General Semiparametric Shared Frailty Model: Estimation and Simulation with {frailtySurv}
+  \emph{Journal of Statistical Software}, \bold{86}(4), 1-42
+  
   Zucker DM, Gorfine M, Hsu L (2008)
   Pseudo-full likelihood estimation for prospective survival analysis with a general semiparametric shared frailty model: Asymptotic theory.
   \emph{Journal of Statistical Planning and Inference}, \bold{138}(7), 1998-2016.

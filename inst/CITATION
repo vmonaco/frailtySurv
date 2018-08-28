@@ -1,0 +1,20 @@
+bibentry(bibtype = "Article",
+  title        = "General Semiparametric Shared Frailty Model: Estimation and Simulation with {frailtySurv}",
+  author       = c(person(given = c("John", "V."),
+                          family = "Monaco"),
+                   person(given = "Malka",
+                          family = "Gorfine",
+                          email = "gorfinem@post.tau.ac.il"),
+                   person(given = "Li",
+                          family = "Hsu",
+                          email = "lih@fredhutch.org")),
+  journal      = "Journal of Statistical Software",
+  year         = "2018",
+  volume       = "86",
+  number       = "4",
+  pages        = "1--42",
+  doi          = "10.18637/jss.v086.i04",
+
+  header       = "To cite frailtySurv in publications use:"
+)
+

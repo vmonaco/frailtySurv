@@ -1,6 +1,9 @@
 frailtySurv
 --------
 
+# Version 1.3.5 (August 2018)
+  * Added citation to JSS article
+
 # Version 1.3.4 (June 2018)
 
 ## Bug fixes
