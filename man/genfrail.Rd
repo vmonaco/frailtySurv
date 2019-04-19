@@ -100,6 +100,7 @@ dat.3 <- genfrail(N = 300, K = 2,
 
 # Generate data with PVF frailty, truncated Poisson cluster sizes, normal
 # covariates, and 0.35 censorship from a lognormal distribution
+set.seed(1234)
 dat.4 <- genfrail(N = 100, K = "poisson", K.param=c(5, 1), 
                   beta = c(log(2),log(3)),
                   frailty = "pvf", theta = 0.3, 
@@ -110,10 +111,12 @@ dat.4 <- genfrail(N = 100, K = "poisson", K.param=c(5, 1),
 summary(dat.4)
 
 # An oscillating baseline hazard
+set.seed(1234)
 dat.5 <- genfrail(lambda_0=function(t, tau=4.6, C=0.01, A=2, f=0.1) 
                               A^sin(f*pi*t) * (tau*(C*t)^tau)/t)
 
 # Uniform censorship with 0.25 censoring rate
+set.seed(1234)
 dat.6 <- genfrail(N = 300, K = 2, 
                   beta = c(log(2),log(3)),
                   frailty = "gamma", theta = 2, 
