@@ -1,6 +1,9 @@
 frailtySurv
 --------
 
+# Version 1.3.6 (April 2019)
+  * TODO
+
 # Version 1.3.5 (August 2018)
   * Added citation to JSS article
 
