@@ -7,6 +7,7 @@
 // Exported functions are of the form (NumericVector x, NumericVector p), where
 // p is again a parameter vector
 
+#define STRICT_R_HEADERS
 #include <Rcpp.h>
 #include <Rmath.h>
 #include "cubature.h"
@@ -214,7 +215,7 @@ double deriv_deriv_lt_dgamma_c(int m, double s, double theta) {
 // Log-normal (LN)
 double dlognormal(double x, double *params) {
   double theta = params[0];
-  double factor1 = 1/(x*sqrt(theta*2*PI));
+  double factor1 = 1/(x*sqrt(theta*2*M_PI));
   double factor2 = exp(-pow(log(x),2)/(2*theta));
   return factor1*factor2;
 }
@@ -222,22 +223,22 @@ double dlognormal(double x, double *params) {
 double deriv_dlognormal(double x, double *params, int deriv_idx) {
   double theta = params[0];
   double term1_numer = pow(log(x),2) * exp(-pow(log(x),2)/(2*theta));
-  double term1_denom = 2 * sqrt(2*PI) * pow(theta, 5.0/2.0) * x;
+  double term1_denom = 2 * sqrt(2*M_PI) * pow(theta, 5.0/2.0) * x;
   double term2_numer = exp(-pow(log(x),2)/(2*theta));
-  double term2_denom = 2 * sqrt(2*PI) * pow(theta, 3.0/2.0) * x;
+  double term2_denom = 2 * sqrt(2*M_PI) * pow(theta, 3.0/2.0) * x;
   return (term1_numer/term1_denom) - (term2_numer/term2_denom);
 }
 
 double deriv_deriv_dlognormal(double x, double *params, int deriv_idx_1, int deriv_idx_2) {
   double theta = params[0];
   return pow(log(x),2.0) * (exp(-(pow(log(x),2.0))/(2.0 * theta)) * ((pow(log(x),2.0)) * 
-             2.0/pow((2.0 * theta),2.0)))/(2.0 * sqrt(2.0 * PI) * pow(theta,(5.0/2.0)) * x) - (pow(log(x),2.0) * 
-             exp(-(pow(log(x),2.0))/(2.0 * theta))) * (2.0 * sqrt(2.0 * PI) * (pow(theta,((5.0/2.0) - 1)) * 
-             (5.0/2.0)) * x)/pow((2.0 * sqrt(2.0 * PI) * pow(theta,(5.0/2.0)) * x),2.0) - 
+             2.0/pow((2.0 * theta),2.0)))/(2.0 * sqrt(2.0 * M_PI) * pow(theta,(5.0/2.0)) * x) - (pow(log(x),2.0) * 
+             exp(-(pow(log(x),2.0))/(2.0 * theta))) * (2.0 * sqrt(2.0 * M_PI) * (pow(theta,((5.0/2.0) - 1)) * 
+             (5.0/2.0)) * x)/pow((2.0 * sqrt(2.0 * M_PI) * pow(theta,(5.0/2.0)) * x),2.0) - 
              (exp(-(pow(log(x),2.0))/(2.0 * theta)) * ((pow(log(x),2.0)) * 2.0/pow((2.0 * theta),2.0))/(2.0 * 
-             sqrt(2.0 * PI) * pow(theta,(3.0/2.0)) * x) - (exp(-(pow(log(x),2.0))/(2.0 * 
-             theta))) * (2.0 * sqrt(2.0 * PI) * (pow(theta,((3.0/2.0) - 1)) * (3.0/2.0)) * 
-             x)/pow((2.0 * sqrt(2.0 * PI) * pow(theta,(3.0/2.0)) * x),2.0));
+             sqrt(2.0 * M_PI) * pow(theta,(3.0/2.0)) * x) - (exp(-(pow(log(x),2.0))/(2.0 * 
+             theta))) * (2.0 * sqrt(2.0 * M_PI) * (pow(theta,((3.0/2.0) - 1)) * (3.0/2.0)) * 
+             x)/pow((2.0 * sqrt(2.0 * M_PI) * pow(theta,(3.0/2.0)) * x),2.0));
 }
 
 int lt_dlognormal_deriv(unsigned ndim, const double *x, void *fdata, unsigned fdim, double *fval) {
@@ -332,16 +333,16 @@ NumericVector deriv_deriv_dlognormal_c(NumericVector x, NumericVector theta) {
 double dinvgauss(double x, double *params) {
   double theta = params[0];
   double numer = exp(-pow(x - 1, 2)/(2*theta*x));
-  double denom = sqrt(2*PI*theta*pow(x,3));
+  double denom = sqrt(2*M_PI*theta*pow(x,3));
   return numer/denom;
 }
 
 double deriv_dinvgauss(double x, double *params, int deriv_idx) {
   double theta = params[0];
   double term1_numer = pow(x - 1, 2) * exp(-pow(x - 1, 2)/(2*theta*x));
-  double term1_denom = 2 * sqrt(2*PI) * pow(theta, 2) * x * sqrt(theta * pow(x, 3));
+  double term1_denom = 2 * sqrt(2*M_PI) * pow(theta, 2) * x * sqrt(theta * pow(x, 3));
   double term2_numer = pow(x, 3) * exp(-pow(x - 1, 2)/(2*theta*x));
-  double term2_denom = 2 * sqrt(2*PI) * pow(theta * pow(x, 3), 3.0/2.0);
+  double term2_denom = 2 * sqrt(2*M_PI) * pow(theta * pow(x, 3), 3.0/2.0);
   return term1_numer/term1_denom - term2_numer/term2_denom;
 }
 
@@ -351,18 +352,18 @@ double deriv_deriv_dinvgauss(double x, double *params, int deriv_idx_1, int deri
           theta * x,2)) * ((pow((x - 1),2)) * (2 * x)/pow(2 * theta * x,2)) - 
           exp(-(pow((x - 1),2))/(2 * theta * x)) * ((pow((x - 1),2)) * (2 * x) * 
           (2 * (2 * x * (2 * theta * x)))/pow(pow(2 * theta * x,2),2)))/sqrt(2 * 
-          PI * theta * (pow(x,3))) - exp(-(pow((x - 1),2))/(2 * theta * x)) * 
-          ((pow((x - 1),2)) * (2 * x)/pow(2 * theta * x,2)) * (0.5 * (2 * PI * 
-          (pow(x,3)) * pow(2 * PI * theta * (pow(x,3)),-0.5)))/pow(sqrt(2 * PI * theta * 
+          M_PI * theta * (pow(x,3))) - exp(-(pow((x - 1),2))/(2 * theta * x)) * 
+          ((pow((x - 1),2)) * (2 * x)/pow(2 * theta * x,2)) * (0.5 * (2 * M_PI * 
+          (pow(x,3)) * pow(2 * M_PI * theta * (pow(x,3)),-0.5)))/pow(sqrt(2 * M_PI * theta * 
           (pow(x,3))),2) - ((exp(-(pow((x - 1),2))/(2 * theta * x)) * ((pow((x - 1),2)) * 
-          (2 * x)/pow(2 * theta * x,2)) * (0.5 * (2 * PI * (pow(x,3)) * pow(2 * 
-          PI * theta * (pow(x,3)),-0.5))) - exp(-(pow((x - 1),2))/(2 * theta * 
-          x)) * (0.5 * (2 * PI * (pow(x,3)) * (pow(2 * PI * theta * (pow(x,3)),-(0.5 + 
-          1)) * (0.5 * (2 * PI * (pow(x,3))))))))/pow(sqrt(2 * PI * theta * (pow(x,3))),2) - 
-          exp(-(pow((x - 1),2))/(2 * theta * x)) * (0.5 * (2 * PI * (pow(x,3)) * 
-          pow(2 * PI * theta * (pow(x,3)),-0.5))) * (2 * (0.5 * (2 * PI * 
-          (pow(x,3)) * pow((2 * PI * theta * (pow(x,3))),-0.5)) * sqrt(2 * PI * 
-          theta * (pow(x,3)))))/pow(pow(sqrt(2 * PI * theta * (pow(x,3))),2),2));
+          (2 * x)/pow(2 * theta * x,2)) * (0.5 * (2 * M_PI * (pow(x,3)) * pow(2 * 
+          M_PI * theta * (pow(x,3)),-0.5))) - exp(-(pow((x - 1),2))/(2 * theta * 
+          x)) * (0.5 * (2 * M_PI * (pow(x,3)) * (pow(2 * M_PI * theta * (pow(x,3)),-(0.5 + 
+          1)) * (0.5 * (2 * M_PI * (pow(x,3))))))))/pow(sqrt(2 * M_PI * theta * (pow(x,3))),2) - 
+          exp(-(pow((x - 1),2))/(2 * theta * x)) * (0.5 * (2 * M_PI * (pow(x,3)) * 
+          pow(2 * M_PI * theta * (pow(x,3)),-0.5))) * (2 * (0.5 * (2 * M_PI * 
+          (pow(x,3)) * pow((2 * M_PI * theta * (pow(x,3))),-0.5)) * sqrt(2 * M_PI * 
+          theta * (pow(x,3)))))/pow(pow(sqrt(2 * M_PI * theta * (pow(x,3))),2),2));
 }
 
 int lt_dinvgauss_deriv(unsigned ndim, const double *x, void *fdata, unsigned fdim, double *fval) {
@@ -456,10 +457,10 @@ NumericVector deriv_deriv_dinvgauss_c(NumericVector x, NumericVector theta) {
 double dposstab(double x, double *params) {
   double alpha = params[0];
   
-  double factor1 = -1/(PI * x);
+  double factor1 = -1/(M_PI * x);
   double factor2 = 0;
   for (int k = 1; k <= DPOSSTAB_K; ++k) {
-    factor2 += tgamma(k * alpha + 1) / tgamma(k + 1) * pow(-pow(x, -alpha), k) * sin(alpha * k * PI);
+    factor2 += tgamma(k * alpha + 1) / tgamma(k + 1) * pow(-pow(x, -alpha), k) * sin(alpha * k * M_PI);
   }
   
   return factor1*factor2;
