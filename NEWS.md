@@ -1,6 +1,9 @@
 frailtySurv
 --------
 
+# Version 1.3.7 (September 2021)
+  * Fixed Rcpp strict headers and broken links
+  
 # Version 1.3.6 (April 2019)
   * Added a call to set.seed before each example in genfrail
 

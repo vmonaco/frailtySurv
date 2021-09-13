@@ -79,7 +79,7 @@ You can clone the repository and build the project from source using RStudio. To
 
 More information about [RStudio and git](https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN)
 
-Also see the chapter in the [R packages book](http://r-pkgs.had.co.nz/git.html)
+Also see the chapter in the [R packages book](https://r-pkgs.org/git.html)
 
 ### Build everything
 

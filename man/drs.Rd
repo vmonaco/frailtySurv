@@ -29,7 +29,7 @@ subject, one row for each eye:
   \item{diabetes_type}{type of diabetes, where 1=juvenile (age at dx < 20) and 2=adult}
 }}
 \source{
-\url{http://www.mayo.edu/research/documents/diabeteshtml/doc-10027460}
+\url{https://www.mayo.edu/research/documents/diabeteshtml/doc-10027460}
 }
 \examples{
 \dontrun{

@@ -26,7 +26,7 @@ Daily snapshots of a large backup storage provider over 2 years were made public
 }
 
 \source{
-\url{https://www.backblaze.com/hard-drive-test-data.html}
+\url{https://www.backblaze.com/b2/hard-drive-test-data.html}
 }
 
 \examples{
