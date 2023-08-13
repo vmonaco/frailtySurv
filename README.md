@@ -1,5 +1,3 @@
-[![Travis-CI Build Status](https://travis-ci.org/vmonaco/frailtySurv.svg?branch=master)](https://travis-ci.org/vmonaco/frailtySurv) [![CRAN Downloads](http://cranlogs.r-pkg.org/badges/frailtySurv)](https://CRAN.R-project.org/package=frailtySurv)
-
 frailtySurv
 -----------
 

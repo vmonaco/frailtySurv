@@ -855,7 +855,7 @@ static int heap_push_many(heap *h, size_t ni, heap_item *hi)
 
 static heap_item heap_pop(heap *h)
 {
-  heap_item ret;
+  heap_item ret = {0};
   int i, n, child;
   
   if (!(h->n)) {
