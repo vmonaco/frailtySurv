@@ -130,9 +130,7 @@ You can clone the repository and build the project from source using RStudio. To
 -   In RStudio, go to File -&gt; New Project -&gt; Version Control -&gt; Git
 -   Name the project (eg. frailtySurv), choose location, and specify the Repository URL as `https://github.com/vmonaco/frailtySurv`
 
-More information about [RStudio and git](https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN)
-
-Also see the chapter in the [R packages book](https://r-pkgs.org/git.html)
+See the [R packages book](https://r-pkgs.org/git.html)
 
 ### Build everything
 
